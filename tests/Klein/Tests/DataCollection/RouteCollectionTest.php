@@ -13,12 +13,13 @@ namespace Klein\Tests\DataCollection;
 
 use Klein\DataCollection\RouteCollection;
 use Klein\Route;
-use Klein\Tests\AbstractKleinTest;
+use Klein\Tests\AbstractKleinTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * RouteCollectionTest
  */
-class RouteCollectionTest extends AbstractKleinTest
+class RouteCollectionTest extends AbstractKleinTestCase
 {
 
     /*
@@ -27,10 +28,8 @@ class RouteCollectionTest extends AbstractKleinTest
 
     /**
      * Sample data provider
-     *
-     * @return array
      */
-    public function sampleDataProvider()
+    public static function sampleDataProvider(): array
     {
         $sample_route = new Route(
             function () {
@@ -71,9 +70,7 @@ class RouteCollectionTest extends AbstractKleinTest
      * Tests
      */
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testSet($sample_route, $sample_other_route)
     {
         // Create our collection with NO data
@@ -102,9 +99,7 @@ class RouteCollectionTest extends AbstractKleinTest
         $this->assertTrue($routes->get('first') instanceof Route);
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testConstructorRoutesThroughAdd($sample_route, $sample_other_route)
     {
         $array_of_route_instances = array(
@@ -126,9 +121,7 @@ class RouteCollectionTest extends AbstractKleinTest
         }
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testAddRoute($sample_route, $sample_other_route)
     {
         $array_of_routes = array(
@@ -161,9 +154,7 @@ class RouteCollectionTest extends AbstractKleinTest
         $this->assertTrue(current($routes->all()) instanceof Route);
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testPrepareNamed($sample_route, $sample_other_route, $sample_named_route)
     {
         $array_of_routes = array(
@@ -187,9 +178,7 @@ class RouteCollectionTest extends AbstractKleinTest
         $this->assertSame($sample_named_route, $routes->get($route_name));
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testRouteOrderDoesntChangeAfterPreparing()
     {
         // Get the provided data dynamically

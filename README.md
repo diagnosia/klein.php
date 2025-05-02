@@ -2,19 +2,17 @@
 
 Fork of [https://github.com/klein/klein.php](https://github.com/klein/klein.php)
 
-[![Build Status](https://travis-ci.org/klein/klein.php.png?branch=master)](https://travis-ci.org/klein/klein.php)
+**klein.php** is a fast & flexible router for PHP 8.4+
 
-**klein.php** is a fast & flexible router for PHP 5.3+
-
-* Flexible regular expression routing (inspired by [Sinatra](http://www.sinatrarb.com/))
-* A set of [boilerplate methods](#api) for rapidly building web apps
-* Almost no overhead => [2500+ requests/second](https://gist.github.com/878833)
+- Flexible regular expression routing (inspired by [Sinatra](http://www.sinatrarb.com/))
+- A set of [boilerplate methods](#api) for rapidly building web apps
+- Almost no overhead => [2500+ requests/second](https://gist.github.com/878833)
 
 ## Getting started
 
-1. PHP 5.3.x is required
+1. PHP 8.4+ is required
 2. Install Klein using [Composer](#composer-installation) (recommended) or manually
-3. Setup [URL rewriting](https://gist.github.com/874000) so that all requests are handled by **index.php**
+3. Setup URL rewriting so that all requests are handled by **index.php**
 4. (Optional) Throw in some [APC](http://pecl.php.net/package/APC) for good measure
 
 ## Composer Installation
@@ -25,7 +23,7 @@ Fork of [https://github.com/klein/klein.php](https://github.com/klein/klein.php)
 
 ## Example
 
-*Hello World* - Obligatory hello world example
+_Hello World_ - Obligatory hello world example
 
 ```php
 <?php
@@ -40,7 +38,7 @@ $klein->respond('GET', '/hello-world', function () {
 $klein->dispatch();
 ```
 
-*Example 1* - Respond to all requests
+_Example 1_ - Respond to all requests
 
 ```php
 $klein->respond(function () {
@@ -48,7 +46,7 @@ $klein->respond(function () {
 });
 ```
 
-*Example 2* - Named parameters
+_Example 2_ - Named parameters
 
 ```php
 $klein->respond('/[:name]', function ($request) {
@@ -56,7 +54,7 @@ $klein->respond('/[:name]', function ($request) {
 });
 ```
 
-*Example 3* - [So RESTful](http://bit.ly/g93B1s)
+_Example 3_ - [So RESTful](http://bit.ly/g93B1s)
 
 ```php
 $klein->respond('GET', '/posts', $callback);
@@ -76,7 +74,7 @@ $klein->respond('/posts/[create|edit:action]?/[i:id]?', function ($request, $res
 });
 ```
 
-*Example 4* - Sending objects / files
+_Example 4_ - Sending objects / files
 
 ```php
 $klein->respond(function ($request, $response, $service) {
@@ -99,7 +97,7 @@ $klein->respond('/report/latest', function ($request, $response, $service) {
 });
 ```
 
-*Example 5* - All together
+_Example 5_ - All together
 
 ```php
 $klein->respond(function ($request, $response, $service, $app) use ($klein) {
@@ -164,6 +162,7 @@ Included files are run in the scope of Klein (`$klein`) so all Klein
 methods/properties can be accessed with `$this`
 
 _Example file for: "controllers/projects.php"_
+
 ```php
 // Routes to "/projects/?"
 $this->respond('GET', '/?', function ($request, $response) {
@@ -176,7 +175,7 @@ $this->respond('GET', '/?', function ($request, $response) {
 Services can be stored **lazily**, meaning that they are only instantiated on
 first use.
 
-``` php
+```php
 <?php
 $klein->respond(function ($request, $response, $service, $app) {
     $app->register('lazyDb', function() {
@@ -225,7 +224,7 @@ $service->validateParam('key', 'The key was invalid')->isHex()->isLen(32);
 
 ## Routing
 
-**[** *match_type* **:** *param_name* **]**
+**[** _match_type_ **:** _param_name_ **]**
 
 Some examples
 
@@ -247,7 +246,7 @@ Some more complicated examples
     /output.[xml|json:format]? // Matches "/output", "output.xml", "output.json"
     /[:controller]?/[:action]? // Matches the typical /controller/action format
 
-**Note** - *all* routes that match the request URI are called - this
+**Note** - _all_ routes that match the request URI are called - this
 allows you to incorporate complex conditional logic such as user
 authentication or view layouts. e.g. as a basic example, the following
 code will wrap other routes with a header and footer
@@ -285,7 +284,7 @@ $service->render('myview.phtml', array('title' => 'My View'));
 // Or just: $service->title = 'My View';
 ```
 
-*myview.phtml*
+_myview.phtml_
 
 ```html
 <title><?php echo $this->escape($this->title) ?></title>
@@ -410,7 +409,7 @@ This project uses [PHPUnit](https://github.com/sebastianbergmann/phpunit/) as
 its unit testing framework.
 
 The tests all live in `/tests` and each test extends an abstract class
-`AbstractKleinTest`
+`AbstractKleinTestCase`
 
 To test the project, simply run `php composer.phar install --dev` to download
 a common version of PHPUnit with composer and run the tests from the main

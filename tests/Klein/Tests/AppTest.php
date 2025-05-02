@@ -14,11 +14,13 @@ namespace Klein\Tests;
 use Klein\App;
 use Klein\Exceptions\DuplicateServiceException;
 use Klein\Exceptions\UnknownServiceException;
+use PHPUnit\Framework\Attributes\Depends;
+use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
 
 /**
  * AppTest
  */
-class AppTest extends AbstractKleinTest
+class AppTest extends AbstractKleinTestCase
 {
 
     /**
@@ -44,6 +46,7 @@ class AppTest extends AbstractKleinTest
      * Tests
      */
 
+    #[DoesNotPerformAssertions]
     public function testRegisterFiller()
     {
         $func_name = 'yay_func';
@@ -58,9 +61,7 @@ class AppTest extends AbstractKleinTest
         );
     }
 
-    /**
-     * @depends testRegisterFiller
-     */
+    #[Depends('testRegisterFiller')]
     public function testGet(array $args)
     {
         // Get our vars from our args
@@ -79,9 +80,7 @@ class AppTest extends AbstractKleinTest
         $app->random_thing_that_doesnt_exist;
     }
 
-    /**
-     * @depends testRegisterFiller
-     */
+    #[Depends('testRegisterFiller')]
     public function testCall(array $args)
     {
         // Get our vars from our args
@@ -100,9 +99,7 @@ class AppTest extends AbstractKleinTest
         $app->random_thing_that_doesnt_exist();
     }
 
-    /**
-     * @depends testRegisterFiller
-     */
+    #[Depends('testRegisterFiller')]
     public function testRegisterDuplicateMethod(array $args)
     {
         $this->expectException(DuplicateServiceException::class);

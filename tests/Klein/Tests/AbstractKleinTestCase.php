@@ -14,24 +14,21 @@ namespace Klein\Tests;
 use Klein\Klein;
 use Klein\Request;
 use Klein\Response;
-use Klein\Tests\Mocks\HeadersNoOp;
 use PHPUnit\Framework\TestCase;
 
 /**
- * AbstractKleinTest
+ * AbstractKleinTestCase
  *
  * Base test class for PHP Unit testing
  */
-abstract class AbstractKleinTest extends TestCase
+abstract class AbstractKleinTestCase extends TestCase
 {
 
     /**
      * The automatically created test Klein instance
      * (for easy testing and less boilerplate)
-     *
-     * @type Klein
      */
-    protected $klein_app;
+    protected Klein $klein_app;
 
 
     /**

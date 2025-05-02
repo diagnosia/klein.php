@@ -27,10 +27,8 @@ abstract class AbstractRouteFactory
      * The namespace of which to collect the routes in
      * when matching, so you can define routes under a
      * common endpoint
-     *
-     * @type string
      */
-    protected $namespace;
+    protected string|null $namespace;
 
 
     /**
@@ -42,17 +40,15 @@ abstract class AbstractRouteFactory
      *
      * @param string $namespace The initial namespace to set
      */
-    public function __construct($namespace = null)
+    public function __construct(string|null $namespace = null)
     {
         $this->namespace = $namespace;
     }
 
     /**
      * Gets the value of namespace
-     *
-     * @return string
      */
-    public function getNamespace()
+    public function getNamespace(): string|null
     {
         return $this->namespace;
     }
@@ -61,9 +57,8 @@ abstract class AbstractRouteFactory
      * Sets the value of namespace
      *
      * @param string $namespace The namespace from which to collect the Routes under
-     * @return AbstractRouteFactory
      */
-    public function setNamespace($namespace)
+    public function setNamespace($namespace): static
     {
         $this->namespace = (string) $namespace;
 
@@ -74,9 +69,8 @@ abstract class AbstractRouteFactory
      * Append a namespace to the current namespace
      *
      * @param string $namespace The namespace from which to collect the Routes under
-     * @return AbstractRouteFactory
      */
-    public function appendNamespace($namespace)
+    public function appendNamespace($namespace): static
     {
         $this->namespace .= (string) $namespace;
 

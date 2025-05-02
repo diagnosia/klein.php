@@ -12,13 +12,12 @@
 namespace Klein\Tests;
 
 use InvalidArgumentException;
-use Klein\Klein;
 use Klein\Route;
 
 /**
  * RouteTest
  */
-class RouteTest extends AbstractKleinTest
+class RouteTest extends AbstractKleinTestCase
 {
 
     protected function getTestCallable()

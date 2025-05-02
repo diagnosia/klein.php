@@ -12,20 +12,19 @@
 namespace Klein\Tests\DataCollection;
 
 use Klein\DataCollection\HeaderDataCollection;
-use Klein\Tests\AbstractKleinTest;
+use Klein\Tests\AbstractKleinTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * HeaderDataCollectionTest
  */
-class HeaderDataCollectionTest extends AbstractKleinTest
+class HeaderDataCollectionTest extends AbstractKleinTestCase
 {
 
     /**
      * Non existent key in the sample data
-     *
-     * @type string
      */
-    protected static $nonexistent_key = 'non-standard-header';
+    protected static string $nonexistent_key = 'non-standard-header';
 
 
     /*
@@ -35,11 +34,8 @@ class HeaderDataCollectionTest extends AbstractKleinTest
     /**
      * Quickly makes sure that no sample data arrays
      * have any keys that match the "nonexistent_key"
-     *
-     * @param array $sample_data
-     * @return void
      */
-    protected function prepareSampleData(&$sample_data)
+    protected static function prepareSampleData(array &$sample_data): void
     {
         if (isset($sample_data[static::$nonexistent_key])) {
             unset($sample_data[static::$nonexistent_key]);
@@ -47,18 +43,17 @@ class HeaderDataCollectionTest extends AbstractKleinTest
 
         foreach ($sample_data as &$data) {
             if (is_array($data)) {
-                $this->prepareSampleData($data);
+                static::prepareSampleData($data);
             }
         }
+
         reset($sample_data);
     }
 
     /**
      * Sample data provider
-     *
-     * @return array
      */
-    public function sampleDataProvider()
+    public static function sampleDataProvider(): array
     {
         // Populate our sample data
         $sample_data = array(
@@ -77,7 +72,7 @@ class HeaderDataCollectionTest extends AbstractKleinTest
             'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
         );
 
-        $this->prepareSampleData($sample_data);
+        static::prepareSampleData($sample_data);
 
         $data_collection = new HeaderDataCollection($sample_data);
 
@@ -91,9 +86,8 @@ class HeaderDataCollectionTest extends AbstractKleinTest
      * Tests
      */
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    
+    #[DataProvider('sampleDataProvider')]
     public function testConstructorCorrectlyFormatted($sample_data, $data_collection)
     {
         $this->assertNotSame($sample_data, $data_collection->all());
@@ -117,9 +111,7 @@ class HeaderDataCollectionTest extends AbstractKleinTest
         );
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testGet($sample_data, $data_collection)
     {
         $default = 'WOOT!';
@@ -147,9 +139,8 @@ class HeaderDataCollectionTest extends AbstractKleinTest
         $this->assertArrayNotHasKey(key($data), $data_collection->all());
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    
+    #[DataProvider('sampleDataProvider')]
     public function testExists($sample_data, $data_collection)
     {
         // Make sure the set worked, but the key is different
@@ -158,9 +149,8 @@ class HeaderDataCollectionTest extends AbstractKleinTest
         $this->assertArrayNotHasKey('HOST', $data_collection->all());
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    
+    #[DataProvider('sampleDataProvider')]
     public function testRemove($sample_data, $data_collection)
     {
         $this->assertTrue($data_collection->exists('HOST'));
@@ -204,8 +194,8 @@ class HeaderDataCollectionTest extends AbstractKleinTest
         $old_error_val = error_reporting();
         error_reporting(E_ALL ^ E_USER_DEPRECATED);
 
-        $normalized_key = HeaderDataCollection::normalizeName($header);
-        $normalized_key_without_canonicalization = HeaderDataCollection::normalizeName($header, false);
+        $normalized_key = HeaderDataCollection::normalizeKeyDelimiters(strtolower($header));
+        $normalized_key_without_canonicalization = HeaderDataCollection::normalizeKeyDelimiters($header);
 
         error_reporting($old_error_val);
 

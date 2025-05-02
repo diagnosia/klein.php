@@ -19,7 +19,7 @@ function implement_custom_fastcgi_function()
         // Let's just define it then
         function fastcgi_finish_request()
         {
-            echo 'fastcgi_finish_request';
+            echo '';
         }
     }
 }
@@ -27,14 +27,14 @@ function implement_custom_fastcgi_function()
 function implement_custom_apc_cache_functions()
 {
     // Check if the function doesn't exist
-    if (!function_exists('apc_fetch')) {
+    if (!function_exists('apcu_fetch')) {
 
-        function apc_fetch($key)
+        function apcu_fetch($key)
         {
             return false;
         }
 
-        function apc_store($key, $value)
+        function apcu_store($key, $value)
         {
             return false;
         }

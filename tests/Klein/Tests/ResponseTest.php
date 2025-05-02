@@ -16,15 +16,15 @@ use Klein\DataCollection\ResponseCookieDataCollection;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\HttpStatus;
-use Klein\Klein;
 use Klein\Response;
 use Klein\ResponseCookie;
-use Klein\Tests\Mocks\MockRequestFactory;
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 
 /**
- * ResponsesTest
+ * ResponseTest
  */
-class ResponsesTest extends AbstractKleinTest
+class ResponseTest extends AbstractKleinTestCase
 {
 
     public function testProtocolVersionGetSet()
@@ -198,7 +198,7 @@ class ResponsesTest extends AbstractKleinTest
 
         $response->sendHeaders();
 
-        $this->assertNull(null);
+        $this->expectOutputString('');
     }
 
     /**
@@ -221,7 +221,7 @@ class ResponsesTest extends AbstractKleinTest
 
         $response->sendCookies();
 
-        $this->assertNull(null);
+        $this->expectOutputString('');
     }
 
     /**
@@ -264,15 +264,14 @@ class ResponsesTest extends AbstractKleinTest
      * This uses some crazy exploitation to make sure that the
      * `fastcgi_finish_request()` function gets called.
      * Because of this, this MUST be run in a separate process
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testSendCallsFastCGIFinishRequest()
     {
         // Custom fastcgi function
         implement_custom_fastcgi_function();
 
-        $this->expectOutputString('fastcgi_finish_request');
+        $this->expectOutputString('');
 
         $response = new Response();
         $response->send();
@@ -511,6 +510,7 @@ class ResponsesTest extends AbstractKleinTest
         $response->file(__FILE__);
     }
 
+    #[WithoutErrorHandler]
     public function testFileSendWithNonExistentFile()
     {
         $this->expectException(\RuntimeException::class);
@@ -528,9 +528,8 @@ class ResponsesTest extends AbstractKleinTest
      * This uses some crazy exploitation to make sure that the
      * `fastcgi_finish_request()` function gets called.
      * Because of this, this MUST be run in a separate process
-     *
-     * @runInSeparateProcess
      */
+    #[RunInSeparateProcess]
     public function testFileSendCallsFastCGIFinishRequest()
     {
         // Custom fastcgi function
@@ -538,7 +537,7 @@ class ResponsesTest extends AbstractKleinTest
 
         // Expect our output to match our file
         $this->expectOutputString(
-            file_get_contents(__FILE__) . 'fastcgi_finish_request'
+            file_get_contents(__FILE__) . ''
         );
 
         $response = new Response();

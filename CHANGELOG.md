@@ -2,6 +2,11 @@
 
 ## Changes for Diagnosia
 
+### 2025-05-02
+
+- Update for PHP8.4
+- Update deps and tests
+
 ### 2023-01-26
 
 - Update return types of `src/Klein/DataCollection/DataCollection.php` interface methods to be compatible with PHP8
@@ -23,7 +28,6 @@ rid of that statement. We also added the `.git` folder to the `.gitignore` file.
 
 - Broad exception catch statements will now properly handle PHP 7 `Throwable` types
 
-
 ## 2.1.1
 
 ### Features
@@ -44,7 +48,6 @@ rid of that statement. We also added the `.git` folder to the `.gitignore` file.
 - References to the old https://github.com/chriso/klein.php repository URL have been updated to the new repository URL home of Klein: https://github.com/klein/klein.php
 - Tests were updated to pass under an expanded number of PHP runtime versions and configurations
 - A potential output buffer stack miss-handling in the dispatch process has been fixed
-
 
 ## 2.1.0
 

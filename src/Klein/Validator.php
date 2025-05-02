@@ -66,7 +66,7 @@ class Validator
     public function __construct($str, $err = null)
     {
         $this->str = $str;
-        $this->err = $err;
+        $this->err = $err ?? '';
 
         if (!static::$default_added) {
             static::addDefault();

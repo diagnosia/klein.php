@@ -15,7 +15,6 @@ use Exception;
 use Klein\App;
 use Klein\DataCollection\RouteCollection;
 use Klein\Exceptions\DispatchHaltedException;
-use Klein\Exceptions\HttpException;
 use Klein\Exceptions\HttpExceptionInterface;
 use Klein\Exceptions\UnhandledException;
 use Klein\Klein;
@@ -28,14 +27,14 @@ use OutOfBoundsException;
 /**
  * KleinTest
  */
-class KleinTest extends AbstractKleinTest
+class KleinTest extends AbstractKleinTestCase
 {
 
     /**
      * Constants
      */
 
-    const TEST_CALLBACK_MESSAGE = 'yay';
+    const string TEST_CALLBACK_MESSAGE = 'yay';
 
 
     /**
@@ -370,7 +369,7 @@ class KleinTest extends AbstractKleinTest
 
         $this->klein_app->dispatch();
 
-        $this->assertNull(null);
+        $this->expectOutputString('');
     }
 
     public function testAfterDispatchWithCallableThatThrowsException()

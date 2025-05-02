@@ -13,12 +13,13 @@ namespace Klein\Tests\DataCollection;
 
 use Klein\DataCollection\ResponseCookieDataCollection;
 use Klein\ResponseCookie;
-use Klein\Tests\AbstractKleinTest;
+use Klein\Tests\AbstractKleinTestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * ResponseCookieDataCollectionTest
  */
-class ResponseCookieDataCollectionTest extends AbstractKleinTest
+class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
 {
 
     /*
@@ -27,10 +28,8 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTest
 
     /**
      * Sample data provider
-     *
-     * @return array
      */
-    public function sampleDataProvider()
+    public static function sampleDataProvider(): array
     {
         $sample_cookie = new ResponseCookie(
             'Trevor',
@@ -62,9 +61,7 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTest
      * Tests
      */
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testSet($sample_cookie, $sample_other_cookie)
     {
         // Create our collection with NO data
@@ -89,9 +86,7 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTest
         $this->assertTrue($data_collection->get('first') instanceof ResponseCookie);
     }
 
-    /**
-     * @dataProvider sampleDataProvider
-     */
+    #[DataProvider('sampleDataProvider')]
     public function testConstructorRoutesThroughSet($sample_cookie, $sample_other_cookie)
     {
         $array_of_cookie_instances = array(

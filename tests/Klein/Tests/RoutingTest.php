@@ -23,14 +23,12 @@ use Klein\Request;
 use Klein\Response;
 use Klein\Route;
 use Klein\ServiceProvider;
-use Klein\Tests\Mocks\HeadersEcho;
-use Klein\Tests\Mocks\HeadersSave;
 use Klein\Tests\Mocks\MockRequestFactory;
 
 /**
  * RoutingTest
  */
-class RoutingTest extends AbstractKleinTest
+class RoutingTest extends AbstractKleinTestCase
 {
 
     public function testBasic()
