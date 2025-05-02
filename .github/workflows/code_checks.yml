@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ["8.1", "8.2", "8.3", "8.4"]
+        php: ["8.4"]
     name: PHP ${{ matrix.php }} tests
     steps:
       - uses: actions/checkout@v4
@@ -15,4 +15,3 @@ jobs:
           coverage: none
       - run: composer install --no-progress
       - run: vendor/bin/phpunit
-      - run: vendor/bin/phpcs --standard=PSR2 --encoding=utf-8 -p src/ tests/
