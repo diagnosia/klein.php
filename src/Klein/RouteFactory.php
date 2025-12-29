@@ -52,7 +52,7 @@ class RouteFactory extends AbstractRouteFactory
      * @param string $path
      * @return boolean
      */
-    protected function shouldPathStringCauseRouteMatch($path)
+    protected function shouldPathStringCauseRouteMatch($path): bool
     {
         // Only consider a request to be matched when not using 'matchall'
         return !$this->pathIsNull($path);

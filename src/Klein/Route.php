@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -12,7 +14,7 @@
 
 namespace Klein;
 
-use InvalidArgumentException;
+use TypeError;
 
 /**
  * Route
@@ -44,7 +46,7 @@ class Route
      * - '/posts/[:post_slug]'
      * - '/posts/[i:id]'
      */
-    protected ?string $path;
+    protected string|null $path;
 
     /**
      * The HTTP method to match
@@ -67,7 +69,7 @@ class Route
      *
      * Mostly used for reverse routing
      */
-    protected ?string $name;
+    protected string|null $name;
 
     /**
      * Methods
@@ -78,10 +80,10 @@ class Route
      */
     public function __construct(
         callable $callback,
-        ?string $path = null,
+        string|null $path = null,
         string|array|null $method = null,
         bool $count_match = true,
-        ?string $name = null,
+        string|null $name = null,
     ) {
         // Initialize some properties (use our setters so we can validate param types)
         $this->setCallback($callback);
@@ -102,14 +104,10 @@ class Route
     /**
      * Set the callback
      *
-     * @throws InvalidArgumentException If the callback isn't a callable
+     * @throws TypeError If the callback isn't a callable
      */
     public function setCallback(callable $callback): static
     {
-        if (!is_callable($callback)) {
-            throw new InvalidArgumentException('Expected a callable. Got an uncallable ' . gettype($callback));
-        }
-
         $this->callback = $callback;
 
         return $this;
@@ -118,7 +116,7 @@ class Route
     /**
      * Get the path
      */
-    public function getPath(): ?string
+    public function getPath(): string|null
     {
         return $this->path;
     }
@@ -126,7 +124,7 @@ class Route
     /**
      * Set the path
      */
-    public function setPath(?string $path): static
+    public function setPath(string|null $path): static
     {
         $this->path = $path;
 
@@ -144,10 +142,15 @@ class Route
     /**
      * Set the method
      *
-     * @throws InvalidArgumentException If a non-string or non-array type is passed
+     * @throws TypeError If a non-string or non-array type is passed
      */
     public function setMethod(string|array|null $method): static
     {
+        // Explicit type check to prevent type coercion
+        if ($method !== null && !is_array($method) && !is_string($method)) {
+            throw new TypeError('Expected an array or string. Got a '. gettype($method));
+        }
+
         $this->method = $method;
 
         return $this;
@@ -174,7 +177,7 @@ class Route
     /**
      * Get the name
      */
-    public function getName(): ?string
+    public function getName(): string|null
     {
         return $this->name;
     }
@@ -182,7 +185,7 @@ class Route
     /**
      * Set the name
      */
-    public function setName(?string $name): static
+    public function setName(string|null $name): static
     {
         $this->name = $name;
 

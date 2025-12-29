@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -14,6 +16,7 @@ namespace Klein\Tests;
 
 use InvalidArgumentException;
 use Klein\Route;
+use TypeError;
 
 /**
  * RouteTest
@@ -56,8 +59,7 @@ class RouteTest extends AbstractKleinTestCase
         // Empty constructor
         $route = new Route($test_callable);
 
-        $this->assertNotNull($route->getPath());
-        $this->assertIsString($route->getPath());
+        $this->assertNull($route->getPath());
 
         // Set in constructor
         $route = new Route($test_callable, $test_path);
@@ -130,7 +132,7 @@ class RouteTest extends AbstractKleinTestCase
         $this->assertNull($route->getName());
 
         // Set in constructor
-        $route = new Route($test_callable, null, null, null, $test_name);
+        $route = new Route($test_callable, null, null, false, $test_name);
 
         $this->assertSame($test_name, $route->getName());
 
@@ -163,7 +165,7 @@ class RouteTest extends AbstractKleinTestCase
 
     public function testCallbackSetWithIncorrectType()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(TypeError::class);
         $route = new Route($this->getTestCallable());
 
         // Test setting with the WRONG type
@@ -172,7 +174,7 @@ class RouteTest extends AbstractKleinTestCase
 
     public function testMethodSetWithIncorrectType()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(TypeError::class);
         $route = new Route($this->getTestCallable());
 
         // Test setting with the WRONG type

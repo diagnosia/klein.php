@@ -162,7 +162,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
             null,
             null,
             null,
-            null,
+            false,
             $sample_data['http_only'],
         );
 

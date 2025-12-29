@@ -213,10 +213,10 @@ class Klein
      * @param AbstractRouteFactory $route_factory   A factory class responsible for creating Route instances
      */
     public function __construct(
-        ?ServiceProvider $service = null,
+        ServiceProvider|null $service = null,
         $app = null,
-        ?RouteCollection $routes = null,
-        ?AbstractRouteFactory $route_factory = null,
+        RouteCollection|null $routes = null,
+        AbstractRouteFactory|null $route_factory = null,
     ) {
         // Instanciate and fall back to defaults
         $this->service = $service ?: new ServiceProvider();
@@ -407,8 +407,8 @@ class Klein
      * @return void|string
      */
     public function dispatch(
-        ?Request $request = null,
-        ?AbstractResponse $response = null,
+        Request|null $request = null,
+        AbstractResponse|null $response = null,
         $send_response = true,
         $capture = self::DISPATCH_NO_CAPTURE,
     ) {
@@ -804,7 +804,7 @@ class Klein
      * @throws OutOfBoundsException     If the route requested doesn't exist
      * @return string
      */
-    public function getPathFor($route_name, ?array $params = null, $flatten_regex = true)
+    public function getPathFor($route_name, array|null $params = null, $flatten_regex = true)
     {
         // First, grab the route
         $route = $this->routes->get($route_name);
@@ -1089,7 +1089,7 @@ class Klein
      * @param int|null $code     Optional HTTP status code to send
      * @throws DispatchHaltedException To halt/skip the current dispatch loop
      */
-    public function abort(?int $code = null): never
+    public function abort(int|null $code = null): never
     {
         if (null !== $code) {
             throw HttpException::createFromCode($code);

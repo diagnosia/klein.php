@@ -36,7 +36,7 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         return $this->createMock('\Klein\AbstractRouteFactory');
     }
 
-    protected function getMockBuilderForFactory(?array $methods_to_mock = null)
+    protected function getMockBuilderForFactory(array|null $methods_to_mock = null)
     {
         $methods_to_mock = $methods_to_mock ?: $this->getDefaultMethodsToMock();
 

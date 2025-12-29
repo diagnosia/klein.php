@@ -31,25 +31,25 @@ class ResponseCookie
     /**
      * The string "value" of the cookie
      */
-    protected ?string $value;
+    protected string|null $value;
 
     /**
      * The date/time that the cookie should expire
      *
      * Represented by a Unix "Timestamp"
      */
-    protected ?int $expire;
+    protected int|null $expire;
 
     /**
      * The path on the server that the cookie will
      * be available on
      */
-    protected ?string $path;
+    protected string|null $path;
 
     /**
      * The domain that the cookie is available to
      */
-    protected ?string $domain;
+    protected string|null $domain;
 
     /**
      * Whether the cookie should only be transferred
@@ -81,10 +81,10 @@ class ResponseCookie
      */
     public function __construct(
         string $name,
-        ?string $value = null,
+        string|null $value = null,
         int|string|null $expire = null,
-        ?string $path = null,
-        ?string $domain = null,
+        string|null $path = null,
+        string|null $domain = null,
         bool $secure = false,
         bool $http_only = false,
     ) {
@@ -121,7 +121,7 @@ class ResponseCookie
     /**
      * Gets the cookie's value
      */
-    public function getValue(): ?string
+    public function getValue(): string|null
     {
         return $this->value;
     }
@@ -129,7 +129,7 @@ class ResponseCookie
     /**
      * Sets the cookie's value
      */
-    public function setValue(?string $value): static
+    public function setValue(string|null $value): static
     {
         $this->value = $value;
 
@@ -139,7 +139,7 @@ class ResponseCookie
     /**
      * Gets the cookie's expire time
      */
-    public function getExpire(): ?int
+    public function getExpire(): int|null
     {
         return $this->expire;
     }
@@ -150,7 +150,7 @@ class ResponseCookie
      * The time should be an integer
      * representing a Unix timestamp
      */
-    public function setExpire(?int $expire): static
+    public function setExpire(int|null $expire): static
     {
         $this->expire = $expire;
 
@@ -160,7 +160,7 @@ class ResponseCookie
     /**
      * Gets the cookie's path
      */
-    public function getPath(): ?string
+    public function getPath(): string|null
     {
         return $this->path;
     }
@@ -168,7 +168,7 @@ class ResponseCookie
     /**
      * Sets the cookie's path
      */
-    public function setPath(?string $path): static
+    public function setPath(string|null $path): static
     {
         $this->path = $path;
 
@@ -178,7 +178,7 @@ class ResponseCookie
     /**
      * Gets the cookie's domain
      */
-    public function getDomain(): ?string
+    public function getDomain(): string|null
     {
         return $this->domain;
     }
@@ -186,7 +186,7 @@ class ResponseCookie
     /**
      * Sets the cookie's domain
      */
-    public function setDomain(?string $domain): static
+    public function setDomain(string|null $domain): static
     {
         $this->domain = $domain;
 
