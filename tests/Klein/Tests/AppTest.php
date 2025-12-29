@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -22,13 +23,11 @@ use PHPUnit\Framework\Attributes\DoesNotPerformAssertions;
  */
 class AppTest extends AbstractKleinTestCase
 {
-
     /**
      * Constants
      */
 
     const TEST_CALLBACK_MESSAGE = 'yay';
-
 
     /**
      * Helpers
@@ -40,7 +39,6 @@ class AppTest extends AbstractKleinTestCase
             return $message;
         };
     }
-
 
     /**
      * Tests

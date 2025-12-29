@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,6 +19,4 @@ use RuntimeException;
  *
  * Exception used for when a response is attempted to be sent after its already been sent
  */
-class ResponseAlreadySentException extends RuntimeException implements KleinExceptionInterface
-{
-}
+class ResponseAlreadySentException extends RuntimeException implements KleinExceptionInterface {}

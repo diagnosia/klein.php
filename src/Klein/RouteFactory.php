@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,7 +19,6 @@ namespace Klein;
  */
 class RouteFactory extends AbstractRouteFactory
 {
-
     /**
      * Constants
      */
@@ -29,7 +29,6 @@ class RouteFactory extends AbstractRouteFactory
      * @type string
      */
     const NULL_PATH_VALUE = '*';
-
 
     /**
      * Methods
@@ -43,7 +42,7 @@ class RouteFactory extends AbstractRouteFactory
      */
     protected function pathIsNull($path)
     {
-        return (static::NULL_PATH_VALUE === $path || null === $path);
+        return static::NULL_PATH_VALUE === $path || null === $path;
     }
 
     /**
@@ -72,12 +71,12 @@ class RouteFactory extends AbstractRouteFactory
     protected function preprocessPathString($path)
     {
         // If the path is null, make sure to give it our match-all value
-        $path = (null === $path) ? static::NULL_PATH_VALUE : (string) $path;
+        $path = null === $path ? static::NULL_PATH_VALUE : (string) $path;
 
         // If a custom regular expression (or negated custom regex)
-        if ($this->namespace &&
-            (isset($path[0]) && $path[0] === '@') ||
-            (isset($path[0]) && $path[0] === '!' && isset($path[1]) && $path[1] === '@')
+        if (
+            $this->namespace && (isset($path[0]) && $path[0] === '@')
+            || isset($path[0]) && $path[0] === '!' && isset($path[1]) && $path[1] === '@'
         ) {
             // Is it negated?
             if ($path[0] === '!') {
@@ -100,7 +99,6 @@ class RouteFactory extends AbstractRouteFactory
             } else {
                 $path = '@^' . $this->namespace . $path;
             }
-
         } elseif ($this->namespace && $this->pathIsNull($path)) {
             // Empty route with namespace is a match-all
             $path = '@^' . $this->namespace . '(/|$)';
@@ -128,7 +126,7 @@ class RouteFactory extends AbstractRouteFactory
             $callback,
             $this->preprocessPathString($path),
             $method,
-            $this->shouldPathStringCauseRouteMatch($path) // Ignore the $count_match boolean that they passed
+            $this->shouldPathStringCauseRouteMatch($path), // Ignore the $count_match boolean that they passed
         );
     }
 }

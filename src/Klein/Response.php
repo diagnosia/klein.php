@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,7 +20,6 @@ use RuntimeException;
  */
 class Response extends AbstractResponse
 {
-
     /**
      * Methods
      */
@@ -57,7 +57,7 @@ class Response extends AbstractResponse
             $obj = print_r($obj, true);
         }
 
-        $this->append('<pre>' .  htmlentities($obj, ENT_QUOTES) . "</pre><br />\n");
+        $this->append('<pre>' . htmlentities($obj, ENT_QUOTES) . "</pre><br />\n");
 
         return $this;
     }
@@ -97,7 +97,7 @@ class Response extends AbstractResponse
         }
 
         $this->header('Content-type', $mimetype);
-        $this->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
+        $this->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
 
         // If the response is to be chunked, then the content length must not be sent
         // see: https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.4

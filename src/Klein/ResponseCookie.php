@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,66 +19,50 @@ namespace Klein;
  */
 class ResponseCookie
 {
-
     /**
      * Class properties
      */
 
     /**
      * The name of the cookie
-     *
-     * @type string
      */
-    protected $name;
+    protected string $name;
 
     /**
      * The string "value" of the cookie
-     *
-     * @type string
      */
-    protected $value;
+    protected ?string $value;
 
     /**
      * The date/time that the cookie should expire
      *
      * Represented by a Unix "Timestamp"
-     *
-     * @type int
      */
-    protected $expire;
+    protected ?int $expire;
 
     /**
      * The path on the server that the cookie will
      * be available on
-     *
-     * @type string
      */
-    protected $path;
+    protected ?string $path;
 
     /**
      * The domain that the cookie is available to
-     *
-     * @type string
      */
-    protected $domain;
+    protected ?string $domain;
 
     /**
      * Whether the cookie should only be transferred
      * over an HTTPS connection or not
-     *
-     * @type boolean
      */
-    protected $secure;
+    protected bool $secure;
 
     /**
      * Whether the cookie will be available through HTTP
      * only (not available to be accessed through
      * client-side scripting languages like JavaScript)
-     *
-     * @type boolean
      */
-    protected $http_only;
-
+    protected bool $http_only;
 
     /**
      * Methods
@@ -91,17 +76,17 @@ class ResponseCookie
      * @param int     $expire       The time that the cookie should expire
      * @param string  $path         The path of which to restrict the cookie
      * @param string  $domain       The domain of which to restrict the cookie
-     * @param boolean $secure       Flag of whether the cookie should only be sent over a HTTPS connection
-     * @param boolean $http_only    Flag of whether the cookie should only be accessible over the HTTP protocol
+     * @param bool    $secure       Flag of whether the cookie should only be sent over a HTTPS connection
+     * @param bool    $http_only    Flag of whether the cookie should only be accessible over the HTTP protocol
      */
     public function __construct(
-        $name,
-        $value = null,
-        $expire = null,
-        $path = null,
-        $domain = null,
-        $secure = false,
-        $http_only = false
+        string $name,
+        ?string $value = null,
+        int|string|null $expire = null,
+        ?string $path = null,
+        ?string $domain = null,
+        bool $secure = false,
+        bool $http_only = false,
     ) {
         // Initialize our properties
         $this->setName($name);
@@ -115,8 +100,6 @@ class ResponseCookie
 
     /**
      * Gets the cookie's name
-     *
-     * @return string
      */
     public function getName()
     {
@@ -126,49 +109,37 @@ class ResponseCookie
     /**
      * Sets the cookie's name
      *
-     * @param string $name
      * @return ResponseCookie
      */
-    public function setName($name)
+    public function setName(string $name)
     {
-        $this->name = (string) $name;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
      * Gets the cookie's value
-     *
-     * @return string
      */
-    public function getValue()
+    public function getValue(): ?string
     {
         return $this->value;
     }
 
     /**
      * Sets the cookie's value
-     *
-     * @param string $value
-     * @return ResponseCookie
      */
-    public function setValue($value)
+    public function setValue(?string $value): static
     {
-        if (null !== $value) {
-            $this->value = (string) $value;
-        } else {
-            $this->value = $value;
-        }
+        $this->value = $value;
 
         return $this;
     }
 
     /**
      * Gets the cookie's expire time
-     *
-     * @return int
      */
-    public function getExpire()
+    public function getExpire(): ?int
     {
         return $this->expire;
     }
@@ -178,117 +149,82 @@ class ResponseCookie
      *
      * The time should be an integer
      * representing a Unix timestamp
-     *
-     * @param int $expire
-     * @return ResponseCookie
      */
-    public function setExpire($expire)
+    public function setExpire(?int $expire): static
     {
-        if (null !== $expire) {
-            $this->expire = (int) $expire;
-        } else {
-            $this->expire = $expire;
-        }
+        $this->expire = $expire;
 
         return $this;
     }
 
     /**
      * Gets the cookie's path
-     *
-     * @return string
      */
-    public function getPath()
+    public function getPath(): ?string
     {
         return $this->path;
     }
 
     /**
      * Sets the cookie's path
-     *
-     * @param string $path
-     * @return ResponseCookie
      */
-    public function setPath($path)
+    public function setPath(?string $path): static
     {
-        if (null !== $path) {
-            $this->path = (string) $path;
-        } else {
-            $this->path = $path;
-        }
+        $this->path = $path;
 
         return $this;
     }
 
     /**
      * Gets the cookie's domain
-     *
-     * @return string
      */
-    public function getDomain()
+    public function getDomain(): ?string
     {
         return $this->domain;
     }
 
     /**
      * Sets the cookie's domain
-     *
-     * @param string $domain
-     * @return ResponseCookie
      */
-    public function setDomain($domain)
+    public function setDomain(?string $domain): static
     {
-        if (null !== $domain) {
-            $this->domain = (string) $domain;
-        } else {
-            $this->domain = $domain;
-        }
+        $this->domain = $domain;
 
         return $this;
     }
 
     /**
      * Gets the cookie's secure only flag
-     *
-     * @return boolean
      */
-    public function getSecure()
+    public function getSecure(): bool
     {
         return $this->secure;
     }
 
     /**
      * Sets the cookie's secure only flag
-     *
-     * @param boolean $secure
-     * @return ResponseCookie
      */
-    public function setSecure($secure)
+    public function setSecure(bool $secure): static
     {
-        $this->secure = (boolean) $secure;
+        $this->secure = $secure;
 
         return $this;
     }
 
     /**
      * Gets the cookie's HTTP only flag
-     *
-     * @return boolean
      */
-    public function getHttpOnly()
+    public function getHttpOnly(): bool
     {
         return $this->http_only;
     }
 
     /**
      * Sets the cookie's HTTP only flag
-     *
-     * @param boolean $http_only
-     * @return ResponseCookie
      */
-    public function setHttpOnly($http_only)
+    public function setHttpOnly(bool $http_only): static
     {
-        $this->http_only = (boolean) $http_only;
+        $this->http_only = $http_only;
 
         return $this;
     }

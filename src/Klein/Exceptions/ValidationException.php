@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,6 +19,4 @@ use UnexpectedValueException;
  *
  * Exception used for Validation errors
  */
-class ValidationException extends UnexpectedValueException implements KleinExceptionInterface
-{
-}
+class ValidationException extends UnexpectedValueException implements KleinExceptionInterface {}

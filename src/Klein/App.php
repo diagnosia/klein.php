@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -22,7 +23,6 @@ use Klein\Exceptions\UnknownServiceException;
 #[AllowDynamicProperties]
 class App
 {
-
     /**
      * Class properties
      */
@@ -50,7 +50,7 @@ class App
     public function __get($name)
     {
         if (!isset($this->services[$name])) {
-            throw new UnknownServiceException('Unknown service '. $name);
+            throw new UnknownServiceException('Unknown service ' . $name);
         }
         $service = $this->services[$name];
 
@@ -71,7 +71,7 @@ class App
     public function __call($method, $args)
     {
         if (!isset($this->services[$method]) || !is_callable($this->services[$method])) {
-            throw new BadMethodCallException('Unknown method '. $method .'()');
+            throw new BadMethodCallException('Unknown method ' . $method . '()');
         }
 
         return call_user_func_array($this->services[$method], $args);
@@ -88,7 +88,7 @@ class App
     public function register($name, $closure)
     {
         if (isset($this->services[$name])) {
-            throw new DuplicateServiceException('A service is already registered under '. $name);
+            throw new DuplicateServiceException('A service is already registered under ' . $name);
         }
 
         $this->services[$name] = function () use ($closure) {

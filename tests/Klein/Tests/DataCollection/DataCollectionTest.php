@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -21,12 +22,10 @@ use stdClass;
  */
 class DataCollectionTest extends AbstractKleinTestCase
 {
-
     /**
      * Non existent key in the sample data
      */
     protected static string $nonexistent_key = 'key-name-doesnt-exist';
-
 
     /*
      * Data Providers and Methods
@@ -58,7 +57,7 @@ class DataCollectionTest extends AbstractKleinTestCase
             'id' => 1337,
             'name' => array(
                 'first' => 'Trevor',
-                'last'  => 'Suarez',
+                'last' => 'Suarez',
             ),
             'float' => 13.37,
             'thing' => new stdClass(),
@@ -81,8 +80,8 @@ class DataCollectionTest extends AbstractKleinTestCase
         // Populate our sample data
         $totally_different_sample_data = array(
             '_why' => 'the lucky stiff',
-            'php'  => 'has become beautiful',
-            'yay'  => 'life is very good. :)',
+            'php' => 'has become beautiful',
+            'yay' => 'life is very good. :)',
         );
 
         $this->prepareSampleData($totally_different_sample_data);
@@ -91,7 +90,6 @@ class DataCollectionTest extends AbstractKleinTestCase
             array($totally_different_sample_data),
         );
     }
-
 
     /*
      * Tests
@@ -182,9 +180,7 @@ class DataCollectionTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testReplace($sample_data, $data_collection)
     {
-        $totally_different_sample_data = current(
-            current($this->totallyDifferentSampleDataProvider())
-        );
+        $totally_different_sample_data = current(current($this->totallyDifferentSampleDataProvider()));
 
         $data_collection->replace($totally_different_sample_data);
 
@@ -196,9 +192,7 @@ class DataCollectionTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testMerge($sample_data, $data_collection)
     {
-        $totally_different_sample_data = current(
-            current($this->totallyDifferentSampleDataProvider())
-        );
+        $totally_different_sample_data = current(current($this->totallyDifferentSampleDataProvider()));
 
         $merged_data = array_merge($sample_data, $totally_different_sample_data);
 
@@ -213,9 +207,7 @@ class DataCollectionTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testMergeHard($sample_data, $data_collection)
     {
-        $totally_different_sample_data = current(
-            current($this->totallyDifferentSampleDataProvider())
-        );
+        $totally_different_sample_data = current(current($this->totallyDifferentSampleDataProvider()));
 
         $replaced_data = array_replace($sample_data, $totally_different_sample_data);
 
@@ -227,7 +219,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertSame($replaced_data, $data_collection->all());
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testExists($sample_data, $data_collection)
     {
@@ -235,7 +226,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse($data_collection->exists(static::$nonexistent_key));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testRemove($sample_data, $data_collection)
     {
@@ -246,7 +236,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse($data_collection->exists('id'));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testClear($sample_data, $data_collection)
     {
@@ -258,7 +247,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertSame(array(), $data_collection->all());
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testMagicGet($sample_data, $data_collection)
     {
@@ -283,7 +271,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertSame(current($data), $data_collection->get(key($data)));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testMagicIsset($sample_data, $data_collection)
     {
@@ -293,7 +280,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse(isset($data_collection->{static::$nonexistent_key}));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testMagicUnset($sample_data, $data_collection)
     {
@@ -304,7 +290,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse(isset($data_collection->id));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testIteratorAggregate($sample_data, $data_collection)
     {
@@ -317,7 +302,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertSame($filled_data, $sample_data);
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testArrayAccessGet($sample_data, $data_collection)
     {
@@ -342,7 +326,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertSame(current($data), $data_collection->get(key($data)));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testArrayAccessIsset($sample_data, $data_collection)
     {
@@ -350,7 +333,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse(isset($data_collection[static::$nonexistent_key]));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testArrayAccessUnset($sample_data, $data_collection)
     {
@@ -361,7 +343,6 @@ class DataCollectionTest extends AbstractKleinTestCase
         $this->assertFalse(isset($data_collection['id']));
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testCount($sample_data, $data_collection)
     {

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -23,13 +24,9 @@ use Klein\Validator;
  */
 class ServiceProviderTest extends AbstractKleinTestCase
 {
-
     protected function getBasicServiceProvider()
     {
-        return new ServiceProvider(
-            $request = new Request(),
-            $response = new Response()
-        );
+        return new ServiceProvider($request = new Request(), $response = new Response());
     }
 
     public function testConstructor()
@@ -40,10 +37,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $this->assertFalse($service->isBond());
 
         // New service with injected dependencies
-        $service = new ServiceProvider(
-            $request = new Request(),
-            $response = new Response()
-        );
+        $service = new ServiceProvider($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
         $this->assertTrue($service->isBond());
@@ -57,10 +51,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $this->assertFalse($service->isBond());
 
         // New service with injected dependencies
-        $return_val = $service->bind(
-            $request = new Request(),
-            $response = new Response()
-        );
+        $return_val = $service->bind($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
         $this->assertTrue($service->isBond());
@@ -211,10 +202,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Test the rest
         $all_flashes = $service->flashes();
-        $this->assertCount(
-            count($test_flashes) - count($error_flashes),
-            $all_flashes
-        );
+        $this->assertCount(count($test_flashes) - count($error_flashes), $all_flashes);
 
         // Clean up
         session_destroy();
@@ -226,49 +214,55 @@ class ServiceProviderTest extends AbstractKleinTestCase
         // Test basic markdown conversion
         $this->assertSame(
             '<strong>dog</strong> <em>cat</em> <a href="src">name</a>',
-            ServiceProvider::markdown('**dog** *cat* [name](src)')
+            ServiceProvider::markdown('**dog** *cat* [name](src)'),
         );
 
         // Test array arguments
-        $this->assertSame(
-            '<strong>huh</strong> <em>12</em> <strong>CD</strong>',
-            ServiceProvider::markdown('**%s** *%d* **%X**', array('huh', '12', 205))
-        );
+        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown('**%s** *%d* **%X**', array(
+            'huh',
+            '12',
+            205,
+        )));
 
         // Test variable number of arguments
-        $this->assertSame(
-            '<strong>huh</strong> <em>12</em> <strong>CD</strong>',
-            ServiceProvider::markdown('**%s** *%d* **%X**', 'huh', '12', 205)
-        );
+        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
+            '**%s** *%d* **%X**',
+            'huh',
+            '12',
+            205,
+        ));
 
         // Test second array argument overrides other arguments
-        $this->assertSame(
-            '<strong>huh</strong> <em>12</em> <strong>CD</strong>',
-            ServiceProvider::markdown('**%s** *%d* **%X**', array('huh', '12', 205), 'dog', 'cheese')
-        );
+        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
+            '**%s** *%d* **%X**',
+            array('huh', '12', 205),
+            'dog',
+            'cheese',
+        ));
     }
 
     public function testEscapeCharacters()
     {
         $this->assertSame(
             'H&egrave;&egrave;&egrave;llo! A&amp;W root beer is now 20% off!!',
-            ServiceProvider::escape('Hèèèllo! A&W root beer is now 20% off!!')
+            ServiceProvider::escape('Hèèèllo! A&W root beer is now 20% off!!'),
         );
     }
 
     public function testRefresh()
     {
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                $service->refresh();
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            $service->refresh();
+        });
 
         $this->klein_app->dispatch();
 
         $this->assertSame(
             $this->klein_app->request()->uri(),
-            $this->klein_app->response()->headers()->get('location')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('location'),
         );
         $this->assertTrue($this->klein_app->response()->isLocked());
 
@@ -284,17 +278,18 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $request = new Request();
         $request->server()->set('HTTP_REFERER', $url);
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                $service->back();
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            $service->back();
+        });
 
         $this->klein_app->dispatch($request);
 
         $this->assertSame(
             $url,
-            $this->klein_app->response()->headers()->get('location')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('location'),
         );
         $this->assertTrue($this->klein_app->response()->isLocked());
 
@@ -307,11 +302,9 @@ class ServiceProviderTest extends AbstractKleinTestCase
     {
         $request = new Request();
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                $service->back();
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            $service->back();
+        });
 
         $this->klein_app->dispatch($request);
 
@@ -346,29 +339,28 @@ class ServiceProviderTest extends AbstractKleinTestCase
             'verb' => 'woot',
         );
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($test_data) {
-                // Set some data manually
-                $service->sharedData()->set('name', 'should be overwritten');
+        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+            // Set some data manually
+            $service->sharedData()->set('name', 'should be overwritten');
 
-                // Set our layout
-                $service->layout(__DIR__.'/views/layout.php');
+            // Set our layout
+            $service->layout(__DIR__ . '/views/layout.php');
 
-                // Render our view, and pass some MORE data
-                $service->render(
-                    __DIR__.'/views/test.php',
-                    $test_data
-                );
-            }
-        );
+            // Render our view, and pass some MORE data
+            $service->render(__DIR__ . '/views/test.php', $test_data);
+        });
 
         $this->klein_app->dispatch();
 
         $this->expectOutputString(
-            '<h1>About</h1>' . PHP_EOL
-            .'My name is Trevor Suarez.' . PHP_EOL
-            .'WOOT!' . PHP_EOL
-            .'<div>footer</div>' . PHP_EOL
+            '<h1>About</h1>'
+            . PHP_EOL
+            . 'My name is Trevor Suarez.'
+            . PHP_EOL
+            . 'WOOT!'
+            . PHP_EOL
+            . '<div>footer</div>'
+            . PHP_EOL,
         );
     }
 
@@ -383,29 +375,28 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $response = new Response();
         $response->chunk();
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($test_data) {
-                // Set some data manually
-                $service->sharedData()->set('name', 'should be overwritten');
+        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+            // Set some data manually
+            $service->sharedData()->set('name', 'should be overwritten');
 
-                // Set our layout
-                $service->layout(__DIR__.'/views/layout.php');
+            // Set our layout
+            $service->layout(__DIR__ . '/views/layout.php');
 
-                // Render our view, and pass some MORE data
-                $service->render(
-                    __DIR__.'/views/test.php',
-                    $test_data
-                );
-            }
-        );
+            // Render our view, and pass some MORE data
+            $service->render(__DIR__ . '/views/test.php', $test_data);
+        });
 
         $this->klein_app->dispatch(null, $response);
 
         $this->expectOutputString(
-            '<h1>About</h1>' . PHP_EOL
-            .'My name is Trevor Suarez.' . PHP_EOL
-            .'WOOT!' . PHP_EOL
-            .'<div>footer</div>' . PHP_EOL
+            '<h1>About</h1>'
+            . PHP_EOL
+            . 'My name is Trevor Suarez.'
+            . PHP_EOL
+            . 'WOOT!'
+            . PHP_EOL
+            . '<div>footer</div>'
+            . PHP_EOL,
         );
     }
 
@@ -417,26 +408,18 @@ class ServiceProviderTest extends AbstractKleinTestCase
             'verb' => 'woot',
         );
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($test_data) {
-                // Set our layout
-                $service->layout(__DIR__.'/views/layout.php');
+        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+            // Set our layout
+            $service->layout(__DIR__ . '/views/layout.php');
 
-                // Render our view, and pass some MORE data
-                $service->partial(
-                    __DIR__.'/views/test.php',
-                    $test_data
-                );
-            }
-        );
+            // Render our view, and pass some MORE data
+            $service->partial(__DIR__ . '/views/test.php', $test_data);
+        });
 
         $this->klein_app->dispatch();
 
         // Make sure the layout doesn't get included
-        $this->expectOutputString(
-            'My name is Trevor Suarez.' . PHP_EOL
-            .'WOOT!' . PHP_EOL
-        );
+        $this->expectOutputString('My name is Trevor Suarez.' . PHP_EOL . 'WOOT!' . PHP_EOL);
     }
 
     public function testAddValidator()
@@ -460,17 +443,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
     public function testValidate()
     {
         $this->expectException(ValidationException::class);
-        $this->klein_app->onError(
-            function ($a, $b, $c, $exception) {
-                throw $exception;
-            }
-        );
+        $this->klein_app->onError(function ($a, $b, $c, $exception) {
+            throw $exception;
+        });
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                $service->validate('thing')->isLen(3);
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            $service->validate('thing')->isLen(3);
+        });
 
         $this->klein_app->dispatch();
     }
@@ -478,20 +457,16 @@ class ServiceProviderTest extends AbstractKleinTestCase
     public function testValidateParam()
     {
         $this->expectException(ValidationException::class);
-        $this->klein_app->onError(
-            function ($a, $b, $c, $exception) {
-                throw $exception;
-            }
-        );
+        $this->klein_app->onError(function ($a, $b, $c, $exception) {
+            throw $exception;
+        });
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                // Set a test param
-                $request->paramsNamed()->set('name', 'trevor');
+        $this->klein_app->respond(function ($request, $response, $service) {
+            // Set a test param
+            $request->paramsNamed()->set('name', 'trevor');
 
-                $service->validateParam('name')->notNull()->isLen(3);
-            }
-        );
+            $service->validateParam('name')->notNull()->isLen(3);
+        });
 
         $this->klein_app->dispatch();
     }

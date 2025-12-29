@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -20,7 +21,6 @@ use RuntimeException;
  */
 class DispatchHaltedException extends RuntimeException implements KleinExceptionInterface
 {
-
     /**
      * Constants
      */
@@ -40,7 +40,6 @@ class DispatchHaltedException extends RuntimeException implements KleinException
      */
     const int SKIP_REMAINING = 0;
 
-
     /**
      * Properties
      */
@@ -49,7 +48,6 @@ class DispatchHaltedException extends RuntimeException implements KleinException
      * The number of next matches to skip on a "next" skip
      */
     protected int $number_of_skips = 1;
-
 
     /**
      * Methods

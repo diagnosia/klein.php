@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -29,13 +30,11 @@ use OutOfBoundsException;
  */
 class KleinTest extends AbstractKleinTestCase
 {
-
     /**
      * Constants
      */
 
     const string TEST_CALLBACK_MESSAGE = 'yay';
-
 
     /**
      * Helpers
@@ -47,7 +46,6 @@ class KleinTest extends AbstractKleinTestCase
             return $message;
         };
     }
-
 
     /**
      * Tests
@@ -123,12 +121,9 @@ class KleinTest extends AbstractKleinTestCase
         $test_namespace = '/test/namespace';
         $passed_context = null;
 
-        $this->klein_app->with(
-            $test_namespace,
-            function ($context) use (&$passed_context) {
-                $passed_context = $context;
-            }
-        );
+        $this->klein_app->with($test_namespace, function ($context) use (&$passed_context) {
+            $passed_context = $context;
+        });
 
         $this->assertTrue($passed_context instanceof Klein);
     }
@@ -138,10 +133,7 @@ class KleinTest extends AbstractKleinTestCase
         // Test data
         $test_namespace = '/test/namespace';
 
-        $this->klein_app->with(
-            $test_namespace,
-            'test_num_args_wrapper'
-        );
+        $this->klein_app->with($test_namespace, 'test_num_args_wrapper');
 
         $this->expectOutputString('1');
     }
@@ -157,7 +149,7 @@ class KleinTest extends AbstractKleinTestCase
     {
         // Test data
         $test_namespace = '/test/namespace';
-        $test_routes_include = __DIR__ .'/routes/random.php';
+        $test_routes_include = __DIR__ . '/routes/random.php';
 
         // Test file include
         $this->assertEmpty($this->klein_app->routes()->all());
@@ -214,34 +206,24 @@ class KleinTest extends AbstractKleinTestCase
     {
         $this->klein_app->onError('test_num_args_wrapper');
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                throw new Exception('testing');
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            throw new Exception('testing');
+        });
 
-        $this->assertSame(
-            '4',
-            $this->dispatchAndReturnOutput()
-        );
+        $this->assertSame('4', $this->dispatchAndReturnOutput());
     }
 
     public function testOnErrorWithBadCallables()
     {
         $this->klein_app->onError('this_function_doesnt_exist');
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                throw new Exception('testing');
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            throw new Exception('testing');
+        });
 
         $this->assertEmpty($this->klein_app->service()->flashes());
 
-        $this->assertSame(
-            '',
-            $this->dispatchAndReturnOutput()
-        );
+        $this->assertSame('', $this->dispatchAndReturnOutput());
 
         $this->assertNotEmpty($this->klein_app->service()->flashes());
 
@@ -254,33 +236,31 @@ class KleinTest extends AbstractKleinTestCase
         // Create expected arguments
         $num_of_args = 0;
         $expected_arguments = array(
-            'code'            => null,
-            'klein'           => null,
-            'matched'         => null,
+            'code' => null,
+            'klein' => null,
+            'matched' => null,
             'methods_matched' => null,
-            'exception'       => null,
+            'exception' => null,
         );
 
-        $this->klein_app->onHttpError(
-            function ($code, $klein, $matched, $methods_matched, $exception) use (&$num_of_args, &$expected_arguments) {
-                // Keep track of our arguments
-                $num_of_args = func_num_args();
-                $expected_arguments['code'] = $code;
-                $expected_arguments['klein'] = $klein;
-                $expected_arguments['matched'] = $matched;
-                $expected_arguments['methods_matched'] = $methods_matched;
-                $expected_arguments['exception'] = $exception;
+        $this->klein_app->onHttpError(function ($code, $klein, $matched, $methods_matched, $exception) use (
+            &$num_of_args,
+            &$expected_arguments,
+        ) {
+            // Keep track of our arguments
+            $num_of_args = func_num_args();
+            $expected_arguments['code'] = $code;
+            $expected_arguments['klein'] = $klein;
+            $expected_arguments['matched'] = $matched;
+            $expected_arguments['methods_matched'] = $methods_matched;
+            $expected_arguments['exception'] = $exception;
 
-                $klein->response()->body($code .' error');
-            }
-        );
+            $klein->response()->body($code . ' error');
+        });
 
         $this->klein_app->dispatch(null, null, false);
 
-        $this->assertSame(
-            '404 error',
-            $this->klein_app->response()->body()
-        );
+        $this->assertSame('404 error', $this->klein_app->response()->body());
 
         $this->assertSame(count($expected_arguments), $num_of_args);
 
@@ -297,58 +277,40 @@ class KleinTest extends AbstractKleinTestCase
     {
         $this->klein_app->onHttpError('test_num_args_wrapper');
 
-        $this->assertSame(
-            '5',
-            $this->dispatchAndReturnOutput()
-        );
+        $this->assertSame('5', $this->dispatchAndReturnOutput());
     }
 
     public function testOnHttpErrorWithBadCallables()
     {
         $this->klein_app->onError('this_function_doesnt_exist');
 
-        $this->assertSame(
-            '',
-            $this->dispatchAndReturnOutput()
-        );
+        $this->assertSame('', $this->dispatchAndReturnOutput());
     }
 
     public function testAfterDispatch()
     {
-        $this->klein_app->afterDispatch(
-            function ($klein) {
-                $klein->response()->body('after callbacks!');
-            }
-        );
+        $this->klein_app->afterDispatch(function ($klein) {
+            $klein->response()->body('after callbacks!');
+        });
 
         $this->klein_app->dispatch(null, null, false);
 
-        $this->assertSame(
-            'after callbacks!',
-            $this->klein_app->response()->body()
-        );
+        $this->assertSame('after callbacks!', $this->klein_app->response()->body());
     }
 
     public function testAfterDispatchWithMultipleCallbacks()
     {
-        $this->klein_app->afterDispatch(
-            function ($klein) {
-                $klein->response()->body('after callbacks!');
-            }
-        );
+        $this->klein_app->afterDispatch(function ($klein) {
+            $klein->response()->body('after callbacks!');
+        });
 
-        $this->klein_app->afterDispatch(
-            function ($klein) {
-                $klein->response()->body('whatever');
-            }
-        );
+        $this->klein_app->afterDispatch(function ($klein) {
+            $klein->response()->body('whatever');
+        });
 
         $this->klein_app->dispatch(null, null, false);
 
-        $this->assertSame(
-            'whatever',
-            $this->klein_app->response()->body()
-        );
+        $this->assertSame('whatever', $this->klein_app->response()->body());
     }
 
     public function testAfterDispatchWithStringCallables()
@@ -357,10 +319,7 @@ class KleinTest extends AbstractKleinTestCase
 
         $this->klein_app->dispatch(null, null, false);
 
-        $this->assertSame(
-            'after callbacks!',
-            $this->klein_app->response()->body()
-        );
+        $this->assertSame('after callbacks!', $this->klein_app->response()->body());
     }
 
     public function testAfterDispatchWithBadCallables()
@@ -375,35 +334,25 @@ class KleinTest extends AbstractKleinTestCase
     public function testAfterDispatchWithCallableThatThrowsException()
     {
         $this->expectException(UnhandledException::class);
-        $this->klein_app->afterDispatch(
-            function ($klein) {
-                throw new Exception('testing');
-            }
-        );
+        $this->klein_app->afterDispatch(function ($klein) {
+            throw new Exception('testing');
+        });
 
         $this->klein_app->dispatch();
 
-        $this->assertSame(
-            500,
-            $this->klein_app->response()->code()
-        );
+        $this->assertSame(500, $this->klein_app->response()->code());
     }
 
     public function testErrorsWithNoCallbacks()
     {
         $this->expectException(UnhandledException::class);
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                throw new Exception('testing');
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            throw new Exception('testing');
+        });
 
         $this->klein_app->dispatch();
 
-        $this->assertSame(
-            500,
-            $this->klein_app->response()->code()
-        );
+        $this->assertSame(500, $this->klein_app->response()->code());
     }
 
     public function testSkipThis()
@@ -444,11 +393,9 @@ class KleinTest extends AbstractKleinTestCase
     {
         $test_code = 503;
 
-        $this->klein_app->respond(
-            function ($a, $b, $c, $d, $klein_app) use ($test_code) {
-                $klein_app->abort($test_code);
-            }
-        );
+        $this->klein_app->respond(function ($a, $b, $c, $d, $klein_app) use ($test_code) {
+            $klein_app->abort($test_code);
+        });
 
         try {
             $this->klein_app->dispatch();

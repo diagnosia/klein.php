@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,7 +19,6 @@ namespace Klein\DataCollection;
  */
 class HeaderDataCollection extends DataCollection
 {
-
     /**
      * Constants
      */
@@ -77,7 +77,6 @@ class HeaderDataCollection extends DataCollection
      */
     const NORMALIZE_ALL = -1;
 
-
     /**
      * Properties
      */
@@ -89,7 +88,6 @@ class HeaderDataCollection extends DataCollection
      * @type int
      */
     protected $normalization = self::NORMALIZE_ALL;
-
 
     /**
      * Methods
@@ -278,10 +276,7 @@ class HeaderDataCollection extends DataCollection
     public static function normalizeName($name, $make_lowercase = true)
     {
         // Warn user of deprecation
-        trigger_error(
-            'Use the normalization options and the other normalization methods instead.',
-            E_USER_DEPRECATED
-        );
+        trigger_error('Use the normalization options and the other normalization methods instead.', E_USER_DEPRECATED);
 
         /**
          * Lowercasing header names allows for a more uniform appearance,
@@ -292,10 +287,6 @@ class HeaderDataCollection extends DataCollection
         }
 
         // Do some formatting and return
-        return str_replace(
-            array(' ', '_'),
-            '-',
-            trim($name)
-        );
+        return str_replace(array(' ', '_'), '-', trim($name));
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -23,13 +24,11 @@ use PHPUnit\Framework\TestCase;
  */
 abstract class AbstractKleinTestCase extends TestCase
 {
-
     /**
      * The automatically created test Klein instance
      * (for easy testing and less boilerplate)
      */
     protected Klein $klein_app;
-
 
     /**
      * Setup our test
@@ -56,12 +55,7 @@ abstract class AbstractKleinTestCase extends TestCase
      */
     protected function dispatchAndReturnOutput($request = null, $response = null)
     {
-        return $this->klein_app->dispatch(
-            $request,
-            $response,
-            false,
-            Klein::DISPATCH_CAPTURE_AND_RETURN
-        );
+        return $this->klein_app->dispatch($request, $response, false, Klein::DISPATCH_CAPTURE_AND_RETURN);
     }
 
     /**
@@ -96,7 +90,7 @@ abstract class AbstractKleinTestCase extends TestCase
      * @param Klein $app_context The application context to attach the routes to
      * @return array
      */
-    protected function loadExternalRoutes(Klein $app_context = null)
+    protected function loadExternalRoutes(?Klein $app_context = null)
     {
         // Did we not pass an instance?
         if (is_null($app_context)) {

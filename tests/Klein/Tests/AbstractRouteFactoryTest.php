@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,7 +20,6 @@ use Klein\Route;
  */
 class AbstractRouteFactoryTest extends AbstractKleinTestCase
 {
-
     /**
      * Helpers
      */
@@ -36,14 +36,12 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         return $this->createMock('\Klein\AbstractRouteFactory');
     }
 
-    protected function getMockBuilderForFactory(array $methods_to_mock = null)
+    protected function getMockBuilderForFactory(?array $methods_to_mock = null)
     {
         $methods_to_mock = $methods_to_mock ?: $this->getDefaultMethodsToMock();
 
-        return $this->getMockBuilder('\Klein\AbstractRouteFactory')
-            ->onlyMethods($methods_to_mock);
+        return $this->getMockBuilder('\Klein\AbstractRouteFactory')->onlyMethods($methods_to_mock);
     }
-
 
     /**
      * Tests
@@ -62,9 +60,7 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         $this->assertNull($factory->getNamespace());
 
         // Set in constructor
-        $factory = $this->getMockBuilderForFactory()
-            ->setConstructorArgs( [$test_namespace])
-            ->getMock();
+        $factory = $this->getMockBuilderForFactory()->setConstructorArgs([$test_namespace])->getMock();
 
         $this->assertSame($test_namespace, $factory->getNamespace());
 
@@ -87,9 +83,6 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         $factory->setNamespace($test_namespace);
         $factory->appendNamespace($test_namespace_append);
 
-        $this->assertSame(
-            $test_namespace . $test_namespace_append,
-            $factory->getNamespace()
-        );
+        $this->assertSame($test_namespace . $test_namespace_append, $factory->getNamespace());
     }
 }

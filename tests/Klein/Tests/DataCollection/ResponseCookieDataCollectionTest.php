@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -21,7 +22,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
 {
-
     /*
      * Data Providers and Methods
      */
@@ -31,31 +31,14 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
      */
     public static function sampleDataProvider(): array
     {
-        $sample_cookie = new ResponseCookie(
-            'Trevor',
-            'is a programmer',
-            3600,
-            '/',
-            'example.com',
-            false,
-            false
-        );
+        $sample_cookie = new ResponseCookie('Trevor', 'is a programmer', 3600, '/', 'example.com', false, false);
 
-        $sample_other_cookie = new ResponseCookie(
-            'Chris',
-            'is a boss',
-            60,
-            '/app/',
-            'github.com',
-            true,
-            true
-        );
+        $sample_other_cookie = new ResponseCookie('Chris', 'is a boss', 60, '/app/', 'github.com', true, true);
 
         return array(
             array($sample_cookie, $sample_other_cookie),
         );
     }
-
 
     /*
      * Tests

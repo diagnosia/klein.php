@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,7 +20,6 @@ use Klein\Exceptions\ValidationException;
  */
 class Validator
 {
-
     /**
      * Class properties
      */
@@ -51,7 +51,6 @@ class Validator
      * @type boolean
      */
     protected static $default_added = false;
-
 
     /**
      * Methods
@@ -88,10 +87,10 @@ class Validator
             return null === $max ? $len === $min : $len >= $min && $len <= $max;
         };
         static::$methods['int'] = function ($str) {
-            return (string)$str === ((string)(int)$str);
+            return (string) $str === (string) (int) $str;
         };
         static::$methods['float'] = function ($str) {
-            return (string)$str === ((string)(float)$str);
+            return (string) $str === (string) (float) $str;
         };
         static::$methods['email'] = function ($str) {
             return filter_var($str, FILTER_VALIDATE_EMAIL) !== false;
@@ -154,7 +153,7 @@ class Validator
         $validator = $method;
         $method_substr = substr($method, 0, 2);
 
-        if ($method_substr === 'is') {       // is<$validator>()
+        if ($method_substr === 'is') { // is<$validator>()
             $validator = substr($method, 2);
         } elseif ($method_substr === 'no') { // not<$validator>()
             $validator = substr($method, 3);
@@ -164,7 +163,7 @@ class Validator
         $validator = strtolower($validator);
 
         if (!$validator || !isset(static::$methods[$validator])) {
-            throw new BadMethodCallException('Unknown method '. $method .'()');
+            throw new BadMethodCallException('Unknown method ' . $method . '()');
         }
 
         $validator = static::$methods[$validator];
@@ -188,7 +187,7 @@ class Validator
                 break;
         }
 
-        $result = (bool)($result ^ $reverse);
+        $result = (bool) ($result ^ $reverse);
 
         if (false === $this->err) {
             return $result;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,13 +20,11 @@ use Klein\RouteFactory;
  */
 class RouteFactoryTest extends AbstractKleinTestCase
 {
-
     /**
      * Constants
      */
 
     const TEST_CALLBACK_MESSAGE = 'yay';
-
 
     /**
      * Helpers
@@ -38,7 +37,6 @@ class RouteFactoryTest extends AbstractKleinTestCase
         };
     }
 
-
     /**
      * Tests
      */
@@ -47,19 +45,15 @@ class RouteFactoryTest extends AbstractKleinTestCase
         $test_namespace = null,
         $test_path = null,
         $test_paths_match = true,
-        $should_match = true
+        $should_match = true,
     ) {
         // Test data
         $test_path = is_string($test_path) ? $test_path : '/test';
         $test_callable = $this->getTestCallable();
 
-
         $factory = new RouteFactory($test_namespace);
 
-        $route = $factory->build(
-            $test_callable,
-            $test_path
-        );
+        $route = $factory->build($test_callable, $test_path);
 
         $this->assertTrue($route instanceof Route);
         $this->assertNull($route->getMethod());

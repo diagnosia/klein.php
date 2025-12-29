@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -26,7 +27,6 @@ use PHPUnit\Framework\Attributes\WithoutErrorHandler;
  */
 class ResponseTest extends AbstractKleinTestCase
 {
-
     public function testProtocolVersionGetSet()
     {
         $version_reg_ex = '/^[0-9]\.[0-9]$/';
@@ -175,7 +175,6 @@ class ResponseTest extends AbstractKleinTestCase
         } catch (LockedResponseException $e) {
         }
 
-
         // Assert nothing has changed
         $this->assertSame($protocol_version, $response->protocolVersion());
         $this->assertSame($body, $response->body());
@@ -296,9 +295,9 @@ class ResponseTest extends AbstractKleinTestCase
             // dechex(strlen($content[0]))."\r\n"
             "$content[0]\r\n"
             // .dechex(strlen($content[1]))."\r\n"
-            ."$content[1]\r\n"
+            . "$content[1]\r\n"
             // .dechex(strlen($content[2]))."\r\n"
-            ."$content[2]\r\n"
+            . "$content[2]\r\n",
         );
     }
 
@@ -334,13 +333,13 @@ class ResponseTest extends AbstractKleinTestCase
     public function testCookie()
     {
         $test_cookie_data = array(
-            'name'      => 'name',
-            'value'    => 'value',
-            'expiry'   => null,
-            'path'     => '/path',
-            'domain'   => 'whatever.com',
-            'secure'   => true,
-            'httponly' => true
+            'name' => 'name',
+            'value' => 'value',
+            'expiry' => null,
+            'path' => '/path',
+            'domain' => 'whatever.com',
+            'secure' => true,
+            'httponly' => true,
         );
 
         $test_cookie = new ResponseCookie(
@@ -350,7 +349,7 @@ class ResponseTest extends AbstractKleinTestCase
             $test_cookie_data['path'],
             $test_cookie_data['domain'],
             $test_cookie_data['secure'],
-            $test_cookie_data['httponly']
+            $test_cookie_data['httponly'],
         );
 
         $response = new Response();
@@ -366,7 +365,7 @@ class ResponseTest extends AbstractKleinTestCase
             $test_cookie_data['path'],
             $test_cookie_data['domain'],
             $test_cookie_data['secure'],
-            $test_cookie_data['httponly']
+            $test_cookie_data['httponly'],
         );
 
         $this->assertNotEmpty($response->cookies()->all());
@@ -394,7 +393,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response->noCache();
 
         $this->assertArrayHasKey('Cache-Control', $response->headers()->all());
-        $this->assertEquals('no-store, no-cache', $response->headers()->all()["Cache-Control"]);
+        $this->assertEquals('no-store, no-cache', $response->headers()->all()['Cache-Control']);
     }
 
     public function testRedirect()
@@ -438,59 +437,69 @@ class ResponseTest extends AbstractKleinTestCase
         $file_name = 'testing';
         $file_mime = 'text/plain';
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($file_name, $file_mime) {
-                $response->file(__FILE__, $file_name, $file_mime);
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) use ($file_name, $file_mime) {
+            $response->file(__FILE__, $file_name, $file_mime);
+        });
 
         $this->klein_app->dispatch();
 
         // Expect our output to match our file
-        $this->expectOutputString(
-            file_get_contents(__FILE__)
-        );
+        $this->expectOutputString(file_get_contents(__FILE__));
 
         // Assert headers were passed
         $this->assertEquals(
             $file_mime,
-            $this->klein_app->response()->headers()->get('Content-Type')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Type'),
         );
         $this->assertEquals(
             filesize(__FILE__),
-            $this->klein_app->response()->headers()->get('Content-Length')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Length'),
         );
         $this->assertStringContainsString(
             $file_name,
-            $this->klein_app->response()->headers()->get('Content-Disposition')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Disposition'),
         );
     }
 
     public function testFileSendLooseArgs()
     {
-        $this->klein_app->respond(
-            function ($request, $response, $service) {
-                $response->file(__FILE__);
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) {
+            $response->file(__FILE__);
+        });
 
         $this->klein_app->dispatch();
 
         // Expect our output to match our file
-        $this->expectOutputString(
-            file_get_contents(__FILE__)
-        );
+        $this->expectOutputString(file_get_contents(__FILE__));
 
         // Assert headers were passed
         $this->assertEquals(
             filesize(__FILE__),
-            $this->klein_app->response()->headers()->get('Content-Length')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Length'),
         );
         $this->assertNotNull(
-            $this->klein_app->response()->headers()->get('Content-Type')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Type'),
         );
         $this->assertNotNull(
-            $this->klein_app->response()->headers()->get('Content-Disposition')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Disposition'),
         );
     }
 
@@ -498,9 +507,7 @@ class ResponseTest extends AbstractKleinTestCase
     {
         $this->expectException(ResponseAlreadySentException::class);
         // Expect our output to match our file
-        $this->expectOutputString(
-            file_get_contents(__FILE__)
-        );
+        $this->expectOutputString(file_get_contents(__FILE__));
 
         $response = new Response();
         $response->file(__FILE__);
@@ -536,9 +543,7 @@ class ResponseTest extends AbstractKleinTestCase
         implement_custom_fastcgi_function();
 
         // Expect our output to match our file
-        $this->expectOutputString(
-            file_get_contents(__FILE__) . ''
-        );
+        $this->expectOutputString(file_get_contents(__FILE__) . '');
 
         $response = new Response();
         $response->file(__FILE__);
@@ -557,31 +562,36 @@ class ResponseTest extends AbstractKleinTestCase
             'uniqid' => uniqid(),
         );
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($test_object) {
-                $response->json($test_object);
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) use ($test_object) {
+            $response->json($test_object);
+        });
 
         $this->klein_app->dispatch();
 
         // Expect our output to match our json encoded test object
-        $this->expectOutputString(
-            json_encode($test_object)
-        );
+        $this->expectOutputString(json_encode($test_object));
 
         // Assert headers were passed
         $this->assertEquals(
             'no-cache',
-            $this->klein_app->response()->headers()->get('Pragma')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Pragma'),
         );
         $this->assertEquals(
             'no-store, no-cache',
-            $this->klein_app->response()->headers()->get('Cache-Control')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Cache-Control'),
         );
         $this->assertEquals(
             'application/json',
-            $this->klein_app->response()->headers()->get('Content-Type')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Type'),
         );
     }
 
@@ -593,31 +603,36 @@ class ResponseTest extends AbstractKleinTestCase
         );
         $prefix = 'dogma';
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use ($test_object, $prefix) {
-                $response->json($test_object, $prefix);
-            }
-        );
+        $this->klein_app->respond(function ($request, $response, $service) use ($test_object, $prefix) {
+            $response->json($test_object, $prefix);
+        });
 
         $this->klein_app->dispatch();
 
         // Expect our output to match our json encoded test object
-        $this->expectOutputString(
-            'dogma('. json_encode($test_object) .');'
-        );
+        $this->expectOutputString('dogma(' . json_encode($test_object) . ');');
 
         // Assert headers were passed
         $this->assertEquals(
             'no-cache',
-            $this->klein_app->response()->headers()->get('Pragma')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Pragma'),
         );
         $this->assertEquals(
             'no-store, no-cache',
-            $this->klein_app->response()->headers()->get('Cache-Control')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Cache-Control'),
         );
         $this->assertEquals(
             'text/javascript',
-            $this->klein_app->response()->headers()->get('Content-Type')
+            $this->klein_app
+                ->response()
+                ->headers()
+                ->get('Content-Type'),
         );
     }
 }

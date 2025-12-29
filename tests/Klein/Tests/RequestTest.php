@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,26 +20,18 @@ use Klein\Tests\Mocks\MockRequestFactory;
  */
 class RequestTest extends AbstractKleinTestCase
 {
-
     public function testConstructorAndGetters()
     {
         // Test data
-        $params_get  = array('get');
+        $params_get = array('get');
         $params_post = array('post');
-        $cookies     = array('cookies');
-        $server      = array('server');
-        $files       = array('files');
-        $body        = 'body';
+        $cookies = array('cookies');
+        $server = array('server');
+        $files = array('files');
+        $body = 'body';
 
         // Create the request
-        $request = new Request(
-            $params_get,
-            $params_post,
-            $cookies,
-            $server,
-            $files,
-            $body
-        );
+        $request = new Request($params_get, $params_post, $cookies, $server, $files, $body);
 
         // Make sure our data's the same
         $this->assertSame($params_get, $request->paramsGet()->all());
@@ -55,11 +48,11 @@ class RequestTest extends AbstractKleinTestCase
         $key = uniqid();
 
         // Test data
-        $_GET       = array_merge($_GET, array($key => 'get'));
-        $_POST      = array_merge($_POST, array($key => 'post'));
-        $_COOKIE    = array_merge($_COOKIE, array($key => 'cookies'));
-        $_SERVER    = array_merge($_SERVER, array($key => 'server'));
-        $_FILES     = array_merge($_FILES, array($key => 'files'));
+        $_GET = array_merge($_GET, array($key => 'get'));
+        $_POST = array_merge($_POST, array($key => 'post'));
+        $_COOKIE = array_merge($_COOKIE, array($key => 'cookies'));
+        $_SERVER = array_merge($_SERVER, array($key => 'server'));
+        $_FILES = array_merge($_FILES, array($key => 'files'));
 
         // Create the request
         $request = Request::createFromGlobals();
@@ -75,17 +68,13 @@ class RequestTest extends AbstractKleinTestCase
     public function testUniversalParams()
     {
         // Test data
-        $params_get  = array('page' => 2, 'per_page' => 10, 'num' => 1, 5 => 'ok', 'empty' => null, 'blank' => '');
+        $params_get = array('page' => 2, 'per_page' => 10, 'num' => 1, 5 => 'ok', 'empty' => null, 'blank' => '');
         $params_post = array('first_name' => 'Trevor', 'last_name' => 'Suarez', 'num' => 2, 3 => 'hmm', 4 => 'thing');
-        $cookies     = array('user' => 'Rican7', 'PHPSESSID' => 'randomstring', 'num' => 3, 4 => 'dog');
-        $named       = array('id' => '1f8ae', 'num' => 4);
+        $cookies = array('user' => 'Rican7', 'PHPSESSID' => 'randomstring', 'num' => 3, 4 => 'dog');
+        $named = array('id' => '1f8ae', 'num' => 4);
 
         // Create the request
-        $request = new Request(
-            $params_get,
-            $params_post,
-            $cookies
-        );
+        $request = new Request($params_get, $params_post, $cookies);
 
         // Set our named params
         $request->paramsNamed()->replace($named);
@@ -101,20 +90,16 @@ class RequestTest extends AbstractKleinTestCase
     public function testUniversalParamsWithFilter()
     {
         // Test data
-        $params_get  = array('page' => 2, 'per_page' => 10, 'num' => 1, 5 => 'ok', 'empty' => null, 'blank' => '');
+        $params_get = array('page' => 2, 'per_page' => 10, 'num' => 1, 5 => 'ok', 'empty' => null, 'blank' => '');
         $params_post = array('first_name' => 'Trevor', 'last_name' => 'Suarez', 'num' => 2, 3 => 'hmm', 4 => 'thing');
-        $cookies     = array('user' => 'Rican7', 'PHPSESSID' => 'randomstring', 'num' => 3, 4 => 'dog');
+        $cookies = array('user' => 'Rican7', 'PHPSESSID' => 'randomstring', 'num' => 3, 4 => 'dog');
 
         // Create our filter and expected results
-        $filter      = array('page', 'user', 'num', 'this-key-never-showed-up-anywhere');
-        $expected    = array('page' => 2, 'user' => 'Rican7', 'num' => 3, 'this-key-never-showed-up-anywhere' => null);
+        $filter = array('page', 'user', 'num', 'this-key-never-showed-up-anywhere');
+        $expected = array('page' => 2, 'user' => 'Rican7', 'num' => 3, 'this-key-never-showed-up-anywhere' => null);
 
         // Create the request
-        $request = new Request(
-            $params_get,
-            $params_post,
-            $cookies
-        );
+        $request = new Request($params_get, $params_post, $cookies);
 
         $this->assertSame($expected, $request->params($filter));
     }
@@ -178,9 +163,9 @@ class RequestTest extends AbstractKleinTestCase
         $query = '?q=search';
 
         $request = new Request();
-        $request->server()->set('REQUEST_URI', $uri.$query);
+        $request->server()->set('REQUEST_URI', $uri . $query);
 
-        $this->assertSame($uri.$query, $request->uri());
+        $this->assertSame($uri . $query, $request->uri());
     }
 
     public function testPathname()
@@ -190,7 +175,7 @@ class RequestTest extends AbstractKleinTestCase
         $query = '?q=search';
 
         $request = new Request();
-        $request->server()->set('REQUEST_URI', $uri.$query);
+        $request->server()->set('REQUEST_URI', $uri . $query);
 
         $this->assertSame($uri, $request->pathname());
     }
@@ -227,9 +212,9 @@ class RequestTest extends AbstractKleinTestCase
     public function testMethodOverride()
     {
         // Test data
-        $method                 = 'POST';
-        $override_method        = 'TRACE';
-        $weird_override_method  = 'DELETE';
+        $method = 'POST';
+        $override_method = 'TRACE';
+        $weird_override_method = 'DELETE';
 
         $request = new Request();
         $request->server()->set('REQUEST_METHOD', $method);
@@ -259,37 +244,26 @@ class RequestTest extends AbstractKleinTestCase
         $request->server()->set('REQUEST_URI', $test_uri);
         $request->server()->set('QUERY_STRING', $query_string);
 
-        $this->klein_app->respond(
-            function ($request, $response, $service) use (&$test_one, &$test_two, &$test_three) {
-                // Add a new var
-                $test_one = $request->query('test', 'dog');
+        $this->klein_app->respond(function ($request, $response, $service) use (&$test_one, &$test_two, &$test_three) {
+            // Add a new var
+            $test_one = $request->query('test', 'dog');
 
-                // Modify a current var
-                $test_two = $request->query('page', 7);
+            // Modify a current var
+            $test_two = $request->query('page', 7);
 
-                // Modify a current var
-                $test_three = $request->query(array('per_page' => 10));
-            }
-        );
+            // Modify a current var
+            $test_three = $request->query(array('per_page' => 10));
+        });
 
         $this->klein_app->dispatch($request);
 
         $expected_uri = parse_url($this->klein_app->request()->uri(), PHP_URL_PATH);
 
-        $this->assertSame(
-            $expected_uri . '?' . $query_string . '&test=dog',
-            $test_one
-        );
+        $this->assertSame($expected_uri . '?' . $query_string . '&test=dog', $test_one);
 
-        $this->assertSame(
-            $expected_uri . '?' . str_replace('page=2', 'page=7', $query_string),
-            $test_two
-        );
+        $this->assertSame($expected_uri . '?' . str_replace('page=2', 'page=7', $query_string), $test_two);
 
-        $this->assertSame(
-            $expected_uri . '?' . str_replace('per_page=3', 'per_page=10', $query_string),
-            $test_three
-        );
+        $this->assertSame($expected_uri . '?' . str_replace('per_page=3', 'per_page=10', $query_string), $test_three);
     }
 
     public function testId()
@@ -315,24 +289,16 @@ class RequestTest extends AbstractKleinTestCase
     public function testMockFactory()
     {
         // Test data
-        $uri         = '/test/uri';
-        $method      = 'OPTIONS';
-        $params      = array('get');
-        $cookies     = array('cookies');
-        $server      = array('server');
-        $files       = array('files');
-        $body        = 'body';
+        $uri = '/test/uri';
+        $method = 'OPTIONS';
+        $params = array('get');
+        $cookies = array('cookies');
+        $server = array('server');
+        $files = array('files');
+        $body = 'body';
 
         // Create the request
-        $request = MockRequestFactory::create(
-            $uri,
-            $method,
-            $params,
-            $cookies,
-            $server,
-            $files,
-            $body
-        );
+        $request = MockRequestFactory::create($uri, $method, $params, $cookies, $server, $files, $body);
 
         // Make sure our data's the same
         $this->assertSame($uri, $request->uri());

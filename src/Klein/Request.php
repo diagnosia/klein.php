@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -20,7 +21,6 @@ use Klein\DataCollection\ServerDataCollection;
  */
 class Request
 {
-
     /**
      * Class properties
      */
@@ -88,7 +88,6 @@ class Request
      */
     protected $body;
 
-
     /**
      * Methods
      */
@@ -111,16 +110,16 @@ class Request
         array $cookies = array(),
         array $server = array(),
         array $files = array(),
-        $body = null
+        $body = null,
     ) {
         // Assignment city...
-        $this->params_get   = new DataCollection($params_get);
-        $this->params_post  = new DataCollection($params_post);
-        $this->cookies      = new DataCollection($cookies);
-        $this->server       = new ServerDataCollection($server);
-        $this->headers      = new HeaderDataCollection($this->server->getHeaders());
-        $this->files        = new DataCollection($files);
-        $this->body         = $body ? (string) $body : null;
+        $this->params_get = new DataCollection($params_get);
+        $this->params_post = new DataCollection($params_post);
+        $this->cookies = new DataCollection($cookies);
+        $this->server = new ServerDataCollection($server);
+        $this->headers = new HeaderDataCollection($this->server->getHeaders());
+        $this->files = new DataCollection($files);
+        $this->body = $body ? (string) $body : null;
 
         // Non-injected assignments
         $this->params_named = new DataCollection();
@@ -135,14 +134,7 @@ class Request
     public static function createFromGlobals()
     {
         // Create and return a new instance of this
-        return new static(
-            $_GET,
-            $_POST,
-            $_COOKIE,
-            $_SERVER,
-            $_FILES,
-            null // Let our content getter take care of the "body"
-        );
+        return new static($_GET, $_POST, $_COOKIE, $_SERVER, $_FILES, null); // Let our content getter take care of the "body"
     }
 
     /**
@@ -281,7 +273,7 @@ class Request
             $this->params_get->all($mask, false),
             $this->params_post->all($mask, false),
             $this->cookies->all($mask, false),
-            $this->params_named->all($mask, false) // Add our named params last
+            $this->params_named->all($mask, false), // Add our named params last
         );
     }
 
@@ -370,7 +362,7 @@ class Request
      */
     public function isSecure()
     {
-        return ($this->server->get('HTTPS') == true);
+        return $this->server->get('HTTPS') == true;
     }
 
     /**
@@ -467,10 +459,7 @@ class Request
     {
         $query = array();
 
-        parse_str(
-            $this->server()->get('QUERY_STRING'),
-            $query
-        );
+        parse_str($this->server()->get('QUERY_STRING'), $query);
 
         if (is_array($key)) {
             $query = array_merge($query, $key);

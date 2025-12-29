@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,6 +19,4 @@ use RuntimeException;
  *
  * Exception used for when a regular expression fails to compile
  */
-class RegularExpressionCompilationException extends RuntimeException implements KleinExceptionInterface
-{
-}
+class RegularExpressionCompilationException extends RuntimeException implements KleinExceptionInterface {}

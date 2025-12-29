@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -16,6 +17,4 @@ namespace Klein\Exceptions;
  *
  * An interface for type-hinting generic HTTP errors
  */
-interface HttpExceptionInterface extends KleinExceptionInterface
-{
-}
+interface HttpExceptionInterface extends KleinExceptionInterface {}

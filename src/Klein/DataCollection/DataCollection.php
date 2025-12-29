@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -27,7 +28,6 @@ use IteratorAggregate;
  */
 class DataCollection implements IteratorAggregate, ArrayAccess, Countable
 {
-
     /**
      * Class properties
      */
@@ -38,7 +38,6 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      * @type array
      */
     protected $attributes = array();
-
 
     /**
      * Methods
@@ -87,10 +86,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
              * Remove all of the values from the keys
              * that aren't in the passed mask
              */
-            return array_intersect(
-                array_keys($this->attributes),
-                $mask
-            ) + $keys;
+            return array_intersect(array_keys($this->attributes), $mask) + $keys;
         }
 
         return array_keys($this->attributes);
@@ -129,10 +125,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
              * Remove all of the keys from the attributes
              * that aren't in the passed mask
              */
-            return array_intersect_key(
-                $this->attributes,
-                array_flip($mask)
-            ) + $attributes;
+            return array_intersect_key($this->attributes, array_flip($mask)) + $attributes;
         }
 
         return $this->attributes;
@@ -200,15 +193,9 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
         if (!empty($attributes)) {
             // Hard merge?
             if ($hard) {
-                $this->attributes = array_replace(
-                    $this->attributes,
-                    $attributes
-                );
+                $this->attributes = array_replace($this->attributes, $attributes);
             } else {
-                $this->attributes = array_merge(
-                    $this->attributes,
-                    $attributes
-                );
+                $this->attributes = array_merge($this->attributes, $attributes);
             }
         }
 
@@ -274,7 +261,6 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
         return $clone;
     }
 
-
     /*
      * Magic method implementations
      */
@@ -339,7 +325,6 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
     {
         $this->remove($key);
     }
-
 
     /*
      * Interface required method implementations

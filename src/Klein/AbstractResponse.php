@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -22,7 +23,6 @@ use Klein\ResponseCookie;
  */
 abstract class AbstractResponse
 {
-
     /**
      * Properties
      */
@@ -91,7 +91,6 @@ abstract class AbstractResponse
      */
     public $chunked = false;
 
-
     /**
      * Methods
      */
@@ -107,7 +106,7 @@ abstract class AbstractResponse
      */
     public function __construct($body = '', $status_code = null, array $headers = array())
     {
-        $status_code   = $status_code ?: static::$default_status_code;
+        $status_code = $status_code ?: static::$default_status_code;
 
         // Set our body and code using our internal methods
         $this->body($body);
@@ -333,7 +332,7 @@ abstract class AbstractResponse
 
         // Iterate through our Headers data collection and send each header
         foreach ($this->headers as $key => $value) {
-            header($key .': '. $value, false);
+            header($key . ': ' . $value, false);
         }
 
         if ($cookies_also) {
@@ -365,7 +364,7 @@ abstract class AbstractResponse
                 $cookie->getPath() ?? '',
                 $cookie->getDomain() ?? '',
                 $cookie->getSecure(),
-                $cookie->getHttpOnly()
+                $cookie->getHttpOnly(),
             );
         }
 
@@ -484,16 +483,13 @@ abstract class AbstractResponse
         $path = '/',
         $domain = null,
         $secure = false,
-        $httponly = false
+        $httponly = false,
     ) {
         if (null === $expiry) {
             $expiry = time() + (3600 * 24 * 30);
         }
 
-        $this->cookies->set(
-            $key,
-            new ResponseCookie($key, $value, $expiry, $path, $domain, $secure, $httponly)
-        );
+        $this->cookies->set($key, new ResponseCookie($key, $value, $expiry, $path, $domain, $secure, $httponly));
 
         return $this;
     }

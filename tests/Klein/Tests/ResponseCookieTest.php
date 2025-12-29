@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,7 +20,6 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 class ResponseCookieTest extends AbstractKleinTestCase
 {
-
     /*
      * Data Providers and Methods
      */
@@ -65,7 +65,6 @@ class ResponseCookieTest extends AbstractKleinTestCase
         );
     }
 
-
     /*
      * Tests
      */
@@ -101,11 +100,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testExpireGetSet($defaults, $sample_data, $sample_data_other)
     {
-        $response_cookie = new ResponseCookie(
-            $defaults['name'],
-            null,
-            $sample_data['expire']
-        );
+        $response_cookie = new ResponseCookie($defaults['name'], null, $sample_data['expire']);
 
         $this->assertSame($sample_data['expire'], $response_cookie->getExpire());
         $this->assertIsInt($response_cookie->getExpire());
@@ -119,12 +114,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testPathGetSet($defaults, $sample_data, $sample_data_other)
     {
-        $response_cookie = new ResponseCookie(
-            $defaults['name'],
-            null,
-            null,
-            $sample_data['path']
-        );
+        $response_cookie = new ResponseCookie($defaults['name'], null, null, $sample_data['path']);
 
         $this->assertSame($sample_data['path'], $response_cookie->getPath());
         $this->assertIsString($response_cookie->getPath());
@@ -138,13 +128,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testDomainGetSet($defaults, $sample_data, $sample_data_other)
     {
-        $response_cookie = new ResponseCookie(
-            $defaults['name'],
-            null,
-            null,
-            null,
-            $sample_data['domain']
-        );
+        $response_cookie = new ResponseCookie($defaults['name'], null, null, null, $sample_data['domain']);
 
         $this->assertSame($sample_data['domain'], $response_cookie->getDomain());
         $this->assertIsString($response_cookie->getDomain());
@@ -158,14 +142,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testSecureGetSet($defaults, $sample_data, $sample_data_other)
     {
-        $response_cookie = new ResponseCookie(
-            $defaults['name'],
-            null,
-            null,
-            null,
-            null,
-            $sample_data['secure']
-        );
+        $response_cookie = new ResponseCookie($defaults['name'], null, null, null, null, $sample_data['secure']);
 
         $this->assertSame($sample_data['secure'], $response_cookie->getSecure());
         $this->assertIsBool($response_cookie->getSecure());
@@ -186,7 +163,7 @@ class ResponseCookieTest extends AbstractKleinTestCase
             null,
             null,
             null,
-            $sample_data['http_only']
+            $sample_data['http_only'],
         );
 
         $this->assertSame($sample_data['http_only'], $response_cookie->getHttpOnly());

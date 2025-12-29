@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -23,7 +24,6 @@ namespace Klein\DataCollection;
  */
 class ServerDataCollection extends DataCollection
 {
-
     /**
      * Class properties
      */
@@ -47,7 +47,6 @@ class ServerDataCollection extends DataCollection
         'CONTENT_TYPE',
         'CONTENT_MD5',
     );
-
 
     /**
      * Methods
@@ -86,10 +85,7 @@ class ServerDataCollection extends DataCollection
             // Does our server attribute have our header prefix?
             if (self::hasPrefix($key, self::$http_header_prefix)) {
                 // Add our server attribute to our header array
-                $headers[
-                    substr($key, strlen(self::$http_header_prefix))
-                ] = $value;
-
+                $headers[substr($key, strlen(self::$http_header_prefix))] = $value;
             } elseif (in_array($key, self::$http_nonprefixed_headers)) {
                 // Add our server attribute to our header array
                 $headers[$key] = $value;

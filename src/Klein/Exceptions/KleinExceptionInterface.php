@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -21,6 +22,4 @@ namespace Klein\Exceptions;
  * easier to handle Klein exceptions while still allowing the different
  * exception classes to properly extend the corresponding SPL Exception type
  */
-interface KleinExceptionInterface
-{
-}
+interface KleinExceptionInterface {}

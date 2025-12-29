@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,7 +19,6 @@ use Klein\HttpStatus;
  */
 class HttpStatusTest extends AbstractKleinTestCase
 {
-
     public function testStaticMessageFromCode()
     {
         // Set our test data

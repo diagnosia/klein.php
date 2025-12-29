@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,7 +19,6 @@ namespace Klein;
  */
 class HttpStatus
 {
-
     /**
      * The HTTP status code
      *
@@ -91,7 +91,6 @@ class HttpStatus
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
     );
-
 
     /**
      * Constructor
@@ -195,8 +194,8 @@ class HttpStatus
      */
     public static function getMessageFromCode($int)
     {
-        if (isset(static::$http_messages[ $int ])) {
-            return static::$http_messages[ $int ];
+        if (isset(static::$http_messages[$int])) {
+            return static::$http_messages[$int];
         } else {
             return null;
         }

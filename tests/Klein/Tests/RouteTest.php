@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -19,7 +20,6 @@ use Klein\Route;
  */
 class RouteTest extends AbstractKleinTestCase
 {
-
     protected function getTestCallable()
     {
         return function () {
@@ -153,7 +153,7 @@ class RouteTest extends AbstractKleinTestCase
 
         $this->assertSame(
             call_user_func_array($test_callable, $test_arguments),
-            call_user_func_array($route, $test_arguments)
+            call_user_func_array($route, $test_arguments),
         );
     }
 

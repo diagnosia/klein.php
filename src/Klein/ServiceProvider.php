@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -21,7 +22,6 @@ use Klein\DataCollection\DataCollection;
  */
 class ServiceProvider
 {
-
     /**
      * Class properties
      */
@@ -68,7 +68,6 @@ class ServiceProvider
      */
     protected $shared_data;
 
-
     /**
      * Methods
      */
@@ -79,7 +78,7 @@ class ServiceProvider
      * @param Request $request              Object containing all HTTP request data and behaviors
      * @param AbstractResponse $response    Object containing all HTTP response data and behaviors
      */
-    public function __construct(Request|null $request = null, AbstractResponse|null $response = null)
+    public function __construct(?Request $request = null, ?AbstractResponse $response = null)
     {
         // Bind our objects
         $this->bind($request, $response);
@@ -95,10 +94,10 @@ class ServiceProvider
      * @param AbstractResponse $response    Object containing all HTTP response data and behaviors
      * @return ServiceProvider
      */
-    public function bind(Request|null $request = null, AbstractResponse|null $response = null)
+    public function bind(?Request $request = null, ?AbstractResponse $response = null)
     {
         // Keep references
-        $this->request  = $request  ?: $this->request;
+        $this->request = $request ?: $this->request;
         $this->response = $response ?: $this->response;
 
         return $this;
@@ -106,7 +105,7 @@ class ServiceProvider
 
     public function isBond(): bool
     {
-        return ($this->request && $this->response);
+        return $this->request && $this->response;
     }
 
     /**
@@ -206,8 +205,8 @@ class ServiceProvider
         // Create our markdown parse/conversion regex's
         $md = array(
             '/\[([^\]]++)\]\(([^\)]++)\)/' => '<a href="$2">$1</a>',
-            '/\*\*([^\*]++)\*\*/'          => '<strong>$1</strong>',
-            '/\*([^\*]++)\*/'              => '<em>$1</em>'
+            '/\*\*([^\*]++)\*\*/' => '<strong>$1</strong>',
+            '/\*([^\*]++)\*/' => '<em>$1</em>',
         );
 
         // Let's make our arguments more "magical"
@@ -253,9 +252,7 @@ class ServiceProvider
      */
     public function refresh()
     {
-        $this->response->redirect(
-            $this->request->uri()
-        );
+        $this->response->redirect($this->request->uri());
 
         return $this;
     }
@@ -389,7 +386,6 @@ class ServiceProvider
     {
         return $this->validate($this->request->param($param), $err);
     }
-
 
     /**
      * Magic "__isset" method

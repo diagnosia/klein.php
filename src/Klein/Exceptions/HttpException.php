@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -20,7 +21,6 @@ use RuntimeException;
  */
 class HttpException extends RuntimeException implements HttpExceptionInterface
 {
-
     /**
      * Methods
      */

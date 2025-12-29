@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -20,12 +21,10 @@ use PHPUnit\Framework\Attributes\DataProvider;
  */
 class HeaderDataCollectionTest extends AbstractKleinTestCase
 {
-
     /**
      * Non existent key in the sample data
      */
     protected static string $nonexistent_key = 'non-standard-header';
-
 
     /*
      * Data Providers and Methods
@@ -60,8 +59,9 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
             'HOST' => 'localhost:8000',
             'CONNECTION' => 'keep-alive',
             'CONTENT_LENGTH' => '137',
-            'USER_AGENT' => 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31'
-                .' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
+            'USER_AGENT' =>
+                'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31'
+                . ' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
             'CACHE_CONTROL' => 'no-cache',
             'ORIGIN' => 'chrome-extension://fdmmgilgnpjigdojojpjoooidkmcomcm',
             'AUTHORIZATION' => 'Basic MTIzOjQ1Ng==',
@@ -81,12 +81,10 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
         );
     }
 
-
     /*
      * Tests
      */
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testConstructorCorrectlyFormatted($sample_data, $data_collection)
     {
@@ -101,13 +99,11 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
 
         $this->assertIsInt($data_collection->getNormalization());
 
-        $data_collection->setNormalization(
-            HeaderDataCollection::NORMALIZE_TRIM & HeaderDataCollection::NORMALIZE_CASE
-        );
+        $data_collection->setNormalization(HeaderDataCollection::NORMALIZE_TRIM & HeaderDataCollection::NORMALIZE_CASE);
 
         $this->assertSame(
             HeaderDataCollection::NORMALIZE_TRIM & HeaderDataCollection::NORMALIZE_CASE,
-            $data_collection->getNormalization()
+            $data_collection->getNormalization(),
         );
     }
 
@@ -139,7 +135,6 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
         $this->assertArrayNotHasKey(key($data), $data_collection->all());
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testExists($sample_data, $data_collection)
     {
@@ -149,7 +144,6 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
         $this->assertArrayNotHasKey('HOST', $data_collection->all());
     }
 
-    
     #[DataProvider('sampleDataProvider')]
     public function testRemove($sample_data, $data_collection)
     {

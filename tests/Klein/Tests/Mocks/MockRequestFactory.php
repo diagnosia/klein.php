@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -21,7 +22,6 @@ use Klein\Request;
  */
 class MockRequestFactory
 {
-
     /**
      * Create a new mock request
      *
@@ -41,17 +41,10 @@ class MockRequestFactory
         $cookies = array(),
         $server = array(),
         $files = array(),
-        $body = null
+        $body = null,
     ) {
         // Create a new Request object
-        $request = new Request(
-            array(),
-            array(),
-            $cookies,
-            $server,
-            $files,
-            $body
-        );
+        $request = new Request(array(), array(), $cookies, $server, $files, $body);
 
         // Reformat
         $req_method = strtoupper(trim($req_method));

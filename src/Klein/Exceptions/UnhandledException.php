@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,6 +19,4 @@ use RuntimeException;
  *
  * Exception used for when a exception isn't correctly handled by the Klein error callbacks
  */
-class UnhandledException extends RuntimeException implements KleinExceptionInterface
-{
-}
+class UnhandledException extends RuntimeException implements KleinExceptionInterface {}

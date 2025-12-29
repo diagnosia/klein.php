@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,6 +19,4 @@ use OutOfBoundsException;
  *
  * Exception used for when a service was called that doesn't exist
  */
-class UnknownServiceException extends OutOfBoundsException implements KleinExceptionInterface
-{
-}
+class UnknownServiceException extends OutOfBoundsException implements KleinExceptionInterface {}

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -13,7 +14,6 @@ namespace Klein\Tests\Mocks;
 
 class TestClass
 {
-
     public static function get($request, $response, $app)
     {
         echo 'ok';

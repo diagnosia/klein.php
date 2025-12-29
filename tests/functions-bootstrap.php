@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -28,7 +29,6 @@ function implement_custom_apc_cache_functions()
 {
     // Check if the function doesn't exist
     if (!function_exists('apcu_fetch')) {
-
         function apcu_fetch($key)
         {
             return false;

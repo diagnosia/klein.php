@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -18,7 +19,6 @@ namespace Klein;
  */
 abstract class AbstractRouteFactory
 {
-
     /**
      * Properties
      */
@@ -28,8 +28,7 @@ abstract class AbstractRouteFactory
      * when matching, so you can define routes under a
      * common endpoint
      */
-    protected string|null $namespace;
-
+    protected ?string $namespace;
 
     /**
      * Methods
@@ -40,7 +39,7 @@ abstract class AbstractRouteFactory
      *
      * @param string $namespace The initial namespace to set
      */
-    public function __construct(string|null $namespace = null)
+    public function __construct(?string $namespace = null)
     {
         $this->namespace = $namespace;
     }
@@ -48,7 +47,7 @@ abstract class AbstractRouteFactory
     /**
      * Gets the value of namespace
      */
-    public function getNamespace(): string|null
+    public function getNamespace(): ?string
     {
         return $this->namespace;
     }
