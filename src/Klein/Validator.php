@@ -15,9 +15,6 @@ namespace Klein;
 use BadMethodCallException;
 use Klein\Exceptions\ValidationException;
 
-/**
- * Validator
- */
 class Validator
 {
     /**
@@ -26,31 +23,23 @@ class Validator
 
     /**
      * The available validator methods
-     *
-     * @type array
      */
-    public static $methods = array();
+    public static array $methods = [];
 
     /**
      * The string to validate
-     *
-     * @type string
      */
-    protected $str;
+    protected null|string $str;
 
     /**
      * The custom exception message to throw on validation failure
-     *
-     * @type string
      */
-    protected $err;
+    protected null|string|bool $err;
 
     /**
      * Flag for whether the default validation methods have been added or not
-     *
-     * @type boolean
      */
-    protected static $default_added = false;
+    protected static bool $default_added = false;
 
     /**
      * Methods
@@ -62,10 +51,10 @@ class Validator
      * @param string $str   The string to validate
      * @param string $err   The optional custom exception message to throw on validation failure
      */
-    public function __construct($str, $err = null)
+    public function __construct(null|string $str, null|string|bool $err = null)
     {
         $this->str = $str;
-        $this->err = $err ?? '';
+        $this->err = $err;
 
         if (!static::$default_added) {
             static::addDefault();
@@ -74,49 +63,71 @@ class Validator
 
     /**
      * Adds default validators on first use
-     *
-     * @return void
      */
-    public static function addDefault()
+    public static function addDefault(): void
     {
-        static::$methods['null'] = function ($str) {
+        static::$methods['null'] = function (null|string $str): bool {
             return $str === null || $str === '';
         };
-        static::$methods['len'] = function ($str, $min, $max = null) {
+        static::$methods['len'] = function (null|string $str, int $min, null|int $max = null): bool {
+            if ($str === null)
+                return false;
             $len = strlen($str);
             return null === $max ? $len === $min : $len >= $min && $len <= $max;
         };
-        static::$methods['int'] = function ($str) {
+        static::$methods['int'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return (string) $str === (string) (int) $str;
         };
-        static::$methods['float'] = function ($str) {
+        static::$methods['float'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return (string) $str === (string) (float) $str;
         };
-        static::$methods['email'] = function ($str) {
+        static::$methods['email'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return filter_var($str, FILTER_VALIDATE_EMAIL) !== false;
         };
-        static::$methods['url'] = function ($str) {
+        static::$methods['url'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return filter_var($str, FILTER_VALIDATE_URL) !== false;
         };
-        static::$methods['ip'] = function ($str) {
+        static::$methods['ip'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return filter_var($str, FILTER_VALIDATE_IP) !== false;
         };
-        static::$methods['remoteip'] = function ($str) {
+        static::$methods['remoteip'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
         };
-        static::$methods['alnum'] = function ($str) {
+        static::$methods['alnum'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return ctype_alnum($str);
         };
-        static::$methods['alpha'] = function ($str) {
+        static::$methods['alpha'] = function (null|string $str): bool {
+            if ($str === null)
+                return false;
             return ctype_alpha($str);
         };
-        static::$methods['contains'] = function ($str, $needle) {
-            return strpos($str, $needle) !== false;
+        static::$methods['contains'] = function (null|string $str, string $needle): bool {
+            if ($str === null)
+                return false;
+            return str_contains($str, $needle);
         };
-        static::$methods['regex'] = function ($str, $pattern) {
+        static::$methods['regex'] = function (null|string $str, string $pattern): bool {
+            if ($str === null)
+                return false;
             return preg_match($pattern, $str);
         };
-        static::$methods['chars'] = function ($str, $chars) {
+        static::$methods['chars'] = function (null|string $str, string $chars): bool {
+            if ($str === null)
+                return false;
             return preg_match("/^[$chars]++$/i", $str);
         };
 
@@ -130,7 +141,7 @@ class Validator
      * @param callable $callback    The callback to perform on validation
      * @return void
      */
-    public static function addValidator($method, $callback)
+    public static function addValidator(string $method, callable $callback): void
     {
         static::$methods[strtolower($method)] = $callback;
     }
@@ -147,7 +158,7 @@ class Validator
      * @throws ValidationException      If the validation check returns false
      * @return Validator|boolean
      */
-    public function __call($method, $args)
+    public function __call(string $method, array $args): Validator|bool
     {
         $reverse = false;
         $validator = $method;
@@ -189,10 +200,14 @@ class Validator
 
         $result = (bool) ($result ^ $reverse);
 
-        if (false === $this->err) {
+        if ($this->err === false) {
             return $result;
-        } elseif (false === $result) {
-            throw new ValidationException($this->err ?? '');
+        }
+
+        if ($result === false) {
+            throw new ValidationException(
+                $this->err ?? 'Validation failed for ' . $method . '() with value: ' . var_export($this->str, true),
+            );
         }
 
         return $this;

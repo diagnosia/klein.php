@@ -37,14 +37,14 @@ class MockRequestFactory
     public static function create(
         $uri = '/',
         $req_method = 'GET',
-        $parameters = array(),
-        $cookies = array(),
-        $server = array(),
-        $files = array(),
+        $parameters = [],
+        $cookies = [],
+        $server = [],
+        $files = [],
         $body = null,
     ) {
         // Create a new Request object
-        $request = new Request(array(), array(), $cookies, $server, $files, $body);
+        $request = new Request([], [], $cookies, $server, $files, $body);
 
         // Reformat
         $req_method = strtoupper(trim($req_method));

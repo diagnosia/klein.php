@@ -426,7 +426,7 @@ class ResponseTest extends AbstractKleinTestCase
 
         $this->assertEmpty($response->body());
 
-        $response->dump(array('sure', 1, 10, 17, 'ok' => 'no'));
+        $response->dump(['sure', 1, 10, 17, 'ok' => 'no']);
 
         $this->assertNotEmpty($response->body());
         $this->assertNotEquals('<pre></pre>', $response->body());

@@ -429,8 +429,8 @@ class Klein
         // Set up some variables for matching
         $skip_num = 0;
         $matched = $this->routes->cloneEmpty(); // Get a clone of the routes collection, as it may have been injected
-        $methods_matched = array();
-        $params = array();
+        $methods_matched = [];
+        $params = [];
         $apc = function_exists('apcu_fetch');
 
         // Start output buffering

@@ -104,7 +104,7 @@ abstract class AbstractResponse
      * @param int $status_code      The status code
      * @param array $headers        The response header "hash"
      */
-    public function __construct($body = '', $status_code = null, array $headers = array())
+    public function __construct($body = '', $status_code = null, array $headers = [])
     {
         $status_code = $status_code ?: static::$default_status_code;
 

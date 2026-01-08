@@ -105,11 +105,11 @@ class Request
      * @param string $body
      */
     public function __construct(
-        array $params_get = array(),
-        array $params_post = array(),
-        array $cookies = array(),
-        array $server = array(),
-        array $files = array(),
+        array $params_get = [],
+        array $params_post = [],
+        array $cookies = [],
+        array $server = [],
+        array $files = [],
         $body = null,
     ) {
         // Assignment city...
@@ -264,7 +264,7 @@ class Request
         if (null !== $mask && $fill_with_nulls) {
             $attributes = array_fill_keys($mask, null);
         } else {
-            $attributes = array();
+            $attributes = [];
         }
 
         // Merge our params in the get, post, cookies, named order
@@ -457,7 +457,7 @@ class Request
      */
     public function query($key, $value = null)
     {
-        $query = array();
+        $query = [];
 
         parse_str($this->server()->get('QUERY_STRING'), $query);
 

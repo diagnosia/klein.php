@@ -148,7 +148,7 @@ class Route
     {
         // Explicit type check to prevent type coercion
         if ($method !== null && !is_array($method) && !is_string($method)) {
-            throw new TypeError('Expected an array or string. Got a '. gettype($method));
+            throw new TypeError('Expected an array or string. Got a ' . gettype($method));
         }
 
         $this->method = $method;

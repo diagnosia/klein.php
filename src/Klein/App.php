@@ -32,7 +32,7 @@ class App
      *
      * @type array
      */
-    protected $services = array();
+    protected $services = [];
 
     /**
      * Magic "__get" method

@@ -99,7 +99,7 @@ abstract class AbstractKleinTestCase extends TestCase
 
         $route_directory = __DIR__ . '/routes/';
         $route_files = scandir($route_directory);
-        $route_namespaces = array();
+        $route_namespaces = [];
 
         foreach ($route_files as $file) {
             if (is_file($route_directory . $file)) {

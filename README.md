@@ -358,7 +358,7 @@ $response->
 $service->
     sharedData()                                    // Return the shared data collection
     startSession()                                  // Start a session and return its ID
-    flash($msg, $type = 'info', $params = array()   // Set a flash message
+    flash($msg, $type = 'info', $params = []   // Set a flash message
     flashes($type = null)                           // Retrieve and clears all flashes of $type
     markdown($str, $args, ...)                      // Return a string formatted with markdown
     escape($str)                                    // Escape a string
@@ -368,8 +368,8 @@ $service->
     query($arr)
     layout($layout)                                 // Set the view layout
     yieldView()                                     // Call inside the layout to render the view content
-    render($view, $data = array())                  // Render a view or partial (in the scope of $response)
-    partial($view, $data = array())                 // Render a partial without a layout (in the scope of $response)
+    render($view, $data = [])                  // Render a view or partial (in the scope of $response)
+    partial($view, $data = [])                 // Render a partial without a layout (in the scope of $response)
     addValidator($method, $callback)                // Add a custom validator method
     validate($string, $err = null)                  // Validate a string (with a custom error message)
     validateParam($param, $err = null)                  // Validate a param
@@ -414,6 +414,32 @@ The tests all live in `/tests` and each test extends an abstract class
 To test the project, simply run `php composer.phar install --dev` to download
 a common version of PHPUnit with composer and run the tests from the main
 directory with `./vendor/bin/phpunit`
+
+## Running locally
+
+You need to have Docker installed. Build the image and run it:
+
+```sh
+# Build
+docker build -t local/klein .
+
+# Run
+docker run --rm -it -v "$PWD":/app local/klein bash
+
+## Within the container shell
+
+# Install deps
+composer install
+
+# Run all tests
+vendor/bin/phpunit
+
+# Run Mago linting
+vendor/bin/mago lint
+
+# Run Mago formatting
+vendor/bin/mago fmt
+```
 
 ## Contributing
 

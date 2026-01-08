@@ -814,7 +814,7 @@ class RoutingTest extends AbstractKleinTestCase
 
     public function test405Routes()
     {
-        $result_array = array();
+        $result_array = [];
 
         $this->expectOutputString('_');
 
@@ -847,7 +847,7 @@ class RoutingTest extends AbstractKleinTestCase
 
     public function test405ErrorHandler()
     {
-        $result_array = array();
+        $result_array = [];
 
         $this->expectOutputString('_');
 

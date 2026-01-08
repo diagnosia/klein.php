@@ -79,7 +79,7 @@ class ServerDataCollection extends DataCollection
     public function getHeaders()
     {
         // Define a headers array
-        $headers = array();
+        $headers = [];
 
         foreach ($this->attributes as $key => $value) {
             // Does our server attribute have our header prefix?

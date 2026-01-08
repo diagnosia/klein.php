@@ -2,6 +2,16 @@
 
 ## Changes for Diagnosia
 
+### 2025-12-29 (4.1.2)
+
+- Fix depcrecation warning in Validator for `strlen` not accepting `null` anymore
+- Update deps and tests
+
+### 2025-12-29 (4.1.1)
+
+- Update for PHP8.5
+- Update deps and tests
+
 ### 2025-05-02
 
 - Update for PHP8.4

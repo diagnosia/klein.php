@@ -37,7 +37,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      *
      * @type array
      */
-    protected $attributes = array();
+    protected $attributes = [];
 
     /**
      * Methods
@@ -48,7 +48,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      *
      * @param array $attributes The data attributes of this collection
      */
-    public function __construct(array $attributes = array())
+    public function __construct(array $attributes = [])
     {
         $this->attributes = $attributes;
     }
@@ -79,7 +79,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
             if ($fill_with_nulls) {
                 $keys = $mask;
             } else {
-                $keys = array();
+                $keys = [];
             }
 
             /*
@@ -118,7 +118,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
             if ($fill_with_nulls) {
                 $attributes = array_fill_keys($mask, null);
             } else {
-                $attributes = array();
+                $attributes = [];
             }
 
             /*
@@ -169,7 +169,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      * @param array $attributes The attributes to replace the collection's with
      * @return DataCollection
      */
-    public function replace(array $attributes = array())
+    public function replace(array $attributes = [])
     {
         $this->attributes = $attributes;
 
@@ -187,7 +187,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      * @param boolean $hard     Whether or not to make the merge "hard"
      * @return DataCollection
      */
-    public function merge(array $attributes = array(), $hard = false)
+    public function merge(array $attributes = [], $hard = false)
     {
         // Don't waste our time with an "array_merge" call if the array is empty
         if (!empty($attributes)) {

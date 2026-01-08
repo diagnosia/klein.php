@@ -31,7 +31,7 @@ class ResponseCookieDataCollection extends DataCollection
      * @override (doesn't call our parent)
      * @param array $cookies The cookies of this collection
      */
-    public function __construct(array $cookies = array())
+    public function __construct(array $cookies = [])
     {
         foreach ($cookies as $key => $value) {
             $this->set($key, $value);

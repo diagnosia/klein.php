@@ -31,7 +31,7 @@ class RouteCollection extends DataCollection
      * @override (doesn't call our parent)
      * @param array $routes The routes of this collection
      */
-    public function __construct(array $routes = array())
+    public function __construct(array $routes = [])
     {
         foreach ($routes as $value) {
             $this->add($value);

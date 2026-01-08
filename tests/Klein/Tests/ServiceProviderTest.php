@@ -129,7 +129,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Clean up
         session_destroy();
-        $_SESSION = array();
+        $_SESSION = [];
     }
 
     public function testFlashWithMarkdown()
@@ -155,7 +155,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Clean up
         session_destroy();
-        $_SESSION = array();
+        $_SESSION = [];
     }
 
     public function testFlashes()
@@ -206,7 +206,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Clean up
         session_destroy();
-        $_SESSION = array();
+        $_SESSION = [];
     }
 
     public function testMarkdownParser()

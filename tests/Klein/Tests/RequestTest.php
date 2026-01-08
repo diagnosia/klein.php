@@ -191,7 +191,7 @@ class RequestTest extends AbstractKleinTestCase
         $this->assertEmpty($request->body());
 
         // In constructor
-        $request = new Request(array(), array(), array(), array(), array(), $body);
+        $request = new Request([], [], [], [], [], $body);
 
         $this->assertSame($body, $request->body());
     }
@@ -305,8 +305,8 @@ class RequestTest extends AbstractKleinTestCase
         $this->assertSame($method, $request->method());
         $this->assertSame($params, $request->paramsGet()->all());
 
-        $this->assertSame(array(), $request->paramsPost()->all());
-        $this->assertSame(array(), $request->paramsNamed()->all());
+        $this->assertSame([], $request->paramsPost()->all());
+        $this->assertSame([], $request->paramsNamed()->all());
         $this->assertSame($cookies, $request->cookies()->all());
         $this->assertContains($cookies[0], $request->params());
         $this->assertContains($server[0], $request->server()->all());

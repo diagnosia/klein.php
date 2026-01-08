@@ -100,7 +100,7 @@ class HeaderDataCollection extends DataCollection
      * @param array $headers        The headers of this collection
      * @param int $normalization    The header key normalization technique/style to use
      */
-    public function __construct(array $headers = array(), $normalization = self::NORMALIZE_ALL)
+    public function __construct(array $headers = [], $normalization = self::NORMALIZE_ALL)
     {
         $this->normalization = (int) $normalization;
 

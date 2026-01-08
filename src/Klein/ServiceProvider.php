@@ -153,9 +153,9 @@ class ServiceProvider
             $type = 'info';
         }
         if (!isset($_SESSION['__flashes'])) {
-            $_SESSION['__flashes'] = array($type => array());
+            $_SESSION['__flashes'] = array($type => []);
         } elseif (!isset($_SESSION['__flashes'][$type])) {
-            $_SESSION['__flashes'][$type] = array();
+            $_SESSION['__flashes'][$type] = [];
         }
         $_SESSION['__flashes'][$type][] = $this->markdown($msg, $params);
     }
@@ -171,14 +171,14 @@ class ServiceProvider
         $this->startSession();
 
         if (!isset($_SESSION['__flashes'])) {
-            return array();
+            return [];
         }
 
         if (null === $type) {
             $flashes = $_SESSION['__flashes'];
             unset($_SESSION['__flashes']);
         } else {
-            $flashes = array();
+            $flashes = [];
             if (isset($_SESSION['__flashes'][$type])) {
                 $flashes = $_SESSION['__flashes'][$type];
                 unset($_SESSION['__flashes'][$type]);
@@ -312,7 +312,7 @@ class ServiceProvider
      * @param array $data   The data to render in the view
      * @return void
      */
-    public function render($view, array $data = array())
+    public function render($view, array $data = [])
     {
         $original_view = $this->view;
 
@@ -343,7 +343,7 @@ class ServiceProvider
      * @param array $data   The data to render in the view
      * @return void
      */
-    public function partial($view, array $data = array())
+    public function partial($view, array $data = [])
     {
         $layout = $this->layout;
         $this->layout = null;
@@ -367,10 +367,10 @@ class ServiceProvider
      * Start a validator chain for the specified string
      *
      * @param string $string    The string to validate
-     * @param string $err       The custom exception message to throw
+     * @param string $err       The custom exception message to throw or `false` to return the result as boolean
      * @return Validator
      */
-    public function validate($string, $err = null)
+    public function validate(null|string $string, null|string|bool $err = null): Validator
     {
         return new Validator($string, $err);
     }
@@ -382,7 +382,7 @@ class ServiceProvider
      * @param string $err       The custom exception message to throw
      * @return Validator
      */
-    public function validateParam($param, $err = null)
+    public function validateParam(string $param, null|string|bool $err = null): Validator
     {
         return $this->validate($this->request->param($param), $err);
     }

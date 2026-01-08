@@ -164,7 +164,7 @@ class DataCollectionTest extends AbstractKleinTestCase
         $data_collection = new DataCollection();
 
         // Make sure its first empty
-        $this->assertSame(array(), $data_collection->all());
+        $this->assertSame([], $data_collection->all());
 
         // Set our data from our test data
         $return_val = $data_collection->set(key($data), current($data));
@@ -244,7 +244,7 @@ class DataCollectionTest extends AbstractKleinTestCase
         $data_collection->clear();
 
         $this->assertNotSame($original_data, $data_collection->all());
-        $this->assertSame(array(), $data_collection->all());
+        $this->assertSame([], $data_collection->all());
     }
 
     #[DataProvider('sampleDataProvider')]
@@ -293,7 +293,7 @@ class DataCollectionTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testIteratorAggregate($sample_data, $data_collection)
     {
-        $filled_data = array();
+        $filled_data = [];
 
         foreach ($data_collection as $key => $data) {
             $filled_data[$key] = $data;
