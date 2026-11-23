@@ -32,9 +32,11 @@ RUN pie install apcu/apcu:5.1.28 \
     && rm -rf /tmp/* ~/.pie ~/.cache \
     && php -m > /dev/null
 
-# php.ini-development (dev image: errors displayed) plus the timezone default from the enterprise base image
+# php.ini-development (dev image: errors displayed) plus the timezone default from the enterprise base image,
+# and APCu enabled on the CLI so the tests cover the route regex cache
 RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
-    && printf '[PHP]\ndate.timezone = UTC\n' > "$PHP_INI_DIR/conf.d/00-base.ini"
+    && printf '[PHP]\ndate.timezone = UTC\n' > "$PHP_INI_DIR/conf.d/00-base.ini" \
+    && printf 'apc.enable_cli = 1\n' > "$PHP_INI_DIR/conf.d/99-apcu-cli.ini"
 
 COPY --from=composer /composer /usr/bin/composer
 

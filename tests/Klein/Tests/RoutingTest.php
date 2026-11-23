@@ -985,6 +985,80 @@ class RoutingTest extends AbstractKleinTestCase
         static::assertSame(implode('', $test_strings), $test_result);
     }
 
+    public function testAbortWithInvalidCodeGoesThroughErrorCallbacks()
+    {
+        $error_type = null;
+
+        $this->klein_app->onError(static function ($klein, $message, $type) use (&$error_type) {
+            $error_type = $type;
+        });
+
+        $this->klein_app->respond(static function ($request, $response, $service, $app, $klein) {
+            $klein->abort(999);
+        });
+
+        // Used to send a "HTTP/1.1 999" status line
+        $this->klein_app->dispatch(null, null, false);
+
+        static::assertSame(\InvalidArgumentException::class, $error_type);
+        static::assertSame(200, $this->klein_app->response()->code());
+    }
+
+    public function testRouteRegexCacheKeyDependsOnMatchTypes()
+    {
+        $default = $this->createKleinWithIntegerType('[0-9]++');
+        $same = $this->createKleinWithIntegerType('[0-9]++');
+        $letters = $this->createKleinWithIntegerType('[a-z]++');
+
+        static::assertSame($default->cacheKey('/n/[i:id]'), $same->cacheKey('/n/[i:id]'));
+        static::assertNotSame($default->cacheKey('/n/[i:id]'), $letters->cacheKey('/n/[i:id]'));
+        static::assertNotSame($default->cacheKey('/n/[i:id]'), $default->cacheKey('/m/[i:id]'));
+    }
+
+    public function testRouteRegexCacheDoesNotLeakBetweenMatchTypes()
+    {
+        if (!function_exists('apcu_enabled') || !apcu_enabled()) {
+            static::markTestSkipped('Needs APCu enabled on the CLI (apc.enable_cli=1)');
+        }
+
+        apcu_clear_cache();
+
+        // Both compile "/n/[i:id]" and only differ in what "i" matches
+        $digits = $this->createKleinWithIntegerType('[0-9]++');
+        $letters = $this->createKleinWithIntegerType('[a-z]++');
+
+        foreach ([$digits, $letters] as $klein) {
+            $klein->respond('/n/[i:id]', static fn() => 'matched');
+        }
+
+        $digits->dispatch(MockRequestFactory::create('/n/123'), null, false);
+        $letters->dispatch(MockRequestFactory::create('/n/abc'), null, false);
+
+        // The second one used to get the first one's cached regex (and a 404)
+        static::assertSame('matched', $digits->response()->body());
+        static::assertSame('matched', $letters->response()->body());
+    }
+
+    /**
+     * Creates a Klein instance (always of the same class) with a custom "i" match type
+     */
+    private function createKleinWithIntegerType(string $type): Klein
+    {
+        return new class($type) extends Klein {
+            public function __construct(string $type)
+            {
+                parent::__construct();
+
+                $this->match_types['i'] = $type;
+            }
+
+            public function cacheKey(string $expression): string
+            {
+                return $this->getRouteRegexCacheKey($expression);
+            }
+        };
+    }
+
     public function testGetPathForEncodesParams()
     {
         $captured = [];
@@ -1173,7 +1247,7 @@ class RoutingTest extends AbstractKleinTestCase
 
     public function testDispatchAbortCallsHttpError()
     {
-        $test_code = 666;
+        $test_code = 451;
         $this->expectOutputString('1,aborted,' . $test_code);
 
         $this->klein_app->onHttpError(static function ($code, $klein_app) {

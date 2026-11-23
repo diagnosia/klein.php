@@ -863,16 +863,17 @@ class Klein
     {
         // Whether compiled route regexes can be cached in APCu
         $apc = function_exists('apcu_fetch');
+        $cache_key = $apc ? $this->getRouteRegexCacheKey($expression) : null;
 
         try {
             // Check if there's a cached regex string
-            $regex = $apc ? apcu_fetch("route:{$expression}") : false;
+            $regex = $apc ? apcu_fetch($cache_key) : false;
 
             if (false === $regex) {
                 $regex = $this->compileRoute($expression);
 
                 if ($apc) {
-                    apcu_store("route:{$expression}", $regex);
+                    apcu_store($cache_key, $regex);
                 }
             }
         } catch (RegularExpressionCompilationException $e) {
@@ -880,6 +881,20 @@ class Klein
         }
 
         return $regex;
+    }
+
+    /**
+     * Gets the APCu cache key of a route's compiled regular expression
+     *
+     * The compilation depends on the class (which may override it) and its match types, so both are
+     * part of the key; otherwise apps on the same server could get each other's compiled routes
+     *
+     * @param string $expression    The route's path expression
+     * @return string
+     */
+    protected function getRouteRegexCacheKey($expression)
+    {
+        return 'klein:route:' . md5(static::class . "\0" . serialize($this->match_types)) . ':' . $expression;
     }
 
     /**

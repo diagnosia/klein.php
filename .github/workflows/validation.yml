@@ -23,6 +23,9 @@ jobs:
         with:
           php-version: ${{ matrix.php }}
           coverage: none
+          # APCu on the CLI, so the tests cover the route regex cache
+          extensions: apcu
+          ini-values: apc.enable_cli=1
       - run: composer install --no-progress --prefer-dist
       - run: vendor/bin/phpunit
 

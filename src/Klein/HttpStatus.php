@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Klein;
 
+use InvalidArgumentException;
+
 /**
  * HttpStatus
  *
@@ -45,6 +47,8 @@ class HttpStatus
         // Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
+        102 => 'Processing',
+        103 => 'Early Hints',
 
         // Successful 2xx
         200 => 'OK',
@@ -54,6 +58,9 @@ class HttpStatus
         204 => 'No Content',
         205 => 'Reset Content',
         206 => 'Partial Content',
+        207 => 'Multi-Status',
+        208 => 'Already Reported',
+        226 => 'IM Used',
 
         // Redirection 3xx
         300 => 'Multiple Choices',
@@ -64,6 +71,7 @@ class HttpStatus
         305 => 'Use Proxy',
         306 => '(Unused)',
         307 => 'Temporary Redirect',
+        308 => 'Permanent Redirect',
 
         // Client Error 4xx
         400 => 'Bad Request',
@@ -84,6 +92,16 @@ class HttpStatus
         415 => 'Unsupported Media Type',
         416 => 'Requested Range Not Satisfiable',
         417 => 'Expectation Failed',
+        421 => 'Misdirected Request',
+        422 => 'Unprocessable Content',
+        423 => 'Locked',
+        424 => 'Failed Dependency',
+        425 => 'Too Early',
+        426 => 'Upgrade Required',
+        428 => 'Precondition Required',
+        429 => 'Too Many Requests',
+        431 => 'Request Header Fields Too Large',
+        451 => 'Unavailable For Legal Reasons',
 
         // Server Error 5xx
         500 => 'Internal Server Error',
@@ -92,6 +110,10 @@ class HttpStatus
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
+        506 => 'Variant Also Negotiates',
+        507 => 'Insufficient Storage',
+        508 => 'Loop Detected',
+        511 => 'Network Authentication Required',
     ];
 
     /**
@@ -135,12 +157,32 @@ class HttpStatus
      * Set the HTTP status code
      *
      * @param int $code
+     * @throws InvalidArgumentException If the code isn't a valid HTTP status code (100-599, RFC 9110)
      * @return HttpStatus
      */
     public function setCode($code)
     {
-        $this->code = (int) $code;
+        $code = (int) $code;
+
+        if (!static::isValidCode($code)) {
+            throw new InvalidArgumentException('Expected an HTTP status code between 100 and 599. Got: ' . $code);
+        }
+
+        $this->code = $code;
         return $this;
+    }
+
+    /**
+     * Checks if a code is a valid HTTP status code
+     *
+     * RFC 9110 defines the range 100-599, anything else breaks the status line
+     *
+     * @param int $code
+     * @return boolean
+     */
+    public static function isValidCode($code)
+    {
+        return $code >= 100 && $code <= 599;
     }
 
     /**

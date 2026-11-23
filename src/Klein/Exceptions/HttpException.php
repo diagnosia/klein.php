@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Klein\Exceptions;
 
+use InvalidArgumentException;
+use Klein\HttpStatus;
 use RuntimeException;
 
 /**
@@ -30,11 +32,21 @@ class HttpException extends RuntimeException implements HttpExceptionInterface
     /**
      * Create an HTTP exception from nothing but an HTTP code
      *
+     * Checked here, so e.g. abort(999) fails in the route callback (and goes through the error
+     * callbacks) instead of later, while the HTTP error callbacks set the response code
+     *
      * @param int $code
+     * @throws InvalidArgumentException If the code isn't a valid HTTP status code
      * @return HttpException
      */
     public static function createFromCode($code): HttpException
     {
-        return new static('', (int) $code);
+        $code = (int) $code;
+
+        if (!HttpStatus::isValidCode($code)) {
+            throw new InvalidArgumentException('Expected an HTTP status code between 100 and 599. Got: ' . $code);
+        }
+
+        return new static('', $code);
     }
 }

@@ -28,6 +28,12 @@
   it refreshes, closing an open redirect
 - Add SameSite cookie support: `$samesite` parameter for `Response::cookie()` and `ResponseCookie`
   (`Strict`, `Lax` or `None`, default: not sent); a cookie with a `null` value no longer throws when sent
+- The APCu cache key of compiled route regexes includes the class and its match types, so apps on the same
+  server with different match types no longer get each other's compiled routes
+- Add the missing HTTP status messages (e.g. 103, 308, 422, 425, 428, 429, 431, 451, 511)
+- `HttpStatus` and `HttpException::createFromCode()` (so `abort()`) reject codes outside 100-599 with an
+  `InvalidArgumentException`
+- Enable APCu on the CLI in the Docker image and in CI, so the tests cover the route regex cache
 
 ### 2026-11-23 (4.2.0)
 

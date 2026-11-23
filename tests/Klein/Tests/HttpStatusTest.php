@@ -14,7 +14,9 @@ declare(strict_types=1);
 
 namespace Klein\Tests;
 
+use InvalidArgumentException;
 use Klein\HttpStatus;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * HttpStatusTest
@@ -33,7 +35,7 @@ class HttpStatusTest extends AbstractKleinTestCase
     public function testManualEntryViaConstructor()
     {
         // Set our manual test data
-        $code = 666;
+        $code = 599; // Valid, but without a registered message
         $message = 'The devil\'s mark';
 
         $http_status = new HttpStatus($code, $message);
@@ -46,7 +48,7 @@ class HttpStatusTest extends AbstractKleinTestCase
     {
         // Set our manual test data
         $constructor_code = 123;
-        $code = 666;
+        $code = 599; // Valid, but without a registered message
         $message = 'The devil\'s mark';
 
         $http_status = new HttpStatus($constructor_code);
@@ -82,5 +84,69 @@ class HttpStatusTest extends AbstractKleinTestCase
         $this->expectOutputString($expected_string);
 
         static::assertSame($expected_string, $http_status->getFormattedString());
+    }
+
+    public static function modernStatusCodeProvider(): array
+    {
+        return [
+            [103, 'Early Hints'],
+            [308, 'Permanent Redirect'],
+            [422, 'Unprocessable Content'],
+            [425, 'Too Early'],
+            [428, 'Precondition Required'],
+            [429, 'Too Many Requests'],
+            [431, 'Request Header Fields Too Large'],
+            [451, 'Unavailable For Legal Reasons'],
+            [511, 'Network Authentication Required'],
+        ];
+    }
+
+    #[DataProvider('modernStatusCodeProvider')]
+    public function testModernStatusCodesHaveMessages(int $code, string $message)
+    {
+        static::assertSame($message, HttpStatus::getMessageFromCode($code));
+        // Used to be just e.g. "429", without a reason phrase
+        static::assertSame($code . ' ' . $message, (string) new HttpStatus($code));
+    }
+
+    public static function invalidStatusCodeProvider(): array
+    {
+        return [
+            'zero' => [0],
+            'negative' => [-200],
+            'below range' => [99],
+            'above range' => [600],
+            'four digits' => [1000],
+            'non-numeric string' => ['abc'],
+        ];
+    }
+
+    #[DataProvider('invalidStatusCodeProvider')]
+    public function testInvalidCodeThrows(mixed $code)
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new HttpStatus($code);
+    }
+
+    public function testInvalidCodeViaSetterThrows()
+    {
+        $http_status = new HttpStatus(200);
+
+        try {
+            $http_status->setCode(999);
+            static::fail('Expected an InvalidArgumentException');
+        } catch (InvalidArgumentException) {
+            // The previous code is kept
+            static::assertSame(200, $http_status->getCode());
+        }
+    }
+
+    public function testIsValidCode()
+    {
+        static::assertTrue(HttpStatus::isValidCode(100));
+        static::assertTrue(HttpStatus::isValidCode(599));
+        static::assertFalse(HttpStatus::isValidCode(99));
+        static::assertFalse(HttpStatus::isValidCode(600));
     }
 }
