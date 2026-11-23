@@ -25,6 +25,12 @@
 - `ServiceProvider::startSession()` returns the id of an already active session instead of `null`
 - Revert the 2021-08-18 workaround: `Response::chunk($str)` prefixes the chunk with its length in hex again, as
   chunked transfer encoding requires (and as `AbstractResponse::chunk()` always did for the body)
+- Sending a chunked response (`send()`, so also at the end of `dispatch()`) ends it: the rest of the body is sent as
+  a last chunk, followed by the terminating empty chunk. `chunk('')` writes nothing instead of that terminating
+  chunk, `chunk()` throws a `ResponseAlreadySentException` after sending, and a locked response's body is no
+  longer half written before the `LockedResponseException`
+- `ServiceProvider::render()` sends a view rendered into a chunked response as a chunk (it used to be written
+  without chunk framing); nested `render()`/`partial()` calls are part of the outer chunk
 
 ### 2026-11-23 (4.3.0)
 

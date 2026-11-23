@@ -346,6 +346,9 @@ abstract class AbstractResponse
     /**
      * Send the response and lock it
      *
+     * A chunked response is ended here: what is left of the body is sent as a last chunk,
+     * followed by the empty chunk that terminates the response
+     *
      * @param boolean $override             Whether or not to override the check if the response has already been sent
      * @throws ResponseAlreadySentException If the response has already been sent
      */
@@ -357,7 +360,8 @@ abstract class AbstractResponse
 
         // Send our response data
         $this->sendHeaders();
-        $this->sendBody();
+
+        $this->sendBodyOrLastChunks();
 
         // Lock the response from further modification
         $this->lock();
@@ -387,9 +391,14 @@ abstract class AbstractResponse
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
      * @throws LockedResponseException  If the response is locked (when it isn't chunked yet or has a body left)
+     * @throws ResponseAlreadySentException If the response has already been sent (and so ended)
      */
     public function chunk(): static
     {
+        if ($this->sent) {
+            throw new ResponseAlreadySentException('Response has already been sent');
+        }
+
         if (false === $this->chunked) {
             // Check before marking it as chunked, as the header can't be set on a locked response
             $this->requireUnlocked();
@@ -399,15 +408,55 @@ abstract class AbstractResponse
             flush();
         }
 
-        if (($body_length = strlen($this->body)) > 0) {
-            printf("%x\r\n", $body_length);
-            $this->sendBody();
-            $this->body('');
-            echo "\r\n";
-            flush();
+        if ('' !== $this->body) {
+            // Check before writing, so a locked response doesn't end up with a half written chunk
+            $this->requireUnlocked();
+
+            $this->writeChunk($this->body);
+            $this->body = '';
         }
 
         return $this;
+    }
+
+    /**
+     * Sends the body, or ends a chunked response with the rest of the body and the terminating chunk
+     */
+    private function sendBodyOrLastChunks(): void
+    {
+        if (!$this->chunked) {
+            $this->sendBody();
+
+            return;
+        }
+
+        $this->writeChunk($this->body);
+        $this->writeLastChunk();
+    }
+
+    /**
+     * Writes data as one chunk of a chunked response: its length in hex, then the data
+     *
+     * Empty data is skipped, as an empty chunk would terminate the response
+     */
+    protected function writeChunk(string $data): void
+    {
+        if ('' === $data) {
+            return;
+        }
+
+        printf("%x\r\n", strlen($data));
+        echo $data, "\r\n";
+        flush();
+    }
+
+    /**
+     * Writes the empty chunk that terminates a chunked response
+     */
+    protected function writeLastChunk(): void
+    {
+        echo "0\r\n\r\n";
+        flush();
     }
 
     /**

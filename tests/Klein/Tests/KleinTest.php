@@ -61,6 +61,20 @@ class KleinTest extends AbstractKleinTestCase
         static::assertTrue($klein instanceof Klein);
     }
 
+    public function testDispatchEndsChunkedResponse()
+    {
+        $this->klein_app->respond('/', static function ($request, $response) {
+            $response->chunk('hello');
+            $response->chunk('world');
+        });
+
+        $this->expectOutputString("5\r\nhello\r\n5\r\nworld\r\n0\r\n\r\n");
+
+        $this->klein_app->dispatch(MockRequestFactory::create('/'));
+
+        static::assertTrue($this->klein_app->response()->isSent());
+    }
+
     public function testAfterDispatchCannotChangeHeadersOfLockedResponse()
     {
         $error_type = null;

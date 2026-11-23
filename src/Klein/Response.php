@@ -36,16 +36,16 @@ class Response extends AbstractResponse
      *
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
-     * @param string|null $str  An optional string to send as a response "chunk"
+     * The response is ended (with the terminating empty chunk) when it is sent
+     *
+     * @param string|null $str  An optional string to send as a response "chunk" (an empty one is skipped)
      */
     public function chunk(string|null $str = null): static
     {
         parent::chunk();
 
         if (null !== $str) {
-            printf("%x\r\n", strlen($str));
-            echo "{$str}\r\n";
-            flush();
+            $this->writeChunk($str);
         }
 
         return $this;

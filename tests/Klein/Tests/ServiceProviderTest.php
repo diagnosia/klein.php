@@ -470,7 +470,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         $this->klein_app->dispatch(null, $response);
 
-        $this->expectOutputString(
+        $rendered =
             '<h1>About</h1>'
             . PHP_EOL
             . 'My name is Trevor Suarez.'
@@ -478,8 +478,10 @@ class ServiceProviderTest extends AbstractKleinTestCase
             . 'WOOT!'
             . PHP_EOL
             . '<div>footer</div>'
-            . PHP_EOL,
-        );
+            . PHP_EOL;
+
+        // The rendered view (used to be written without chunk framing) as one chunk, then the terminating chunk
+        $this->expectOutputString(dechex(strlen($rendered)) . "\r\n" . $rendered . "\r\n0\r\n\r\n");
     }
 
     public function testPartial()
@@ -502,6 +504,24 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Make sure the layout doesn't get included
         $this->expectOutputString('My name is Trevor Suarez.' . PHP_EOL . 'WOOT!' . PHP_EOL);
+    }
+
+    public function testRenderChunkedWithNestedPartial()
+    {
+        $response = new Response();
+        $response->chunk();
+
+        $this->klein_app->respond(static function ($request, $response, $service) {
+            $service->render(__DIR__ . '/views/with-partial.php', ['name' => 'trevor suarez', 'verb' => 'woot']);
+        });
+
+        $this->klein_app->dispatch(null, $response);
+
+        $rendered =
+            '<header>' . PHP_EOL . 'My name is Trevor Suarez.' . PHP_EOL . 'WOOT!' . PHP_EOL . '</header>' . PHP_EOL;
+
+        // One chunk for the whole view: the nested partial() isn't framed (twice) on its own
+        $this->expectOutputString(dechex(strlen($rendered)) . "\r\n" . $rendered . "\r\n0\r\n\r\n");
     }
 
     public function testAddValidator()

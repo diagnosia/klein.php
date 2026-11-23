@@ -309,6 +309,60 @@ class ResponseTest extends AbstractKleinTestCase
         static::assertSame('chunked', $response->headers()->get('Transfer-Encoding'));
     }
 
+    public function testSendEndsChunkedResponse()
+    {
+        $response = new Response('initial');
+        $response->chunk('more');
+        $response->body('rest');
+
+        // The rest of the body as a last chunk, then the empty chunk that terminates the response
+        $this->expectOutputString("7\r\ninitial\r\n4\r\nmore\r\n4\r\nrest\r\n0\r\n\r\n");
+
+        $response->send();
+
+        static::assertTrue($response->isSent());
+    }
+
+    public function testChunkWithEmptyStringWritesNothing()
+    {
+        $response = new Response();
+        $response->chunk();
+
+        // An empty chunk ("0\r\n\r\n") would terminate the response early
+        $this->expectOutputString('');
+
+        $response->chunk('');
+    }
+
+    public function testChunkAfterSendThrows()
+    {
+        $response = new Response();
+        $response->chunk('data');
+        $response->send();
+
+        $this->expectOutputString("4\r\ndata\r\n0\r\n\r\n");
+        $this->expectException(ResponseAlreadySentException::class);
+
+        $response->chunk('too late');
+    }
+
+    public function testChunkOfLockedResponseWritesNothing()
+    {
+        $response = new Response();
+        $response->chunk();
+        $response->body('locked body')->lock();
+
+        $this->expectOutputString('');
+
+        try {
+            $response->chunk();
+            static::fail('Expected a LockedResponseException');
+        } catch (LockedResponseException) {
+            // Nothing written, so no half written chunk
+            static::assertSame('locked body', $response->body());
+        }
+    }
+
     public function testHeader()
     {
         $headers = [

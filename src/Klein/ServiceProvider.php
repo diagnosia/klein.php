@@ -55,6 +55,11 @@ class ServiceProvider
     protected DataCollection $shared_data;
 
     /**
+     * Whether a render() is capturing its output to send it as a chunk (only the outermost one does)
+     */
+    private bool $capturing_chunk = false;
+
+    /**
      * Constructor
      *
      * @param Request|null $request         Object containing all HTTP request data and behaviors
@@ -332,6 +337,9 @@ class ServiceProvider
     /**
      * Renders a view + optional layout
      *
+     * With a chunked response, the rendered output is sent as a chunk (by the outermost render() call,
+     * so nested ones like partial() aren't framed twice)
+     *
      * @param string $view  The view to render
      * @param array $data   The data to render in the view
      */
@@ -348,20 +356,43 @@ class ServiceProvider
         // The view may set a layout while it renders; only the one set before counts
         $layout = $this->layout;
 
-        if (null === $layout) {
-            $this->yieldView();
+        $capture = $this->response->chunked && !$this->capturing_chunk;
+
+        if ($capture) {
+            $this->capturing_chunk = true;
+            ob_start();
         }
 
-        if (null !== $layout) {
-            require $layout;
+        try {
+            $this->renderViewOrLayout($layout);
+        } finally {
+            // restore state for parent render()
+            $this->view = $original_view;
+
+            if ($capture) {
+                $this->capturing_chunk = false;
+                $output = (string) ob_get_clean();
+            }
         }
 
-        if (false !== $this->response->chunked) {
+        if ($capture) {
+            $this->response->append($output);
             $this->response->chunk();
         }
+    }
 
-        // restore state for parent render()
-        $this->view = $original_view;
+    /**
+     * Renders the current view, through the layout if there is one
+     */
+    private function renderViewOrLayout(string|null $layout): void
+    {
+        if (null === $layout) {
+            $this->yieldView();
+
+            return;
+        }
+
+        require $layout;
     }
 
     /**
