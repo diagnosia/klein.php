@@ -1,7 +1,7 @@
 {
   "name": "klein/klein",
   "description": "A lightning fast router for PHP",
-  "version": "4.3.0",
+  "version": "5.0.0",
   "keywords": [
     "router",
     "routing",

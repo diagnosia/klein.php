@@ -2,7 +2,7 @@
 
 ## Changes for Diagnosia
 
-### Unreleased
+### 2026-11-23 (5.0.0)
 
 - Add native types everywhere: parameter, return, property and class constant types (`mixed` only where a
   value can really be anything). Subclasses that override methods or redeclare properties/constants need the
