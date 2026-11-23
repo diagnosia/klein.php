@@ -2,7 +2,7 @@
 
 ## Changes for Diagnosia
 
-### Unreleased
+### 2026-11-23 (4.3.0)
 
 - Fix `TypeError`s from `strict_types` on non-string input: `_method[]=x` overrides, `Request::query()`
   without a query string, `Response::dump()`/`ServiceProvider::escape()` with scalars, non-string cookie
