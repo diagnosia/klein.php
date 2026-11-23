@@ -1130,7 +1130,8 @@ class Klein
             }
 
             if (null !== $this->service && null !== $this->response) {
-                $this->service->flash((string) $err);
+                // Flash only the (escaped) message: it may contain user input, and the trace leaks internals
+                $this->service->flash('%s', [$msg]);
                 $this->response->redirect($callback);
             }
         }

@@ -9,6 +9,10 @@
   names/values/expire times, and validating array params (which now fail validation)
 - Security: `Response::json()` only accepts a (dotted) JavaScript identifier as JSONP callback and
   throws an `InvalidArgumentException` otherwise, preventing script injection via the callback name
+- Security: a redirecting `onError()` handler now flashes only the HTML-escaped exception message instead
+  of the unescaped exception string with its stack trace
+- `ServiceProvider::markdown()`/`flash()` without arguments no longer treat the text as a format string, so
+  a `%` in it can't throw a `ValueError` or get eaten (`%%` is no longer collapsed to `%` in that case)
 
 ### 2026-11-23 (4.2.0)
 

@@ -231,6 +231,26 @@ class KleinTest extends AbstractKleinTestCase
         session_destroy();
     }
 
+    public function testOnErrorRedirectFlashesEscapedMessageOnly()
+    {
+        // A non-callable error "callback" is a URL to redirect to, with the error flashed
+        $this->klein_app->onError('/error-page');
+
+        $this->klein_app->respond(static function () {
+            throw new Exception('<b>100% broken</b>, 50% done');
+        });
+
+        $this->klein_app->dispatch(null, null, false);
+
+        // Escaped, with the "%" signs intact and without the exception class or stack trace
+        static::assertSame(['&lt;b&gt;100% broken&lt;/b&gt;, 50% done'], $this->klein_app->service()->flashes('info'));
+        static::assertSame(302, $this->klein_app->response()->code());
+        static::assertSame('/error-page', $this->klein_app->response()->headers()->get('Location'));
+
+        // Clean up
+        session_destroy();
+    }
+
     public function testOnHttpError()
     {
         // Create expected arguments

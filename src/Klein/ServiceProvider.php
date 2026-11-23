@@ -143,6 +143,9 @@ class ServiceProvider
     /**
      * Stores a flash message of $type
      *
+     * The message is a trusted markdown template and is NOT escaped. Pass untrusted
+     * text (user input, exception messages) as a param instead, e.g. flash('%s', [$text])
+     *
      * @param string $msg       The message to flash
      * @param string $type      The flash message type
      * @param array $params     Optional params to be parsed by markdown
@@ -157,7 +160,8 @@ class ServiceProvider
         }
         $_SESSION['__flashes'] ??= [];
         $_SESSION['__flashes'][$type] ??= [];
-        $_SESSION['__flashes'][$type][] = $this->markdown($msg, $params);
+        // Without params, the message isn't used as a format string (so a "%" in it stays as is)
+        $_SESSION['__flashes'][$type][] = null === $params ? $this->markdown($msg) : $this->markdown($msg, $params);
     }
 
     /**
@@ -199,6 +203,10 @@ class ServiceProvider
      * Also, this method takes in EITHER an array of optional arguments (as the second parameter)
      * ... OR this method will simply take a variable number of arguments (after the initial str arg)
      *
+     * With arguments, the string is a format string for vsprintf() and the arguments are HTML escaped.
+     * Without arguments, the string is used as is (a "%" doesn't need to be escaped as "%%").
+     * The string itself is NOT escaped, so it must not contain untrusted text.
+     *
      * @param string $str   The text string to parse
      * @param array $args   Optional arguments to be parsed by markdown
      * @return string
@@ -229,7 +237,10 @@ class ServiceProvider
         }
 
         // Actually do our markdown conversion
-        return vsprintf(preg_replace(array_keys($md), $md, $str), $args);
+        $html = preg_replace(array_keys($md), $md, $str);
+
+        // Only format when there is something to insert, so a "%" in a plain message can't throw a ValueError
+        return [] === $args ? $html : vsprintf($html, $args);
     }
 
     /**

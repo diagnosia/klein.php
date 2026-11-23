@@ -103,7 +103,8 @@ _Example 5_ - All together
 $klein->respond(function ($request, $response, $service, $app) use ($klein) {
     // Handle exceptions => flash the message and redirect to the referrer
     $klein->onError(function ($klein, $err_msg) {
-        $klein->service()->flash($err_msg);
+        // Pass untrusted text as a param, so it gets HTML escaped
+        $klein->service()->flash('%s', [$err_msg]);
         $klein->service()->back();
     });
 

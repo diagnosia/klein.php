@@ -243,6 +243,37 @@ class ServiceProviderTest extends AbstractKleinTestCase
         ));
     }
 
+    public function testMarkdownWithoutArgsKeepsPercentSigns()
+    {
+        // Used to throw a ValueError ("The arguments array must contain 2 items")
+        static::assertSame(
+            '100% <strong>done</strong>, 50% %s left',
+            ServiceProvider::markdown('100% **done**, 50% %s left'),
+        );
+        static::assertSame('100% done', ServiceProvider::markdown('100% done', []));
+    }
+
+    public function testMarkdownEscapesArgs()
+    {
+        static::assertSame('<strong>&lt;script&gt;alert(&quot;x&quot;)&lt;/script&gt;</strong>', ServiceProvider::markdown('**%s**', [
+            '<script>alert("x")</script>',
+        ]));
+    }
+
+    public function testFlashWithPercentSign()
+    {
+        $service = new ServiceProvider();
+
+        // "% o" used to be taken as a format spec and eat the "of"
+        $service->flash('Saved 100% of the files, 50% faster');
+
+        static::assertSame(['Saved 100% of the files, 50% faster'], $service->flashes('info'));
+
+        // Clean up
+        session_destroy();
+        $_SESSION = [];
+    }
+
     public function testEscapeCharacters()
     {
         static::assertSame(
