@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Klein;
 
+use InvalidArgumentException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use RuntimeException;
 
@@ -22,6 +23,15 @@ use RuntimeException;
  */
 class Response extends AbstractResponse
 {
+    /**
+     * The allowed JSONP callback names: a JavaScript identifier, optionally dotted (e.g. "jQuery123" or "app.cb")
+     *
+     * Anything else could inject script into the JSONP response
+     *
+     * @var string
+     */
+    const JSONP_CALLBACK_REGEX = '/^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/D';
+
     /**
      * Methods
      */
@@ -143,11 +153,20 @@ class Response extends AbstractResponse
      * the passed json encoded object
      *
      * @param mixed $object         The data to encode as JSON
-     * @param string $jsonp_prefix  The name of the JSON-P function prefix
+     * @param string $jsonp_prefix  The name of the JSON-P function prefix, see JSONP_CALLBACK_REGEX
+     * @throws InvalidArgumentException If the JSON-P function prefix isn't a valid callback name
      * @return Response
      */
     public function json($object, $jsonp_prefix = null)
     {
+        // The prefix usually comes straight from a request param, so it must not be able to inject script
+        if (
+            null !== $jsonp_prefix
+            && (!is_string($jsonp_prefix) || preg_match(static::JSONP_CALLBACK_REGEX, $jsonp_prefix) !== 1)
+        ) {
+            throw new InvalidArgumentException('The JSONP callback name must be a (dotted) JavaScript identifier');
+        }
+
         $this->body('');
         $this->noCache();
 

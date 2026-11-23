@@ -2,6 +2,14 @@
 
 ## Changes for Diagnosia
 
+### Unreleased
+
+- Fix `TypeError`s from `strict_types` on non-string input: `_method[]=x` overrides, `Request::query()`
+  without a query string, `Response::dump()`/`ServiceProvider::escape()` with scalars, non-string cookie
+  names/values/expire times, and validating array params (which now fail validation)
+- Security: `Response::json()` only accepts a (dotted) JavaScript identifier as JSONP callback and
+  throws an `InvalidArgumentException` otherwise, preventing script injection via the callback name
+
 ### 2026-11-23 (4.2.0)
 
 - Fix escaping of the backtick delimiter in compiled route regexes

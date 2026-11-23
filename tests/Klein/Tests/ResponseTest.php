@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Klein\Tests;
 
+use InvalidArgumentException;
 use Klein\DataCollection\HeaderDataCollection;
 use Klein\DataCollection\ResponseCookieDataCollection;
 use Klein\Exceptions\LockedResponseException;
@@ -593,5 +594,58 @@ class ResponseTest extends AbstractKleinTestCase
         static::assertSame('no-cache', $this->klein_app->response()->headers()->get('Pragma'));
         static::assertSame('no-store, no-cache', $this->klein_app->response()->headers()->get('Cache-Control'));
         static::assertSame('text/javascript', $this->klein_app->response()->headers()->get('Content-Type'));
+    }
+
+    public static function validJsonpCallbackProvider(): array
+    {
+        return [
+            'plain' => ['dogma'],
+            'jQuery style' => ['jQuery3710_1700000000000'],
+            'dollar and underscore' => ['$_cb$'],
+            'dotted' => ['app.callbacks.done'],
+        ];
+    }
+
+    #[DataProvider('validJsonpCallbackProvider')]
+    public function testJSONWithValidPrefix(string $prefix)
+    {
+        $this->expectOutputString($prefix . '(["cheese"]);');
+
+        $response = new Response();
+        $response->json(['cheese'], $prefix);
+
+        static::assertSame('text/javascript', $response->headers()->get('Content-Type'));
+    }
+
+    public static function invalidJsonpCallbackProvider(): array
+    {
+        return [
+            'script injection' => ['alert(document.cookie);//'],
+            'html' => ['<script>alert(1)</script>'],
+            'empty' => [''],
+            'leading digit' => ['1cb'],
+            'trailing dot' => ['cb.'],
+            'double dot' => ['a..b'],
+            'brackets' => ['cb[0]'],
+            'whitespace' => ['cb x'],
+            'trailing newline' => ["cb\n"],
+            'array' => [['cb']],
+        ];
+    }
+
+    #[DataProvider('invalidJsonpCallbackProvider')]
+    public function testJSONWithInvalidPrefixThrows(mixed $prefix)
+    {
+        $response = new Response('previous body');
+
+        try {
+            $response->json(['cheese'], $prefix);
+            static::fail('Expected an InvalidArgumentException');
+        } catch (InvalidArgumentException) {
+            // The response must be left untouched and unsent
+            static::assertSame('previous body', $response->body());
+            static::assertNull($response->headers()->get('Content-Type'));
+            static::assertFalse($response->isSent());
+        }
     }
 }
