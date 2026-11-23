@@ -96,24 +96,19 @@ class ServiceProviderTest extends AbstractKleinTestCase
         session_destroy();
     }
 
-    public function testStartSessionFails()
+    public function testStartSessionWithActiveSession()
     {
-        // Only care about some errors, and keep the old value
-        $old_error_val = error_reporting();
-        error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-
-        session_id('');
+        // A session started elsewhere
         session_start();
 
         $service = new ServiceProvider();
 
-        $returned = $service->startSession();
-
-        static::assertNull($returned);
+        // Used to return null instead of the active session's id
+        static::assertSame(session_id(), $service->startSession());
+        static::assertNotSame('', $service->startSession());
 
         // Clean up
         session_destroy();
-        error_reporting($old_error_val);
     }
 
     public function testFlash()

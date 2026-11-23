@@ -21,6 +21,31 @@ code that *extends* Klein's classes needs to match the new types:
 - `HttpStatus` and `HttpException::createFromCode()` take an `int` code between 100 and 599
 - `Response::json()` takes a `string|null` JSONP prefix, `Request::__construct()` a `string|null` body
 
+### Behavior Changes
+
+- `Response::header()`, `cookie()` and `noCache()` (and the first `chunk()`) throw a `LockedResponseException` on a
+  locked response, like `body()` and `code()` always did. A response is locked by `redirect()`, `send()`, and after
+  an `onError()`/`onHttpError()` handler ran. This affects headers added in an `afterDispatch()` callback (e.g. CORS
+  headers): after a redirect or a handled error, the exception is passed to the `onError()` callbacks and the header
+  is missing. Unlock the response around such changes if they should apply to every response:
+
+  ```php
+  $klein->afterDispatch(function ($klein) {
+      $response = $klein->response();
+      $locked = $response->isLocked();
+
+      $response->unlock()->header('Access-Control-Allow-Origin', '*');
+
+      if ($locked) {
+          $response->lock();
+      }
+  });
+  ```
+- `RouteFactory::build()` uses its `$name` and `$count_match` arguments, which custom callers may have passed
+  expecting them to be ignored
+- `ServiceProvider::startSession()` returns the id of an already active session instead of `null`
+- `ServiceProvider::isBond()` is deprecated in favor of `isBound()`
+
 
 ## 2.1.1 to 2.1.2
 

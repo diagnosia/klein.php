@@ -67,6 +67,20 @@ class RouteFactoryTest extends AbstractKleinTestCase
         }
     }
 
+    public function testBuildWithNameAndCountMatch()
+    {
+        $factory = new RouteFactory();
+
+        $route = $factory->build($this->getTestCallable(), '/test', 'GET', false, 'test-route');
+
+        // Both used to be ignored
+        static::assertSame('test-route', $route->getName());
+        static::assertFalse($route->getCountMatch());
+
+        // A route matching every path never counts as a match
+        static::assertFalse($factory->build($this->getTestCallable(), '*', null, true)->getCountMatch());
+    }
+
     public function testBuildWithNamespacedPath()
     {
         // Test data

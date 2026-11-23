@@ -19,6 +19,10 @@
 - `Request::id()` is cryptographically random (`random_bytes()`) instead of time based (`uniqid()`): 40 hex
   characters by default, 16 with `id(false)`
 - The tests expect the deprecation notices of the deprecated 404/405 "routes" instead of reporting them
+- `Response::header()`, `cookie()`, `noCache()` and a first `chunk()` respect the response lock like the other
+  setters (throwing a `LockedResponseException`); the `Allow` header of a 405 isn't set on a locked response
+- `RouteFactory::build()` passes `$name` to the route and respects `$count_match` (instead of ignoring both)
+- `ServiceProvider::startSession()` returns the id of an already active session instead of `null`
 
 ### 2026-11-23 (4.3.0)
 

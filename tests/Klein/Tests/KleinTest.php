@@ -19,12 +19,14 @@ use Klein\App;
 use Klein\DataCollection\RouteCollection;
 use Klein\Exceptions\DispatchHaltedException;
 use Klein\Exceptions\HttpExceptionInterface;
+use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\UnhandledException;
 use Klein\Klein;
 use Klein\Request;
 use Klein\Response;
 use Klein\Route;
 use Klein\ServiceProvider;
+use Klein\Tests\Mocks\MockRequestFactory;
 use OutOfBoundsException;
 
 /**
@@ -57,6 +59,39 @@ class KleinTest extends AbstractKleinTestCase
 
         static::assertNotNull($klein);
         static::assertTrue($klein instanceof Klein);
+    }
+
+    public function testAfterDispatchCannotChangeHeadersOfLockedResponse()
+    {
+        $error_type = null;
+
+        $this->klein_app->onError(static function ($klein, $message, $type) use (&$error_type) {
+            $error_type = $type;
+        });
+        $this->klein_app->respond('/', static fn($request, $response) => $response->redirect('/elsewhere'));
+        $this->klein_app->afterDispatch(static function ($klein) {
+            $klein->response()->header('X-After', 'dispatch');
+        });
+
+        $this->klein_app->dispatch(MockRequestFactory::create('/'), null, false);
+
+        // redirect() locked the response, so the header is rejected (see UPGRADING.md)
+        static::assertSame(LockedResponseException::class, $error_type);
+        static::assertNull($this->klein_app->response()->headers()->get('X-After'));
+        static::assertSame('/elsewhere', $this->klein_app->response()->headers()->get('Location'));
+    }
+
+    public function testAfterDispatchCanChangeHeadersAfterUnlocking()
+    {
+        $this->klein_app->respond('/', static fn($request, $response) => $response->redirect('/elsewhere'));
+        $this->klein_app->afterDispatch(static function ($klein) {
+            $klein->response()->unlock()->header('X-After', 'dispatch')->lock();
+        });
+
+        $this->klein_app->dispatch(MockRequestFactory::create('/'), null, false);
+
+        static::assertSame('dispatch', $this->klein_app->response()->headers()->get('X-After'));
+        static::assertTrue($this->klein_app->response()->isLocked());
     }
 
     public function testRequestAndResponseAreNullBeforeDispatch()

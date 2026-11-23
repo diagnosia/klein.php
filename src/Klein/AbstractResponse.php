@@ -386,10 +386,14 @@ abstract class AbstractResponse
      *
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
+     * @throws LockedResponseException  If the response is locked (when it isn't chunked yet or has a body left)
      */
     public function chunk(): static
     {
         if (false === $this->chunked) {
+            // Check before marking it as chunked, as the header can't be set on a locked response
+            $this->requireUnlocked();
+
             $this->chunked = true;
             $this->header('Transfer-encoding', 'chunked');
             flush();
@@ -411,9 +415,13 @@ abstract class AbstractResponse
      *
      * @param string $key       The name of the HTTP response header
      * @param string|Stringable|int|float|bool|null $value The value to set the header with
+     * @throws LockedResponseException  If the response is locked
      */
     public function header(string $key, string|Stringable|int|float|bool|null $value): static
     {
+        // Require that the response be unlocked before changing it
+        $this->requireUnlocked();
+
         $this->headers->set($key, $value);
 
         return $this;
@@ -430,6 +438,7 @@ abstract class AbstractResponse
      * @param boolean $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param boolean $httponly     Flag of whether the cookie should only be accessible over the HTTP protocol
      * @param string|null $samesite The SameSite attribute ("Strict", "Lax" or "None"; "None" requires $secure)
+     * @throws LockedResponseException  If the response is locked
      */
     public function cookie(
         string|int $key,
@@ -441,6 +450,9 @@ abstract class AbstractResponse
         bool $httponly = false,
         string|null $samesite = null,
     ): static {
+        // Require that the response be unlocked before changing it
+        $this->requireUnlocked();
+
         if (null === $expiry) {
             $expiry = time() + (3600 * 24 * 30);
         }
@@ -455,6 +467,8 @@ abstract class AbstractResponse
 
     /**
      * Tell the browser not to cache the response
+     *
+     * @throws LockedResponseException  If the response is locked
      */
     public function noCache(): static
     {

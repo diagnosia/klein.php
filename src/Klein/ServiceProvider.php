@@ -112,19 +112,20 @@ class ServiceProvider
     /**
      * Get the current session's ID
      *
-     * This will start a session if the current session id is null
+     * This will start a session if none is active yet
      *
-     * @return string|false|null    The session id, false if it couldn't be started, null if one was already active
+     * @return string|false     The session id (also of a session that was already active), false if it couldn't be
+     *  started
      */
-    public function startSession(): string|false|null
+    public function startSession(): string|false
     {
-        if (session_id() === '') {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
             // Attempt to start a session
             session_start();
-
-            $session_id = session_id();
-            $this->session_id = $session_id === '' ? false : $session_id;
         }
+
+        $session_id = session_id();
+        $this->session_id = false === $session_id || '' === $session_id ? false : $session_id;
 
         return $this->session_id;
     }

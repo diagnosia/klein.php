@@ -620,8 +620,10 @@ class Klein
             throw HttpException::createFromCode(404);
         }
 
-        // Add our methods to our allow header
-        $this->response->header('Allow', implode(', ', $methods_matched));
+        // Add our methods to our allow header, unless a route has already locked the response
+        if (!$this->response->isLocked()) {
+            $this->response->header('Allow', implode(', ', $methods_matched));
+        }
 
         if (strcasecmp($req_method, 'OPTIONS') !== 0) {
             throw HttpException::createFromCode(405);

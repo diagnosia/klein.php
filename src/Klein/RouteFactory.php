@@ -86,8 +86,8 @@ class RouteFactory extends AbstractRouteFactory
      * @param callable $callback    Callable callback method to execute on route match
      * @param string|null $path             Route URI path to match
      * @param string|array|null $method     HTTP Method to match
-     * @param boolean $count_match          Ignored: whether a route counts as a match depends on its path
-     * @param string|null $name             Ignored: set it with Route::setName() on the returned route
+     * @param boolean $count_match          Whether the route counts as a match (one matching every path never does)
+     * @param string|null $name             The name of the route
      */
     public function build(
         callable $callback,
@@ -100,7 +100,8 @@ class RouteFactory extends AbstractRouteFactory
             $callback,
             $this->preprocessPathString($path),
             $method,
-            $this->shouldPathStringCauseRouteMatch($path), // Ignore the $count_match boolean that they passed
+            $count_match && $this->shouldPathStringCauseRouteMatch($path),
+            $name,
         );
     }
 }

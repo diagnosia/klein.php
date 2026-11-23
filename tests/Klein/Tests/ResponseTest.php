@@ -152,6 +152,8 @@ class ResponseTest extends AbstractKleinTestCase
         $protocol_version = $response->protocolVersion();
         $body = $response->body();
         $code = $response->code();
+        $headers = $response->headers()->all();
+        $cookies = $response->cookies()->all();
 
         // Attempt to modify, every attempt has to be rejected
         $attempts = [
@@ -160,6 +162,10 @@ class ResponseTest extends AbstractKleinTestCase
             'code' => static fn() => $response->code(204),
             'prepend' => static fn() => $response->prepend('cat'),
             'append' => static fn() => $response->append('dog'),
+            'header' => static fn() => $response->header('X-Pet', 'cat'),
+            'cookie' => static fn() => $response->cookie('pet', 'dog'),
+            'noCache' => $response->noCache(...),
+            'chunk' => $response->chunk(...),
         ];
 
         foreach ($attempts as $method => $attempt) {
@@ -175,6 +181,9 @@ class ResponseTest extends AbstractKleinTestCase
         static::assertSame($protocol_version, $response->protocolVersion());
         static::assertSame($body, $response->body());
         static::assertSame($code, $response->code());
+        static::assertSame($headers, $response->headers()->all());
+        static::assertSame($cookies, $response->cookies()->all());
+        static::assertFalse($response->chunked);
     }
 
     /**

@@ -998,6 +998,22 @@ class RoutingTest extends AbstractKleinTestCase
         static::assertSame(implode('', $test_strings), $test_result);
     }
 
+    public function test405WithLockedResponse()
+    {
+        // A catch-all route (which doesn't count as a match) locks the response
+        $this->klein_app->respond(static function ($request, $response) {
+            $response->body('locked early')->lock();
+        });
+        $this->klein_app->respond('POST', '/', static function () {});
+
+        // Setting the "Allow" header on the locked response must not escape dispatch()
+        $this->klein_app->dispatch(MockRequestFactory::create('/', 'GET'), null, false);
+
+        static::assertSame('locked early', $this->klein_app->response()->body());
+        static::assertSame(200, $this->klein_app->response()->code());
+        static::assertNull($this->klein_app->response()->headers()->get('Allow'));
+    }
+
     public function testAbortWithInvalidCodeGoesThroughErrorCallbacks()
     {
         $error_type = null;
