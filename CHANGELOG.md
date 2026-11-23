@@ -2,6 +2,20 @@
 
 ## Changes for Diagnosia
 
+### Unreleased
+
+- Add native types everywhere: parameter, return, property and class constant types (`mixed` only where a
+  value can really be anything). Subclasses that override methods or redeclare properties/constants need the
+  same types, see UPGRADING.md
+- `Klein::respond()` and the method aliases accept an integer path (like the deprecated `404` "routes")
+- `KleinExceptionInterface` extends `Throwable`
+- `$collection[] = $value` appends to a `DataCollection` instead of storing the value under the key `""`
+- A request body of `"0"` is kept instead of being read again from `php://input`
+- `Klein::dispatch()` returns `null` instead of nothing when not capturing; its output buffer loops stop
+  if a buffer can't be removed instead of looping forever
+- A route regex failing without a PHP warning (e.g. hitting the backtrack limit) throws the compilation
+  exception with PCRE's error message instead of a `TypeError`
+
 ### 2026-11-23 (4.3.0)
 
 - Fix `TypeError`s from `strict_types` on non-string input: `_method[]=x` overrides, `Request::query()`

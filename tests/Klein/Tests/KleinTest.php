@@ -59,6 +59,19 @@ class KleinTest extends AbstractKleinTestCase
         static::assertTrue($klein instanceof Klein);
     }
 
+    public function testRequestAndResponseAreNullBeforeDispatch()
+    {
+        $klein = new Klein();
+
+        static::assertNull($klein->request());
+        static::assertNull($klein->response());
+
+        $klein->dispatch(null, null, false);
+
+        static::assertInstanceOf(Request::class, $klein->request());
+        static::assertInstanceOf(Response::class, $klein->response());
+    }
+
     public function testService()
     {
         $service = $this->klein_app->service();

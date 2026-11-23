@@ -34,14 +34,14 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      *
      * @var string
      */
-    const MESSAGE_FORMAT = 'Route failed to compile with path "%s".';
+    const string MESSAGE_FORMAT = 'Route failed to compile with path "%s".';
 
     /**
      * The extra failure message format
      *
      * @var string
      */
-    const FAILURE_MESSAGE_TITLE_FORMAT = 'Failed with message: "%s"';
+    const string FAILURE_MESSAGE_TITLE_FORMAT = 'Failed with message: "%s"';
 
     /**
      * Properties
@@ -50,9 +50,9 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
     /**
      * The route that failed to compile
      *
-     * @var Route
+     * @var Route|null
      */
-    protected $route;
+    protected Route|null $route = null;
 
     /**
      * Methods
@@ -64,9 +64,9 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      *
      * @param Route $route              The route that failed to compile
      * @param Throwable|null $previous  The previous exception
-     * @return RoutePathCompilationException
+     * @return static
      */
-    public static function createFromRoute(Route $route, Throwable|null $previous = null)
+    public static function createFromRoute(Route $route, Throwable|null $previous = null): static
     {
         $error = null !== $previous ? $previous->getMessage() : null;
         $code = null !== $previous ? (int) $previous->getCode() : 0;
@@ -87,9 +87,9 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      * Gets the value of route
      *
      * @sccess public
-     * @return Route
+     * @return Route|null
      */
-    public function getRoute()
+    public function getRoute(): Route|null
     {
         return $this->route;
     }
@@ -97,11 +97,10 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
     /**
      * Sets the value of route
      *
-     * @param Route The route that failed to compile
-     * @sccess protected
-     * @return RoutePathCompilationException
+     * @param Route $route The route that failed to compile
+     * @return static
      */
-    protected function setRoute(Route $route)
+    protected function setRoute(Route $route): static
     {
         $this->route = $route;
 

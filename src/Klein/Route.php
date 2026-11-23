@@ -146,11 +146,6 @@ class Route
      */
     public function setMethod(string|array|null $method): static
     {
-        // Explicit type check to prevent type coercion
-        if ($method !== null && !is_array($method) && !is_string($method)) {
-            throw new TypeError('Expected an array or string. Got a ' . gettype($method));
-        }
-
         $this->method = $method;
 
         return $this;
@@ -197,13 +192,11 @@ class Route
      *
      * Allows the ability to arbitrarily call this instance like a function
      *
-     * @param mixed $args Generic arguments, magically accepted
+     * @param mixed ...$args Generic arguments, passed on to the callback
      * @return mixed
      */
-    public function __invoke($args = null)
+    public function __invoke(mixed ...$args): mixed
     {
-        $args = func_get_args();
-
         return call_user_func_array($this->callback, $args);
     }
 }

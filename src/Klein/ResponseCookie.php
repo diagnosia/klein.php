@@ -76,7 +76,7 @@ class ResponseCookie
     /**
      * The allowed SameSite values, keyed by their lowercase form
      */
-    const SAME_SITE_VALUES = ['strict' => 'Strict', 'lax' => 'Lax', 'none' => 'None'];
+    const array SAME_SITE_VALUES = ['strict' => 'Strict', 'lax' => 'Lax', 'none' => 'None'];
 
     /**
      * Methods
@@ -118,7 +118,7 @@ class ResponseCookie
     /**
      * Gets the cookie's name
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -126,9 +126,9 @@ class ResponseCookie
     /**
      * Sets the cookie's name
      *
-     * @return ResponseCookie
+     * @return static
      */
-    public function setName(string|int $name)
+    public function setName(string|int $name): static
     {
         $this->name = (string) $name;
 

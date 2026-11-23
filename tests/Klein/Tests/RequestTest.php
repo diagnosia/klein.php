@@ -227,6 +227,14 @@ class RequestTest extends AbstractKleinTestCase
         static::assertSame($body, $request->body());
     }
 
+    public function testBodyZeroIsKept()
+    {
+        // "0" is falsy, so it used to be dropped (and php://input read instead)
+        $request = new Request([], [], [], [], [], '0');
+
+        static::assertSame('0', $request->body());
+    }
+
     public function testMethod()
     {
         // Test data

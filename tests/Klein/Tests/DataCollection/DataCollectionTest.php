@@ -336,6 +336,17 @@ class DataCollectionTest extends AbstractKleinTestCase
         static::assertSame(current($data), $data_collection->get(key($data)));
     }
 
+    public function testArrayAccessAppend()
+    {
+        $data_collection = new DataCollection(['dog' => 'cooper']);
+
+        // Both used to end up under the key "" (the second overwriting the first)
+        $data_collection[] = 'first';
+        $data_collection[] = 'second';
+
+        static::assertSame(['dog' => 'cooper', 0 => 'first', 1 => 'second'], $data_collection->all());
+    }
+
     #[DataProvider('sampleDataProvider')]
     public function testArrayAccessIsset($sample_data, $data_collection)
     {

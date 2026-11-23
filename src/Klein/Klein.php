@@ -43,14 +43,14 @@ class Klein
      *
      * @var string
      */
-    const ROUTE_COMPILE_REGEX = '`(\\\?(?:/|\.|))(?:\[([^:\]]*)(?::([^:\]]*))?\])(\?|)`';
+    const string ROUTE_COMPILE_REGEX = '`(\\\?(?:/|\.|))(?:\[([^:\]]*)(?::([^:\]]*))?\])(\?|)`';
 
     /**
      * The regular expression used to escape the non-named param section of a route URL
      *
      * @var string
      */
-    const ROUTE_ESCAPE_REGEX = '`(?<=^|\])[^\]\[\?]+?(?=\[|$)`';
+    const string ROUTE_ESCAPE_REGEX = '`(?<=^|\])[^\]\[\?]+?(?=\[|$)`';
 
     /**
      * Dispatch route output handling
@@ -59,7 +59,7 @@ class Klein
      *
      * @var int
      */
-    const DISPATCH_NO_CAPTURE = 0;
+    const int DISPATCH_NO_CAPTURE = 0;
 
     /**
      * Dispatch route output handling
@@ -68,7 +68,7 @@ class Klein
      *
      * @var int
      */
-    const DISPATCH_CAPTURE_AND_RETURN = 1;
+    const int DISPATCH_CAPTURE_AND_RETURN = 1;
 
     /**
      * Dispatch route output handling
@@ -77,7 +77,7 @@ class Klein
      *
      * @var int
      */
-    const DISPATCH_CAPTURE_AND_REPLACE = 2;
+    const int DISPATCH_CAPTURE_AND_REPLACE = 2;
 
     /**
      * Dispatch route output handling
@@ -86,7 +86,7 @@ class Klein
      *
      * @var int
      */
-    const DISPATCH_CAPTURE_AND_PREPEND = 3;
+    const int DISPATCH_CAPTURE_AND_PREPEND = 3;
 
     /**
      * Dispatch route output handling
@@ -95,7 +95,7 @@ class Klein
      *
      * @var int
      */
-    const DISPATCH_CAPTURE_AND_APPEND = 4;
+    const int DISPATCH_CAPTURE_AND_APPEND = 4;
 
     /**
      * Class properties
@@ -111,9 +111,9 @@ class Klein
      * - hexadecimal:   '[h:color]'
      * - slug:          '[s:article]'
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $match_types = [
+    protected array $match_types = [
         'i' => '[0-9]++',
         'a' => '[0-9A-Za-z]++',
         'h' => '[0-9A-Fa-f]++',
@@ -128,28 +128,28 @@ class Klein
      *
      * @var RouteCollection
      */
-    protected $routes;
+    protected RouteCollection $routes;
 
     /**
      * The Route factory object responsible for creating Route instances
      *
      * @var AbstractRouteFactory
      */
-    protected $route_factory;
+    protected AbstractRouteFactory $route_factory;
 
     /**
      * A stack of error callback callables
      *
      * @var SplStack
      */
-    protected $error_callbacks;
+    protected SplStack $error_callbacks;
 
     /**
      * A stack of HTTP error callback callables
      *
      * @var SplStack
      */
-    protected $http_error_callbacks;
+    protected SplStack $http_error_callbacks;
 
     /**
      * A queue of callbacks to call after processing the dispatch loop
@@ -157,14 +157,16 @@ class Klein
      *
      * @var SplQueue
      */
-    protected $after_filter_callbacks;
+    protected SplQueue $after_filter_callbacks;
 
     /**
      * The output buffer level used by the dispatch process
      *
+     * 0 until the first dispatch, so no buffer is touched before
+     *
      * @var int
      */
-    private $output_buffer_level;
+    private int $output_buffer_level = 0;
 
     /**
      * Route objects
@@ -173,30 +175,34 @@ class Klein
     /**
      * The Request object passed to each matched route
      *
-     * @var Request
+     * Null until the first dispatch
+     *
+     * @var Request|null
      */
-    protected $request;
+    protected Request|null $request = null;
 
     /**
      * The Response object passed to each matched route
      *
-     * @var AbstractResponse
+     * Null until the first dispatch
+     *
+     * @var AbstractResponse|null
      */
-    protected $response;
+    protected AbstractResponse|null $response = null;
 
     /**
      * The service provider object passed to each matched route
      *
      * @var ServiceProvider
      */
-    protected $service;
+    protected ServiceProvider $service;
 
     /**
      * A generic variable passed to each matched route
      *
      * @var mixed
      */
-    protected $app;
+    protected mixed $app;
 
     /**
      * Methods
@@ -215,7 +221,7 @@ class Klein
      */
     public function __construct(
         ServiceProvider|null $service = null,
-        $app = null,
+        mixed $app = null,
         RouteCollection|null $routes = null,
         AbstractRouteFactory|null $route_factory = null,
     ) {
@@ -235,7 +241,7 @@ class Klein
      *
      * @return RouteCollection
      */
-    public function routes()
+    public function routes(): RouteCollection
     {
         return $this->routes;
     }
@@ -243,9 +249,9 @@ class Klein
     /**
      * Returns the request object
      *
-     * @return Request
+     * @return Request|null   Null before the first dispatch
      */
-    public function request()
+    public function request(): Request|null
     {
         return $this->request;
     }
@@ -253,9 +259,9 @@ class Klein
     /**
      * Returns the response object
      *
-     * @return Response
+     * @return AbstractResponse|null  Null before the first dispatch
      */
-    public function response()
+    public function response(): AbstractResponse|null
     {
         return $this->response;
     }
@@ -265,7 +271,7 @@ class Klein
      *
      * @return ServiceProvider
      */
-    public function service()
+    public function service(): ServiceProvider
     {
         return $this->service;
     }
@@ -275,7 +281,7 @@ class Klein
      *
      * @return mixed
      */
-    public function app()
+    public function app(): mixed
     {
         return $this->app;
     }
@@ -288,7 +294,7 @@ class Klein
      * for the minimum of a callback to be passed in its current configuration.
      *
      * @see Klein::respond()
-     * @param mixed $args               An argument array. Hint: This works well when passing "func_get_args()"
+     * @param array $args               An argument array. Hint: This works well when passing "func_get_args()"
      *  @named string | array $method   HTTP Method to match
      *  @named string $path             Route URI path to match
      *  @named callable $callback       Callable callback method to execute on route match
@@ -333,16 +339,26 @@ class Klein
      * });
      * </code>
      *
-     * @param string|array|callable $method     HTTP Method to match
-     * @param string|callable $path             Route URI path to match
-     * @param callable $callback                Callable callback method to execute on route match
+     * As the arguments shift with their number, each parameter is typed with what any of them can be
+     *
+     * @param callable|string|array|int|null $method    HTTP Method to match (or the path or callback)
+     * @param callable|string|int|null $path            Route URI path to match (or the callback)
+     * @param callable|null $callback                   Callable callback method to execute on route match
      *
      * @return Route
      */
-    public function respond($method, $path = '*', $callback = null): Route
-    {
+    public function respond(
+        callable|string|array|int|null $method,
+        callable|string|int|null $path = '*',
+        callable|null $callback = null,
+    ): Route {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
+
+        // Paths like the deprecated 404/405 "routes" may be given as integers
+        if (is_int($path)) {
+            $path = (string) $path;
+        }
 
         $route = $this->route_factory->build($callback, $path, $method);
 
@@ -376,7 +392,7 @@ class Klein
      * @param callable|string $routes   The defined routes callable or filename to collect under the namespace
      * @return void
      */
-    public function with($namespace, $routes)
+    public function with(string $namespace, callable|string $routes): void
     {
         $previous = $this->route_factory->getNamespace();
 
@@ -402,18 +418,18 @@ class Klein
      * Dispatch with optionally injected dependencies
      * This DI allows for easy testing, object mocking, or class extension
      *
-     * @param Request $request              The request object to give to each callback
-     * @param AbstractResponse $response    The response object to give to each callback
+     * @param Request|null $request            The request object to give to each callback
+     * @param AbstractResponse|null $response  The response object to give to each callback
      * @param boolean $send_response        Whether or not to "send" the response after the last route has been matched
      * @param int $capture                  Specify a DISPATCH_* constant to change the output capturing behavior
-     * @return void|string
+     * @return string|null                  The output with DISPATCH_CAPTURE_AND_RETURN, null otherwise
      */
     public function dispatch(
         Request|null $request = null,
         AbstractResponse|null $response = null,
-        $send_response = true,
-        $capture = self::DISPATCH_NO_CAPTURE,
-    ) {
+        bool $send_response = true,
+        int $capture = self::DISPATCH_NO_CAPTURE,
+    ): string|null {
         $this->prepareDispatch($request, $response);
 
         $req_method = $this->request->method();
@@ -445,6 +461,8 @@ class Klein
         if ($send_response && !$this->response->isSent()) {
             $this->response->send();
         }
+
+        return null;
     }
 
     /**
@@ -454,7 +472,7 @@ class Klein
      * @param AbstractResponse|null $response   The response object, a new Response if null
      * @return void
      */
-    private function prepareDispatch(Request|null $request, AbstractResponse|null $response)
+    private function prepareDispatch(Request|null $request, AbstractResponse|null $response): void
     {
         // Set/Initialize our objects to be sent in each callback
         $this->request = $request ?? Request::createFromGlobals();
@@ -478,7 +496,7 @@ class Klein
      * @param string $req_method    The request method
      * @return void
      */
-    private function dispatchRoutes($uri, $req_method)
+    private function dispatchRoutes(string $uri, string $req_method): void
     {
         // Set up some variables for matching
         $skip_num = 0;
@@ -569,7 +587,7 @@ class Klein
         HttpExceptionInterface $http_exception,
         RouteCollection $matched,
         array $methods_matched,
-    ) {
+    ): void {
         // Grab our original response lock state
         $locked = $this->response->isLocked();
 
@@ -590,8 +608,11 @@ class Klein
      * @param array $methods_matched    The methods matched so far
      * @return boolean                  Whether the route was handled as a deprecated 404/405 "route"
      */
-    private function handleDeprecatedHttpErrorRoute(Route $route, RouteCollection $matched, array $methods_matched)
-    {
+    private function handleDeprecatedHttpErrorRoute(
+        Route $route,
+        RouteCollection $matched,
+        array $methods_matched,
+    ): bool {
         $path = $route->getPath();
 
         if ($path !== '404' && $path !== '405' || !$matched->isEmpty()) {
@@ -618,7 +639,7 @@ class Klein
      * @param string|array|null $method     The method(s) of the route
      * @return array
      */
-    private function mergeMatchedMethods(array $methods_matched, $method)
+    private function mergeMatchedMethods(array $methods_matched, string|array|null $method): array
     {
         return array_unique(array_filter(array_merge($methods_matched, (array) $method)));
     }
@@ -629,7 +650,7 @@ class Klein
      * @param array $params The params matched from the route's path
      * @return void
      */
-    private function mergeNamedParams(array $params)
+    private function mergeNamedParams(array $params): void
     {
         if ([] === $params) {
             return;
@@ -654,7 +675,7 @@ class Klein
      * @throws HttpException            If no route matched (404) or none matched the method (405)
      * @return void
      */
-    private function requireRouteMatch(RouteCollection $matched, array $methods_matched, $req_method)
+    private function requireRouteMatch(RouteCollection $matched, array $methods_matched, string $req_method): void
     {
         if (!$matched->isEmpty()) {
             return;
@@ -676,14 +697,21 @@ class Klein
      * Ends the output buffers started by dispatch, passing each one's content to an optional consumer
      *
      * @param callable|null $consumer   Receives the content of each buffer, innermost first
-     * @return string|false|null        The content of the last (outermost) buffer, null if there was none
+     * @return string|null              The content of the last (outermost) buffer, null if there was none
      */
-    private function drainOutputBuffers(callable|null $consumer = null)
+    private function drainOutputBuffers(callable|null $consumer = null): string|null
     {
         $content = null;
 
-        while (ob_get_level() >= $this->output_buffer_level) {
-            $content = ob_get_clean();
+        while ($this->hasDispatchOutputBuffer()) {
+            $buffer = ob_get_clean();
+
+            // A buffer that can't be removed would otherwise loop forever
+            if (false === $buffer) {
+                break;
+            }
+
+            $content = $buffer;
 
             if (null !== $consumer) {
                 $consumer($content);
@@ -694,12 +722,22 @@ class Klein
     }
 
     /**
+     * Checks if one of the output buffers started by dispatch is still active
+     *
+     * @return boolean
+     */
+    private function hasDispatchOutputBuffer(): bool
+    {
+        return $this->output_buffer_level > 0 && ob_get_level() >= $this->output_buffer_level;
+    }
+
+    /**
      * Captures the output into the response body according to the capture behavior
      *
      * @param int $capture  The DISPATCH_* capture behavior (other than DISPATCH_CAPTURE_AND_RETURN)
      * @return int          The capture behavior, DISPATCH_NO_CAPTURE if it isn't a handled one
      */
-    private function captureOutput($capture)
+    private function captureOutput(int $capture): int
     {
         switch ($capture) {
             case self::DISPATCH_CAPTURE_AND_REPLACE:
@@ -724,7 +762,7 @@ class Klein
      * @param int $capture          The DISPATCH_* capture behavior
      * @return void
      */
-    private function finishOutput($req_method, $capture)
+    private function finishOutput(string $req_method, int $capture): void
     {
         // Test for HEAD request (like GET)
         if (strcasecmp($req_method, 'HEAD') === 0) {
@@ -746,10 +784,13 @@ class Klein
      *
      * @return void
      */
-    private function cleanOutputBuffers()
+    private function cleanOutputBuffers(): void
     {
-        while (ob_get_level() >= $this->output_buffer_level) {
-            ob_end_clean();
+        while ($this->hasDispatchOutputBuffer()) {
+            // Stop if a buffer can't be removed, which would otherwise loop forever
+            if (!ob_end_clean()) {
+                break;
+            }
         }
     }
 
@@ -758,10 +799,13 @@ class Klein
      *
      * @return void
      */
-    private function flushOutputBuffers()
+    private function flushOutputBuffers(): void
     {
-        while (ob_get_level() >= $this->output_buffer_level) {
-            ob_end_flush();
+        while ($this->hasDispatchOutputBuffer()) {
+            // Stop if a buffer can't be removed, which would otherwise loop forever
+            if (!ob_end_flush()) {
+                break;
+            }
         }
     }
 
@@ -774,7 +818,7 @@ class Klein
      * @param string|array|null $method     The method(s) of the route
      * @return boolean|null                 null if the route doesn't specify a method
      */
-    private function matchRouteMethod($req_method, $method)
+    private function matchRouteMethod(string $req_method, string|array|null $method): bool|null
     {
         if (null === $method) {
             return null;
@@ -804,7 +848,7 @@ class Klein
      * @throws RoutePathCompilationException    If the route's path fails to compile
      * @return int|boolean|null                 The match result, null if the route should be skipped
      */
-    private function matchRoutePath(Route $route, $uri, &$params)
+    private function matchRoutePath(Route $route, string $uri, array|null &$params): int|bool|null
     {
         $path = $route->getPath();
         // Skip a leading "!", which negates the match
@@ -859,28 +903,28 @@ class Klein
      * @throws RoutePathCompilationException    If the route's path fails to compile
      * @return string
      */
-    private function getRouteRegex(Route $route, $expression)
+    private function getRouteRegex(Route $route, string $expression): string
     {
-        // Whether compiled route regexes can be cached in APCu
-        $apc = function_exists('apcu_fetch');
-        $cache_key = $apc ? $this->getRouteRegexCacheKey($expression) : null;
-
         try {
-            // Check if there's a cached regex string
-            $regex = $apc ? apcu_fetch($cache_key) : false;
+            // Without APCu, there is nothing to cache compiled route regexes in
+            if (!function_exists('apcu_fetch')) {
+                return $this->compileRoute($expression);
+            }
 
-            if (false === $regex) {
+            // Check if there's a cached regex string
+            $cache_key = $this->getRouteRegexCacheKey($expression);
+            $regex = apcu_fetch($cache_key);
+
+            if (!is_string($regex)) {
                 $regex = $this->compileRoute($expression);
 
-                if ($apc) {
-                    apcu_store($cache_key, $regex);
-                }
+                apcu_store($cache_key, $regex);
             }
+
+            return $regex;
         } catch (RegularExpressionCompilationException $e) {
             throw RoutePathCompilationException::createFromRoute($route, $e);
         }
-
-        return $regex;
     }
 
     /**
@@ -892,7 +936,7 @@ class Klein
      * @param string $expression    The route's path expression
      * @return string
      */
-    protected function getRouteRegexCacheKey($expression)
+    protected function getRouteRegexCacheKey(string $expression): string
     {
         return 'klein:route:' . md5(static::class . "\0" . serialize($this->match_types)) . ':' . $expression;
     }
@@ -903,12 +947,12 @@ class Klein
      * @param string $route     The route string to compile
      * @return string
      */
-    protected function compileRoute($route)
+    protected function compileRoute(string $route): string
     {
         // First escape all of the non-named param (non [block]s) for regex-chars
         $route = preg_replace_callback(
             static::ROUTE_ESCAPE_REGEX,
-            static fn($match) => preg_quote($match[0], delimiter: '`'),
+            static fn(array $match): string => preg_quote($match[0], delimiter: '`'),
             $route,
         );
 
@@ -918,7 +962,7 @@ class Klein
         // Now let's actually compile the path
         $route = preg_replace_callback(
             static::ROUTE_COMPILE_REGEX,
-            static function ($match) use ($match_types) {
+            static function (array $match) use ($match_types): string {
                 list(, $pre, $type, $param, $optional) = $match;
 
                 if (($match_types[$type] ?? null) !== null) {
@@ -955,28 +999,33 @@ class Klein
      *
      * @param string $regex                          The regular expression to validate
      * @throws RegularExpressionCompilationException If the expression can't be compiled
-     * @return boolean
+     * @return void
      */
-    private function validateRegularExpression($regex)
+    private function validateRegularExpression(string $regex): void
     {
         $error_string = null;
 
         // Set an error handler temporarily
-        set_error_handler(static function ($errno, $errstr) use (&$error_string) {
-            $error_string = $errstr;
-        }, E_NOTICE | E_WARNING);
+        set_error_handler(
+            static function (int $errno, string $errstr) use (&$error_string): bool {
+                $error_string = $errstr;
+
+                // Handled, so PHP's own error handler doesn't report it
+                return true;
+            },
+            E_NOTICE | E_WARNING,
+        );
 
         if (false === preg_match($regex, subject: '') || ($error_string ?? '') !== '') {
             // Remove our temporary error handler
             restore_error_handler();
 
-            throw new RegularExpressionCompilationException($error_string, preg_last_error());
+            // Without a warning (e.g. the backtrack limit was hit), PCRE's own error message is used
+            throw new RegularExpressionCompilationException($error_string ?? preg_last_error_msg(), preg_last_error());
         }
 
         // Remove our temporary error handler
         restore_error_handler();
-
-        return true;
     }
 
     /**
@@ -1003,7 +1052,7 @@ class Klein
      * @throws OutOfBoundsException     If the route requested doesn't exist
      * @return string
      */
-    public function getPathFor($route_name, array|null $params = null, $flatten_regex = true)
+    public function getPathFor(string $route_name, array|null $params = null, bool $flatten_regex = true): string
     {
         // First, grab the route
         $route = $this->routes->get($route_name);
@@ -1018,7 +1067,7 @@ class Klein
         // Use our compilation regex to reverse the path's compilation from its definition
         $reversed_path = preg_replace_callback(
             static::ROUTE_COMPILE_REGEX,
-            static function ($match) use ($params) {
+            static function (array $match) use ($params): string {
                 list($block, $pre, $type, $param, $optional) = $match;
 
                 if (($params[$param] ?? null) !== null) {
@@ -1040,7 +1089,8 @@ class Klein
             return '/';
         }
 
-        return $reversed_path;
+        // Only null if PCRE failed, so fall back to the unchanged path
+        return $reversed_path ?? (string) $path;
     }
 
     /**
@@ -1052,7 +1102,7 @@ class Klein
      * @param string $type      The match type of the param block
      * @return string
      */
-    protected static function encodePathParam($value, $type)
+    protected static function encodePathParam(string $value, string $type): string
     {
         if ($type === '*' || $type === '**') {
             return implode('/', array_map(rawurlencode(...), explode('/', $value)));
@@ -1072,7 +1122,7 @@ class Klein
      * @param array $methods_matched
      * @return void
      */
-    protected function handleRouteCallback(Route $route, RouteCollection $matched, array $methods_matched)
+    protected function handleRouteCallback(Route $route, RouteCollection $matched, array $methods_matched): void
     {
         // Handle the callback
         $returned = call_user_func(
@@ -1103,10 +1153,12 @@ class Klein
     /**
      * Adds an error callback to the stack of error handlers
      *
-     * @param callable $callback            The callable function to execute in the error handling chain
+     * A non-callable string is a URL to redirect to, with the error flashed
+     *
+     * @param callable|string $callback     The callable function to execute in the error handling chain
      * @return void
      */
-    public function onError($callback)
+    public function onError(callable|string $callback): void
     {
         $this->error_callbacks->push($callback);
     }
@@ -1118,7 +1170,7 @@ class Klein
      * @throws UnhandledException      If the error/exception isn't handled by an error callback
      * @return void
      */
-    protected function error(Throwable $err)
+    protected function error(Throwable $err): void
     {
         try {
             if ($this->error_callbacks->isEmpty()) {
@@ -1152,7 +1204,7 @@ class Klein
      * @param Throwable $err    The exception that occurred
      * @return boolean          Whether a callable callback handled the error
      */
-    private function callErrorCallbacks(Throwable $err)
+    private function callErrorCallbacks(Throwable $err): bool
     {
         $type = get_class($err);
         $msg = $err->getMessage();
@@ -1177,10 +1229,13 @@ class Klein
     /**
      * Adds an HTTP error callback to the stack of HTTP error handlers
      *
-     * @param callable $callback            The callable function to execute in the error handling chain
+     * Callability is checked when dispatching (non-callables are skipped), so a string can also name
+     * a function that is only defined later
+     *
+     * @param callable|string $callback     The callable function to execute in the error handling chain
      * @return void
      */
-    public function onHttpError($callback)
+    public function onHttpError(callable|string $callback): void
     {
         $this->http_error_callbacks->push($callback);
     }
@@ -1193,8 +1248,11 @@ class Klein
      * @param array $methods_matched                    The HTTP methods that were matched in dispatch
      * @return void
      */
-    protected function httpError(HttpExceptionInterface $http_exception, RouteCollection $matched, $methods_matched)
-    {
+    protected function httpError(
+        HttpExceptionInterface $http_exception,
+        RouteCollection $matched,
+        array $methods_matched,
+    ): void {
         if (!$this->response->isLocked()) {
             $this->response->code($http_exception->getCode());
         }
@@ -1230,10 +1288,13 @@ class Klein
      * loop has handled all of the route callbacks and before the response
      * is sent
      *
-     * @param callable $callback            The callable function to execute in the after route chain
+     * Callability is checked when dispatching (non-callables are skipped), so a string can also name
+     * a function that is only defined later
+     *
+     * @param callable|string $callback     The callable function to execute in the after route chain
      * @return void
      */
-    public function afterDispatch($callback)
+    public function afterDispatch(callable|string $callback): void
     {
         $this->after_filter_callbacks->enqueue($callback);
     }
@@ -1243,7 +1304,7 @@ class Klein
      *
      * @return void
      */
-    protected function callAfterDispatchCallbacks()
+    protected function callAfterDispatchCallbacks(): void
     {
         try {
             foreach ($this->after_filter_callbacks as $callback) {
@@ -1278,7 +1339,7 @@ class Klein
      * @param int $num The number of next matches to skip
      * @throws DispatchHaltedException To halt/skip the current dispatch loop
      */
-    public function skipNext($num = 1): never
+    public function skipNext(int $num = 1): never
     {
         $skip = new DispatchHaltedException('', DispatchHaltedException::SKIP_NEXT);
         $skip->setNumberOfSkips($num);
@@ -1315,10 +1376,10 @@ class Klein
      * OPTIONS alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function options($path = '*', $callback = null): Route
+    public function options(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Options the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1330,10 +1391,10 @@ class Klein
      * HEAD alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function head($path = '*', $callback = null): Route
+    public function head(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1345,10 +1406,10 @@ class Klein
      * GET alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function get($path = '*', $callback = null): Route
+    public function get(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1360,10 +1421,10 @@ class Klein
      * POST alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function post($path = '*', $callback = null): Route
+    public function post(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1375,10 +1436,10 @@ class Klein
      * PUT alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function put($path = '*', $callback = null): Route
+    public function put(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1390,10 +1451,10 @@ class Klein
      * DELETE alias for "respond()"
      *
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function delete($path = '*', $callback = null): Route
+    public function delete(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);
@@ -1408,10 +1469,10 @@ class Klein
      *
      * @link http://tools.ietf.org/html/rfc5789
      * @see Klein::respond()
-     * @param string|callable $path
+     * @param callable|string|int|null $path
      * @param callable $callback
      */
-    public function patch($path = '*', $callback = null): Route
+    public function patch(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
         // Get the arguments in a very loose format
         extract($this->parseLooseArgumentOrder(func_get_args()), EXTR_OVERWRITE);

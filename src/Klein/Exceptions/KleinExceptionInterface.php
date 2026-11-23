@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Klein\Exceptions;
 
+use Throwable;
+
 /**
  * KleinExceptionInterface
  *
@@ -24,4 +26,4 @@ namespace Klein\Exceptions;
  * easier to handle Klein exceptions while still allowing the different
  * exception classes to properly extend the corresponding SPL Exception type
  */
-interface KleinExceptionInterface {}
+interface KleinExceptionInterface extends Throwable {}

@@ -117,12 +117,11 @@ class HttpStatusTest extends AbstractKleinTestCase
             'below range' => [99],
             'above range' => [600],
             'four digits' => [1000],
-            'non-numeric string' => ['abc'],
         ];
     }
 
     #[DataProvider('invalidStatusCodeProvider')]
-    public function testInvalidCodeThrows(mixed $code)
+    public function testInvalidCodeThrows(int $code)
     {
         $this->expectException(InvalidArgumentException::class);
 

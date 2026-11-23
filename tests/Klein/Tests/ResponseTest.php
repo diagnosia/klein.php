@@ -722,12 +722,11 @@ class ResponseTest extends AbstractKleinTestCase
             'brackets' => ['cb[0]'],
             'whitespace' => ['cb x'],
             'trailing newline' => ["cb\n"],
-            'array' => [['cb']],
         ];
     }
 
     #[DataProvider('invalidJsonpCallbackProvider')]
-    public function testJSONWithInvalidPrefixThrows(mixed $prefix)
+    public function testJSONWithInvalidPrefixThrows(string $prefix)
     {
         $response = new Response('previous body');
 

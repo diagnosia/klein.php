@@ -36,7 +36,7 @@ class ServerDataCollection extends DataCollection
      *
      * @var string
      */
-    protected static $http_header_prefix = 'HTTP_';
+    protected static string $http_header_prefix = 'HTTP_';
 
     /**
      * The list of HTTP headers that for some
@@ -44,7 +44,7 @@ class ServerDataCollection extends DataCollection
      *
      * @var array
      */
-    protected static $http_nonprefixed_headers = [
+    protected static array $http_nonprefixed_headers = [
         'CONTENT_LENGTH',
         'CONTENT_TYPE',
         'CONTENT_MD5',
@@ -61,7 +61,7 @@ class ServerDataCollection extends DataCollection
      * @param string $prefix    The prefix to test
      * @return boolean
      */
-    public static function hasPrefix($string, $prefix)
+    public static function hasPrefix(string $string, string $prefix): bool
     {
         return str_starts_with($string, $prefix);
     }
@@ -74,7 +74,7 @@ class ServerDataCollection extends DataCollection
      *
      * @return array
      */
-    public function getHeaders()
+    public function getHeaders(): array
     {
         // Define a headers array
         $headers = [];

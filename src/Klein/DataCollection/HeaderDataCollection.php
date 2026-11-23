@@ -32,7 +32,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_NONE = 0;
+    const int NORMALIZE_NONE = 0;
 
     /**
      * Normalization option
@@ -41,7 +41,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_TRIM = 1;
+    const int NORMALIZE_TRIM = 1;
 
     /**
      * Normalization option
@@ -50,7 +50,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_DELIMITERS = 2;
+    const int NORMALIZE_DELIMITERS = 2;
 
     /**
      * Normalization option
@@ -59,7 +59,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_CASE = 4;
+    const int NORMALIZE_CASE = 4;
 
     /**
      * Normalization option
@@ -68,7 +68,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_CANONICAL = 8;
+    const int NORMALIZE_CANONICAL = 8;
 
     /**
      * Normalization option
@@ -77,7 +77,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    const NORMALIZE_ALL = -1;
+    const int NORMALIZE_ALL = -1;
 
     /**
      * Properties
@@ -89,7 +89,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @var int
      */
-    protected $normalization = self::NORMALIZE_ALL;
+    protected int $normalization = self::NORMALIZE_ALL;
 
     /**
      * Methods
@@ -102,9 +102,9 @@ class HeaderDataCollection extends DataCollection
      * @param array $headers        The headers of this collection
      * @param int $normalization    The header key normalization technique/style to use
      */
-    public function __construct(array $headers = [], $normalization = self::NORMALIZE_ALL)
+    public function __construct(array $headers = [], int $normalization = self::NORMALIZE_ALL)
     {
-        $this->normalization = (int) $normalization;
+        $this->normalization = $normalization;
 
         foreach ($headers as $key => $value) {
             $this->set($key, $value);
@@ -116,7 +116,7 @@ class HeaderDataCollection extends DataCollection
      *
      * @return int
      */
-    public function getNormalization()
+    public function getNormalization(): int
     {
         return $this->normalization;
     }
@@ -125,11 +125,11 @@ class HeaderDataCollection extends DataCollection
      * Set the header key normalization technique/style to use
      *
      * @param int $normalization
-     * @return HeaderDataCollection
+     * @return static
      */
-    public function setNormalization($normalization)
+    public function setNormalization(int $normalization): static
     {
-        $this->normalization = (int) $normalization;
+        $this->normalization = $normalization;
 
         return $this;
     }
@@ -140,11 +140,11 @@ class HeaderDataCollection extends DataCollection
      * {@inheritdoc}
      *
      * @see DataCollection::get()
-     * @param string $key           The key of the header to return
+     * @param string|int $key       The key of the header to return
      * @param mixed  $default_val   The default value of the header if it contains no value
      * @return mixed
      */
-    public function get($key, $default_val = null)
+    public function get(string|int $key, mixed $default_val = null): mixed
     {
         $key = $this->normalizeKey($key);
 
@@ -157,11 +157,11 @@ class HeaderDataCollection extends DataCollection
      * {@inheritdoc}
      *
      * @see DataCollection::set()
-     * @param string $key   The key of the header to set
-     * @param mixed  $value The value of the header to set
-     * @return HeaderDataCollection
+     * @param string|int $key   The key of the header to set
+     * @param mixed  $value     The value of the header to set
+     * @return static
      */
-    public function set($key, $value)
+    public function set(string|int $key, mixed $value): static
     {
         $key = $this->normalizeKey($key);
 
@@ -174,10 +174,10 @@ class HeaderDataCollection extends DataCollection
      * {@inheritdoc}
      *
      * @see DataCollection::exists()
-     * @param string $key   The key of the header
+     * @param string|int $key   The key of the header
      * @return boolean
      */
-    public function exists($key)
+    public function exists(string|int $key): bool
     {
         $key = $this->normalizeKey($key);
 
@@ -190,10 +190,10 @@ class HeaderDataCollection extends DataCollection
      * {@inheritdoc}
      *
      * @see DataCollection::remove()
-     * @param string $key   The key of the header
+     * @param string|int $key   The key of the header
      * @return void
      */
-    public function remove($key)
+    public function remove(string|int $key): void
     {
         $key = $this->normalizeKey($key);
 
@@ -203,11 +203,13 @@ class HeaderDataCollection extends DataCollection
     /**
      * Normalize a header key based on our set normalization style
      *
-     * @param string $key The ("field") key of the header
+     * @param string|int $key The ("field") key of the header
      * @return string
      */
-    protected function normalizeKey($key)
+    protected function normalizeKey(string|int $key): string
     {
+        $key = (string) $key;
+
         // The normalization steps, applied in this order if their flag is set
         $normalizers = [
             static::NORMALIZE_TRIM => trim(...),
@@ -236,7 +238,7 @@ class HeaderDataCollection extends DataCollection
      * @param string $key The ("field") key of the header
      * @return string
      */
-    public static function normalizeKeyDelimiters($key)
+    public static function normalizeKeyDelimiters(string $key): string
     {
         return str_replace([' ', '_'], replace: '-', subject: $key);
     }
@@ -251,7 +253,7 @@ class HeaderDataCollection extends DataCollection
      * @param string $key The ("field") key of the header
      * @return string
      */
-    public static function canonicalizeKey($key)
+    public static function canonicalizeKey(string $key): string
     {
         $words = explode('-', strtolower($key));
 
@@ -275,7 +277,7 @@ class HeaderDataCollection extends DataCollection
      * @deprecated Use the normalization options and the other normalization methods instead
      * @return string
      */
-    public static function normalizeName($name, $make_lowercase = true)
+    public static function normalizeName(string $name, bool $make_lowercase = true): string
     {
         // Warn user of deprecation
         trigger_error('Use the normalization options and the other normalization methods instead.', E_USER_DEPRECATED);

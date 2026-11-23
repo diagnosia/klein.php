@@ -57,11 +57,11 @@ abstract class AbstractRouteFactory
     /**
      * Sets the value of namespace
      *
-     * @param string $namespace The namespace from which to collect the Routes under
+     * @param string|null $namespace The namespace from which to collect the Routes under (null is stored as "")
      */
-    public function setNamespace($namespace): static
+    public function setNamespace(string|null $namespace): static
     {
-        $this->namespace = (string) $namespace;
+        $this->namespace = $namespace ?? '';
 
         return $this;
     }
@@ -71,9 +71,9 @@ abstract class AbstractRouteFactory
      *
      * @param string $namespace The namespace from which to collect the Routes under
      */
-    public function appendNamespace($namespace): static
+    public function appendNamespace(string $namespace): static
     {
-        $this->namespace .= (string) $namespace;
+        $this->namespace .= $namespace;
 
         return $this;
     }
@@ -84,11 +84,17 @@ abstract class AbstractRouteFactory
      * This method should be implemented to return a Route instance
      *
      * @param callable $callback    Callable callback method to execute on route match
-     * @param string $path          Route URI path to match
-     * @param string|array $method  HTTP Method to match
-     * @param boolean $count_match  Whether or not to count the route as a match when counting total matches
-     * @param string $name          The name of the route
+     * @param string|null $path             Route URI path to match
+     * @param string|array|null $method     HTTP Method to match
+     * @param boolean $count_match          Whether or not to count the route as a match when counting total matches
+     * @param string|null $name             The name of the route
      * @return Route
      */
-    abstract public function build($callback, $path = null, $method = null, $count_match = true, $name = null);
+    abstract public function build(
+        callable $callback,
+        string|null $path = null,
+        string|array|null $method = null,
+        bool $count_match = true,
+        string|null $name = null,
+    ): Route;
 }

@@ -1,6 +1,27 @@
 # Klein Upgrade Guide
 
 
+## 4.3.x to the next release (unreleased)
+
+### Interface Changes
+
+All methods, properties and class constants now have native types. Code that only *calls* Klein is mostly
+unaffected (arguments of the wrong type throw a `TypeError` instead of being coerced or misbehaving later), but
+code that *extends* Klein's classes needs to match the new types:
+
+- Methods you override need compatible return types (e.g. `public function send(bool $override = false): static`
+  in a `Response` subclass), and must not narrow parameter types
+- Properties you redeclare need the same type (e.g. `protected array $match_types` in a `Klein` subclass)
+- Class constants you redeclare need the same type (e.g. `const int NORMALIZE_ALL` in a `HeaderDataCollection`
+  subclass)
+- Fluent methods return `static`, getter/setter pairs `<type>|static` (e.g. `AbstractResponse::body()`)
+- `KleinExceptionInterface` (and so `HttpExceptionInterface`) extends `Throwable`, so classes implementing it
+  must extend `Exception` or `Error`
+- `Klein::request()` and `Klein::response()` are typed nullable: they are `null` until the first dispatch
+- `HttpStatus` and `HttpException::createFromCode()` take an `int` code between 100 and 599
+- `Response::json()` takes a `string|null` JSONP prefix, `Request::__construct()` a `string|null` body
+
+
 ## 2.1.1 to 2.1.2
 
 ### Interface Changes

@@ -28,22 +28,22 @@ class HttpStatus
      *
      * @var int
      */
-    protected $code;
+    protected int $code;
 
     /**
      * The HTTP status message
      *
-     * @var string
+     * @var string|null
      */
-    protected $message;
+    protected string|null $message;
 
     /**
      * HTTP 1.1 status messages based on code
      *
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-     * @var array
+     * @var array<int, string>
      */
-    protected static $http_messages = [
+    protected static array $http_messages = [
         // Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -120,9 +120,10 @@ class HttpStatus
      * Constructor
      *
      * @param int $code The HTTP code
-     * @param string $message (optional) HTTP message for the corresponding code
+     * @param string|null $message (optional) HTTP message for the corresponding code
+     * @throws InvalidArgumentException If the code isn't a valid HTTP status code (100-599, RFC 9110)
      */
-    public function __construct($code, $message = null)
+    public function __construct(int $code, string|null $message = null)
     {
         $this->setCode($code);
 
@@ -138,7 +139,7 @@ class HttpStatus
      *
      * @return int
      */
-    public function getCode()
+    public function getCode(): int
     {
         return $this->code;
     }
@@ -146,9 +147,9 @@ class HttpStatus
     /**
      * Get the HTTP status message
      *
-     * @return string
+     * @return string|null
      */
-    public function getMessage()
+    public function getMessage(): string|null
     {
         return $this->message;
     }
@@ -158,12 +159,10 @@ class HttpStatus
      *
      * @param int $code
      * @throws InvalidArgumentException If the code isn't a valid HTTP status code (100-599, RFC 9110)
-     * @return HttpStatus
+     * @return static
      */
-    public function setCode($code)
+    public function setCode(int $code): static
     {
-        $code = (int) $code;
-
         if (!static::isValidCode($code)) {
             throw new InvalidArgumentException('Expected an HTTP status code between 100 and 599. Got: ' . $code);
         }
@@ -180,7 +179,7 @@ class HttpStatus
      * @param int $code
      * @return boolean
      */
-    public static function isValidCode($code)
+    public static function isValidCode(int $code): bool
     {
         return $code >= 100 && $code <= 599;
     }
@@ -189,11 +188,11 @@ class HttpStatus
      * Set the HTTP status message
      *
      * @param string $message
-     * @return HttpStatus
+     * @return static
      */
-    public function setMessage($message)
+    public function setMessage(string $message): static
     {
-        $this->message = (string) $message;
+        $this->message = $message;
         return $this;
     }
 
@@ -202,7 +201,7 @@ class HttpStatus
      *
      * @return string
      */
-    public function getFormattedString()
+    public function getFormattedString(): string
     {
         $string = (string) $this->code;
 
@@ -222,7 +221,7 @@ class HttpStatus
      *
      * @return string
      */
-    public function __toString()
+    public function __toString(): string
     {
         return $this->getFormattedString();
     }
@@ -236,7 +235,7 @@ class HttpStatus
      * @param int $int
      * @return string|null
      */
-    public static function getMessageFromCode($int)
+    public static function getMessageFromCode(int $int): string|null
     {
         return static::$http_messages[$int] ?? null;
     }

@@ -32,9 +32,9 @@ class App
     /**
      * The array of app services
      *
-     * @var array
+     * @var array<string, callable(): mixed>
      */
-    protected $services = [];
+    protected array $services = [];
 
     /**
      * Magic "__get" method
@@ -49,7 +49,7 @@ class App
      * @throws UnknownServiceException  If a non-registered service is attempted to fetched
      * @return mixed
      */
-    public function __get($name)
+    public function __get(string $name): mixed
     {
         if (($this->services[$name] ?? null) === null) {
             throw new UnknownServiceException('Unknown service ' . $name);
@@ -68,9 +68,9 @@ class App
      * @param string $method          The callable method to execute
      * @param array $args               The argument array to pass to our callback
      * @throws BadMethodCallException   If a non-registered method is attempted to be called
-     * @return void
+     * @return mixed
      */
-    public function __call($method, $args)
+    public function __call(string $method, array $args): mixed
     {
         if (!is_callable($this->services[$method] ?? null)) {
             throw new BadMethodCallException('Unknown method ' . $method . '()');
@@ -85,15 +85,15 @@ class App
      * @param string $name                  The name of the service
      * @param callable $closure             The callable function to execute when requesting our service
      * @throws DuplicateServiceException    If an attempt is made to register two services with the same name
-     * @return mixed
+     * @return void
      */
-    public function register($name, $closure)
+    public function register(string $name, callable $closure): void
     {
         if (($this->services[$name] ?? null) !== null) {
             throw new DuplicateServiceException('A service is already registered under ' . $name);
         }
 
-        $this->services[$name] = static function () use ($closure) {
+        $this->services[$name] = static function () use ($closure): mixed {
             static $instance;
             if (null === $instance) {
                 $instance = $closure();

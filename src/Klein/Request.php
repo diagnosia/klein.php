@@ -30,65 +30,67 @@ class Request
     /**
      * Unique identifier for the request
      *
-     * @var string
+     * @var string|null
      */
-    protected $id;
+    protected string|null $id = null;
 
     /**
      * GET (query) parameters
      *
      * @var DataCollection
      */
-    protected $params_get;
+    protected DataCollection $params_get;
 
     /**
      * POST parameters
      *
      * @var DataCollection
      */
-    protected $params_post;
+    protected DataCollection $params_post;
 
     /**
      * Named parameters
      *
      * @var DataCollection
      */
-    protected $params_named;
+    protected DataCollection $params_named;
 
     /**
      * Client cookie data
      *
      * @var DataCollection
      */
-    protected $cookies;
+    protected DataCollection $cookies;
 
     /**
      * Server created attributes
      *
      * @var ServerDataCollection
      */
-    protected $server;
+    protected ServerDataCollection $server;
 
     /**
      * HTTP request headers
      *
      * @var HeaderDataCollection
      */
-    protected $headers;
+    protected HeaderDataCollection $headers;
 
     /**
      * Uploaded temporary files
      *
      * @var DataCollection
      */
-    protected $files;
+    protected DataCollection $files;
 
     /**
      * The request body
      *
-     * @var string
+     * Null until read from php://input
+     *
+     * @var string|null
      */
-    protected $body;
+    protected string|null $body = null;
 
     /**
      * Methods
@@ -104,7 +106,7 @@ class Request
      * @param array  $cookies
      * @param array  $server
      * @param array  $files
-     * @param string $body
+     * @param string|null $body   The request body, read from php://input if null (or empty)
      */
     public function __construct(
         array $params_get = [],
@@ -112,7 +114,7 @@ class Request
         array $cookies = [],
         array $server = [],
         array $files = [],
-        $body = null,
+        string|null $body = null,
     ) {
         // Assignment city...
         $this->params_get = new DataCollection($params_get);
@@ -121,7 +123,7 @@ class Request
         $this->server = new ServerDataCollection($server);
         $this->headers = new HeaderDataCollection($this->server->getHeaders());
         $this->files = new DataCollection($files);
-        $this->body = $body ? (string) $body : null;
+        $this->body = '' === $body ? null : $body;
 
         // Non-injected assignments
         $this->params_named = new DataCollection();
@@ -131,9 +133,9 @@ class Request
      * Create a new request object using the built-in "superglobals"
      *
      * @link http://php.net/manual/en/language.variables.superglobals.php
-     * @return Request
+     * @return static
      */
-    public static function createFromGlobals()
+    public static function createFromGlobals(): static
     {
         // Create and return a new instance of this
         return new static($_GET, $_POST, $_COOKIE, $_SERVER, $_FILES, null); // Let our content getter take care of the "body"
@@ -147,7 +149,7 @@ class Request
      * @param boolean $hash     Whether or not to hash the ID on creation
      * @return string
      */
-    public function id($hash = true)
+    public function id(bool $hash = true): string
     {
         if (null === $this->id) {
             $this->id = uniqid();
@@ -163,9 +165,9 @@ class Request
     /**
      * Returns the GET parameters collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return DataCollection
      */
-    public function paramsGet()
+    public function paramsGet(): DataCollection
     {
         return $this->params_get;
     }
@@ -173,9 +175,9 @@ class Request
     /**
      * Returns the POST parameters collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return DataCollection
      */
-    public function paramsPost()
+    public function paramsPost(): DataCollection
     {
         return $this->params_post;
     }
@@ -183,9 +185,9 @@ class Request
     /**
      * Returns the named parameters collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return DataCollection
      */
-    public function paramsNamed()
+    public function paramsNamed(): DataCollection
     {
         return $this->params_named;
     }
@@ -193,9 +195,9 @@ class Request
     /**
      * Returns the cookies collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return DataCollection
      */
-    public function cookies()
+    public function cookies(): DataCollection
     {
         return $this->cookies;
     }
@@ -203,9 +205,9 @@ class Request
     /**
      * Returns the server collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return ServerDataCollection
      */
-    public function server()
+    public function server(): ServerDataCollection
     {
         return $this->server;
     }
@@ -213,9 +215,9 @@ class Request
     /**
      * Returns the headers collection
      *
-     * @return \Klein\DataCollection\HeaderDataCollection
+     * @return HeaderDataCollection
      */
-    public function headers()
+    public function headers(): HeaderDataCollection
     {
         return $this->headers;
     }
@@ -223,9 +225,9 @@ class Request
     /**
      * Returns the files collection
      *
-     * @return \Klein\DataCollection\DataCollection
+     * @return DataCollection
      */
-    public function files()
+    public function files(): DataCollection
     {
         return $this->files;
     }
@@ -235,11 +237,12 @@ class Request
      *
      * @return string
      */
-    public function body()
+    public function body(): string
     {
         // Only get it once
         if (null === $this->body) {
-            $this->body = file_get_contents('php://input');
+            $body = file_get_contents('php://input');
+            $this->body = false === $body ? '' : $body;
         }
 
         return $this->body;
@@ -252,12 +255,12 @@ class Request
      * you'd like this method to exclude in the returned array
      *
      * @see \Klein\DataCollection\DataCollection::all()
-     * @param array $mask               The parameter mask array
+     * @param array|null $mask          The parameter mask array
      * @param boolean $fill_with_nulls  Whether or not to fill the returned array
      *  with null values to match the given mask
      * @return array
      */
-    public function params($mask = null, $fill_with_nulls = true)
+    public function params(array|null $mask = null, bool $fill_with_nulls = true): array
     {
         /*
          * Make sure that each key in the mask has at least a
@@ -278,11 +281,11 @@ class Request
     /**
      * Return a request parameter, or $default if it doesn't exist
      *
-     * @param string $key       The name of the parameter to return
+     * @param string|int $key   The name of the parameter to return
      * @param mixed $default    The default value of the parameter if it contains no value
      * @return mixed
      */
-    public function param($key, $default = null)
+    public function param(string|int $key, mixed $default = null): mixed
     {
         // Get all of our request params
         $params = $this->params();
@@ -299,7 +302,7 @@ class Request
      * @param string $param     The name of the parameter
      * @return boolean
      */
-    public function __isset($param)
+    public function __isset(string $param): bool
     {
         // Get all of our request params
         $params = $this->params();
@@ -316,7 +319,7 @@ class Request
      * @param string $param     The name of the parameter
      * @return mixed
      */
-    public function __get($param)
+    public function __get(string $param): mixed
     {
         return $this->param($param);
     }
@@ -334,7 +337,7 @@ class Request
      * @param mixed $value      The value of the parameter
      * @return void
      */
-    public function __set($param, $value)
+    public function __set(string $param, mixed $value): void
     {
         $this->params_named->set($param, $value);
     }
@@ -348,7 +351,7 @@ class Request
      * @param string $param     The name of the parameter
      * @return void
      */
-    public function __unset($param)
+    public function __unset(string $param): void
     {
         $this->params_named->remove($param);
     }
@@ -358,7 +361,7 @@ class Request
      *
      * @return boolean
      */
-    public function isSecure()
+    public function isSecure(): bool
     {
         $https = $this->server->get('HTTPS');
 
@@ -373,21 +376,23 @@ class Request
     /**
      * Gets the request IP address
      *
-     * @return string
+     * @return string|null
      */
-    public function ip()
+    public function ip(): string|null
     {
-        return $this->server->get('REMOTE_ADDR');
+        return $this->serverString('REMOTE_ADDR');
     }
 
     /**
      * Gets the request user agent
      *
-     * @return string
+     * @return string|null
      */
-    public function userAgent()
+    public function userAgent(): string|null
     {
-        return $this->headers->get('USER_AGENT');
+        $user_agent = $this->headers->get('USER_AGENT');
+
+        return is_string($user_agent) ? $user_agent : null;
     }
 
     /**
@@ -395,9 +400,9 @@ class Request
      *
      * @return string
      */
-    public function uri()
+    public function uri(): string
     {
-        return $this->server->get('REQUEST_URI', '/');
+        return $this->serverString('REQUEST_URI') ?? '/';
     }
 
     /**
@@ -405,7 +410,7 @@ class Request
      *
      * @return string
      */
-    public function pathname()
+    public function pathname(): string
     {
         $uri = $this->uri();
 
@@ -430,13 +435,13 @@ class Request
      * $request->method('get') // returns false
      * </code>
      *
-     * @param string $is				The method to check the current request method against
-     * @param boolean $allow_override	Whether or not to allow HTTP method overriding via header or params
+     * @param string|null $is          The method to check the current request method against
+     * @param boolean $allow_override   Whether or not to allow HTTP method overriding via header or params
      * @return string|boolean
      */
-    public function method($is = null, $allow_override = true)
+    public function method(string|null $is = null, bool $allow_override = true): string|bool
     {
-        $method = $this->server->get('REQUEST_METHOD', 'GET');
+        $method = $this->serverString('REQUEST_METHOD') ?? 'GET';
 
         // Override
         if ($allow_override && $method === 'POST') {
@@ -467,15 +472,15 @@ class Request
     /**
      * Adds to or modifies the current query string
      *
-     * @param string $key   The name of the query param
-     * @param mixed $value  The value of the query param
+     * @param string|array $key  The name of the query param, or an array of params to merge
+     * @param mixed $value      The value of the query param
      * @return string
      */
-    public function query($key, $value = null)
+    public function query(string|array $key, mixed $value = null): string
     {
         $query = [];
 
-        parse_str((string) $this->server()->get('QUERY_STRING', ''), $query);
+        parse_str($this->serverString('QUERY_STRING') ?? '', $query);
 
         $query = is_array($key) ? array_merge($query, $key) : array_replace($query, [$key => $value]);
 
@@ -486,5 +491,18 @@ class Request
         }
 
         return $request_uri . ([] !== $query ? '?' . http_build_query($query) : null);
+    }
+
+    /**
+     * Gets a server value if it is a string
+     *
+     * @param string $key   The name of the server value
+     * @return string|null  Null if the value doesn't exist or isn't a string
+     */
+    protected function serverString(string $key): string|null
+    {
+        $value = $this->server->get($key);
+
+        return is_string($value) ? $value : null;
     }
 }

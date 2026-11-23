@@ -25,6 +25,8 @@ class Validator
 
     /**
      * The available validator methods
+     *
+     * @var array<string, callable>
      */
     public static array $methods = [];
 
@@ -58,7 +60,7 @@ class Validator
      * Sets up the validator chain with the string and optional error message
      *
      * @param mixed $str   The string to validate, other scalars are cast to string
-     * @param string $err   The optional custom exception message to throw on validation failure
+     * @param string|bool|null $err The optional custom exception message to throw on validation failure
      */
     public function __construct(mixed $str, null|string|bool $err = null)
     {

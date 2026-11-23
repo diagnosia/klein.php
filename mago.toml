@@ -29,6 +29,9 @@ excessive-parameter-list = { enabled = false }
 cyclomatic-complexity = { enabled = false }
 kan-defect = { enabled = false }
 
+# Disabled: the public API has boolean flag parameters (e.g. send($override)), removing them would break callers
+no-boolean-flag-parameter = { enabled = false }
+
 [analyzer]
 # find-unused-definitions = true
 # find-unused-expressions = false

@@ -37,12 +37,10 @@ class HttpException extends RuntimeException implements HttpExceptionInterface
      *
      * @param int $code
      * @throws InvalidArgumentException If the code isn't a valid HTTP status code
-     * @return HttpException
+     * @return static
      */
-    public static function createFromCode($code): HttpException
+    public static function createFromCode(int $code): static
     {
-        $code = (int) $code;
-
         if (!HttpStatus::isValidCode($code)) {
             throw new InvalidArgumentException('Expected an HTTP status code between 100 and 599. Got: ' . $code);
         }

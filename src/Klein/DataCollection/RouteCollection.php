@@ -54,11 +54,11 @@ class RouteCollection extends DataCollection
      * instance of a Route as the "$value"
      *
      * @see DataCollection::set()
-     * @param string $key                   The name of the route to set
-     * @param Route|callable $value         The value of the route to set
-     * @return RouteCollection
+     * @param string|int $key               The name of the route to set
+     * @param mixed $value      The route (Route or callable) to set, mixed like the parent's
+     * @return static
      */
-    public function set($key, $value)
+    public function set(string|int $key, mixed $value): static
     {
         if (!$value instanceof Route) {
             $value = new Route($value);
@@ -73,9 +73,9 @@ class RouteCollection extends DataCollection
      * This will auto-generate a name
      *
      * @param Route $route
-     * @return RouteCollection
+     * @return static
      */
-    public function addRoute(Route $route)
+    public function addRoute(Route $route): static
     {
         /**
          * Auto-generate a name from the object's hash
@@ -95,9 +95,9 @@ class RouteCollection extends DataCollection
      * or any other Route class compatible callback
      *
      * @param Route|callable $route
-     * @return RouteCollection
+     * @return static
      */
-    public function add($route)
+    public function add(Route|callable $route): static
     {
         if (!$route instanceof Route) {
             $route = new Route($route);
@@ -116,9 +116,9 @@ class RouteCollection extends DataCollection
      * Thankfully, because routes are all objects, this doesn't
      * take much memory as its simply moving references around
      *
-     * @return RouteCollection
+     * @return static
      */
-    public function prepareNamed()
+    public function prepareNamed(): static
     {
         // Create a new collection so we can keep our order
         $prepared = new static();

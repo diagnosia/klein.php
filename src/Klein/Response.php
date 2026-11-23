@@ -31,7 +31,7 @@ class Response extends AbstractResponse
      *
      * @var string
      */
-    const JSONP_CALLBACK_REGEX = '/^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/D';
+    const string JSONP_CALLBACK_REGEX = '/^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/D';
 
     /**
      * Methods
@@ -42,10 +42,10 @@ class Response extends AbstractResponse
      *
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
-     * @param string $str   An optional string to send as a response "chunk"
-     * @return Response
+     * @param string|null $str  An optional string to send as a response "chunk"
+     * @return static
      */
-    public function chunk($str = null)
+    public function chunk(string|null $str = null): static
     {
         parent::chunk();
 
@@ -62,9 +62,9 @@ class Response extends AbstractResponse
      * Dump a variable
      *
      * @param mixed $obj    The variable to dump
-     * @return Response
+     * @return static
      */
-    public function dump($obj)
+    public function dump(mixed $obj): static
     {
         // Arrays and objects are printed, anything else (int, float, bool, null) is cast
         $obj = is_array($obj) || is_object($obj) ? print_r($obj, return: true) : (string) $obj;
@@ -87,12 +87,12 @@ class Response extends AbstractResponse
      * the file's data
      *
      * @param string $path      The path of the file to send
-     * @param string $filename  The file's name
-     * @param string $mimetype  The MIME type of the file, detected from the file if null
+     * @param string|null $filename  The file's name, the path's base name if null
+     * @param string|null $mimetype  The MIME type of the file, detected from the file if null
      * @throws RuntimeException Thrown if the file could not be read (before anything is sent)
-     * @return Response
+     * @return static
      */
-    public function file($path, $filename = null, $mimetype = null)
+    public function file(string $path, string|null $filename = null, string|null $mimetype = null): static
     {
         if ($this->sent) {
             throw new ResponseAlreadySentException('Response has already been sent');
@@ -119,7 +119,7 @@ class Response extends AbstractResponse
         }
 
         $this->header('Content-type', $mimetype);
-        $this->header('Content-Disposition', static::attachmentDisposition((string) $filename));
+        $this->header('Content-Disposition', static::attachmentDisposition($filename));
 
         // If the response is to be chunked, then the content length must not be sent
         // see: https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.4
@@ -161,7 +161,7 @@ class Response extends AbstractResponse
      * @param string $filename  The file's name
      * @return string
      */
-    protected static function attachmentDisposition($filename)
+    protected static function attachmentDisposition(string $filename): string
     {
         $fallback = preg_replace('/[^\x20-\x7E]|["\\\\]/', replacement: '_', subject: $filename);
 
@@ -186,18 +186,15 @@ class Response extends AbstractResponse
      * the passed json encoded object
      *
      * @param mixed $object         The data to encode as JSON
-     * @param string $jsonp_prefix  The name of the JSON-P function prefix, see JSONP_CALLBACK_REGEX
+     * @param string|null $jsonp_prefix The name of the JSON-P function prefix, see JSONP_CALLBACK_REGEX
      * @throws InvalidArgumentException If the JSON-P function prefix isn't a valid callback name
      * @throws JsonException            If the object can't be encoded (e.g. invalid UTF-8), before anything is sent
-     * @return Response
+     * @return static
      */
-    public function json($object, $jsonp_prefix = null)
+    public function json(mixed $object, string|null $jsonp_prefix = null): static
     {
         // The prefix usually comes straight from a request param, so it must not be able to inject script
-        if (
-            null !== $jsonp_prefix
-            && (!is_string($jsonp_prefix) || preg_match(static::JSONP_CALLBACK_REGEX, $jsonp_prefix) !== 1)
-        ) {
+        if (null !== $jsonp_prefix && preg_match(static::JSONP_CALLBACK_REGEX, $jsonp_prefix) !== 1) {
             throw new InvalidArgumentException('The JSONP callback name must be a (dotted) JavaScript identifier');
         }
 
