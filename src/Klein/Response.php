@@ -43,7 +43,7 @@ class Response extends AbstractResponse
         parent::chunk();
 
         if (null !== $str) {
-            // printf("%x\r\n", strlen($str));
+            printf("%x\r\n", strlen($str));
             echo "{$str}\r\n";
             flush();
         }

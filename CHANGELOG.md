@@ -23,6 +23,8 @@
   setters (throwing a `LockedResponseException`); the `Allow` header of a 405 isn't set on a locked response
 - `RouteFactory::build()` passes `$name` to the route and respects `$count_match` (instead of ignoring both)
 - `ServiceProvider::startSession()` returns the id of an already active session instead of `null`
+- Revert the 2021-08-18 workaround: `Response::chunk($str)` prefixes the chunk with its length in hex again, as
+  chunked transfer encoding requires (and as `AbstractResponse::chunk()` always did for the body)
 
 ### 2026-11-23 (4.3.0)
 

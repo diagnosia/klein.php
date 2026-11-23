@@ -281,7 +281,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response->send();
     }
 
-    public function skipChunk()
+    public function testChunk()
     {
         $content = [
             'initial content',
@@ -295,15 +295,18 @@ class ResponseTest extends AbstractKleinTestCase
         $response->chunk($content[1]);
         $response->chunk($content[2]);
 
-        // We do not send the bytes in chunk method
+        // Each chunk is prefixed with its length in hex
         $this->expectOutputString(
-            // dechex(strlen($content[0]))."\r\n"
-            "{$content[0]}\r\n"
-            // .dechex(strlen($content[1]))."\r\n"
-            . "{$content[1]}\r\n"
-            // .dechex(strlen($content[2]))."\r\n"
-            . "{$content[2]}\r\n",
+            dechex(strlen($content[0]))
+            . "\r\n{$content[0]}\r\n"
+            . dechex(strlen($content[1]))
+            . "\r\n{$content[1]}\r\n"
+            . dechex(strlen($content[2]))
+            . "\r\n{$content[2]}\r\n",
         );
+
+        static::assertTrue($response->chunked);
+        static::assertSame('chunked', $response->headers()->get('Transfer-Encoding'));
     }
 
     public function testHeader()
