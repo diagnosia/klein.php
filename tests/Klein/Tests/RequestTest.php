@@ -249,18 +249,58 @@ class RequestTest extends AbstractKleinTestCase
 
         $request = new Request();
         $request->server()->set('REQUEST_METHOD', $method);
-        $request->server()->set('X_HTTP_METHOD_OVERRIDE', $override_method);
+        // The key PHP uses for the X-HTTP-Method-Override header
+        $request->server()->set('HTTP_X_HTTP_METHOD_OVERRIDE', $override_method);
 
         static::assertSame($override_method, $request->method());
         static::assertTrue($request->method($override_method));
         static::assertTrue($request->method(strtolower($override_method)));
 
-        $request->server()->remove('X_HTTP_METHOD_OVERRIDE');
+        $request->server()->remove('HTTP_X_HTTP_METHOD_OVERRIDE');
         $request->paramsPost()->set('_method', $weird_override_method);
 
         static::assertSame($weird_override_method, $request->method());
         static::assertTrue($request->method($weird_override_method));
         static::assertTrue($request->method(strtolower($weird_override_method)));
+    }
+
+    public function testMethodOverrideHeaderFromServerGlobals()
+    {
+        // As createFromGlobals() would get it for a request with an "X-HTTP-Method-Override: put" header
+        $request = new Request([], [], [], ['REQUEST_METHOD' => 'POST', 'HTTP_X_HTTP_METHOD_OVERRIDE' => 'put']);
+
+        static::assertSame('PUT', $request->method());
+        static::assertSame('put', $request->headers()->get('X-HTTP-Method-Override'));
+    }
+
+    public function testMethodOverrideHeaderWinsOverParam()
+    {
+        $request = new Request(
+            [],
+            ['_method' => 'DELETE'],
+            [],
+            [
+                'REQUEST_METHOD' => 'POST',
+                'HTTP_X_HTTP_METHOD_OVERRIDE' => 'PATCH',
+            ],
+        );
+
+        static::assertSame('PATCH', $request->method());
+    }
+
+    public function testMethodOverrideLegacyServerKey()
+    {
+        // The unprefixed key, which older code (and tests) set directly
+        $request = new Request([], [], [], ['REQUEST_METHOD' => 'POST', 'X_HTTP_METHOD_OVERRIDE' => 'PUT']);
+
+        static::assertSame('PUT', $request->method());
+    }
+
+    public function testMethodOverrideHeaderIgnoredWithoutPost()
+    {
+        $request = new Request([], [], [], ['REQUEST_METHOD' => 'GET', 'HTTP_X_HTTP_METHOD_OVERRIDE' => 'DELETE']);
+
+        static::assertSame('GET', $request->method());
     }
 
     public static function unusableMethodOverrideProvider(): array

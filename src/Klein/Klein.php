@@ -382,16 +382,18 @@ class Klein
 
         $this->route_factory->appendNamespace($namespace);
 
-        if (is_callable($routes)) {
-            call_user_func($routes, $this);
+        // Always restore the namespace, so an exception doesn't prefix every route registered afterwards
+        try {
+            if (is_callable($routes)) {
+                call_user_func($routes, $this);
+
+                return;
+            }
+
+            require $routes;
+        } finally {
             $this->route_factory->setNamespace($previous);
-
-            return;
         }
-
-        require $routes;
-
-        $this->route_factory->setNamespace($previous);
     }
 
     /**

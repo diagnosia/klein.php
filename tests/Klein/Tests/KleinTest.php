@@ -128,6 +128,25 @@ class KleinTest extends AbstractKleinTestCase
         static::assertTrue($passed_context instanceof Klein);
     }
 
+    public function testWithRestoresNamespaceOnException()
+    {
+        try {
+            $this->klein_app->with('/outer', static function ($klein) {
+                $klein->with('/inner', static function () {
+                    throw new Exception('route definition failed');
+                });
+            });
+            static::fail('Expected the exception to propagate');
+        } catch (Exception $e) {
+            static::assertSame('route definition failed', $e->getMessage());
+        }
+
+        // Used to become "/outer/inner/after"
+        $route = $this->klein_app->respond('/after', static function () {});
+
+        static::assertSame('/after', $route->getPath());
+    }
+
     public function testWithStringCallable()
     {
         // Test data

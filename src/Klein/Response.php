@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Klein;
 
 use InvalidArgumentException;
+use JsonException;
 use Klein\Exceptions\ResponseAlreadySentException;
 use RuntimeException;
 
@@ -87,14 +88,19 @@ class Response extends AbstractResponse
      *
      * @param string $path      The path of the file to send
      * @param string $filename  The file's name
-     * @param string $mimetype  The MIME type of the file
-     * @throws RuntimeException Thrown if the file could not be read
+     * @param string $mimetype  The MIME type of the file, detected from the file if null
+     * @throws RuntimeException Thrown if the file could not be read (before anything is sent)
      * @return Response
      */
     public function file($path, $filename = null, $mimetype = null)
     {
         if ($this->sent) {
             throw new ResponseAlreadySentException('Response has already been sent');
+        }
+
+        // Check up front, so a missing file doesn't send headers (with an empty Content-length) first
+        if (!is_file($path) || !is_readable($path)) {
+            throw new RuntimeException('The file could not be read');
         }
 
         $this->body('');
@@ -105,6 +111,11 @@ class Response extends AbstractResponse
         }
         if (null === $mimetype) {
             $mimetype = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $path);
+
+            // Fall back to a generic binary type if detection fails
+            if (false === $mimetype) {
+                $mimetype = 'application/octet-stream';
+            }
         }
 
         $this->header('Content-type', $mimetype);
@@ -155,6 +166,7 @@ class Response extends AbstractResponse
      * @param mixed $object         The data to encode as JSON
      * @param string $jsonp_prefix  The name of the JSON-P function prefix, see JSONP_CALLBACK_REGEX
      * @throws InvalidArgumentException If the JSON-P function prefix isn't a valid callback name
+     * @throws JsonException            If the object can't be encoded (e.g. invalid UTF-8), before anything is sent
      * @return Response
      */
     public function json($object, $jsonp_prefix = null)
@@ -167,10 +179,11 @@ class Response extends AbstractResponse
             throw new InvalidArgumentException('The JSONP callback name must be a (dotted) JavaScript identifier');
         }
 
+        // Encode first, so a failure leaves the response untouched instead of sending an empty 200 response
+        $json = json_encode($object, JSON_THROW_ON_ERROR);
+
         $this->body('');
         $this->noCache();
-
-        $json = json_encode($object);
 
         $is_jsonp = null !== $jsonp_prefix;
 

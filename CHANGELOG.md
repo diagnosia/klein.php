@@ -13,6 +13,12 @@
   of the unescaped exception string with its stack trace
 - `ServiceProvider::markdown()`/`flash()` without arguments no longer treat the text as a format string, so
   a `%` in it can't throw a `ValueError` or get eaten (`%%` is no longer collapsed to `%` in that case)
+- Fix the `X-HTTP-Method-Override` header being ignored (read from `HTTP_X_HTTP_METHOD_OVERRIDE`, the
+  unprefixed key still works)
+- `Klein::with()` restores the route namespace when the route definitions throw
+- `Response::json()` throws a `JsonException` when encoding fails instead of sending an empty 200 response
+- `Response::file()` throws before sending anything when the file isn't a readable file, and falls back to
+  `application/octet-stream` when the MIME type can't be detected
 
 ### 2026-11-23 (4.2.0)
 

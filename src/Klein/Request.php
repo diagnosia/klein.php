@@ -441,8 +441,13 @@ class Request
         // Override
         if ($allow_override && $method === 'POST') {
             // For legacy servers, override the HTTP method with the X-HTTP-Method-Override header or _method parameter
-            $override = $this->server->exists('X_HTTP_METHOD_OVERRIDE')
-                ? $this->server->get('X_HTTP_METHOD_OVERRIDE', $method)
+            // PHP exposes the header as HTTP_X_HTTP_METHOD_OVERRIDE; the unprefixed key is kept for compatibility
+            $header_key = $this->server->exists('HTTP_X_HTTP_METHOD_OVERRIDE')
+                ? 'HTTP_X_HTTP_METHOD_OVERRIDE'
+                : 'X_HTTP_METHOD_OVERRIDE';
+
+            $override = $this->server->exists($header_key)
+                ? $this->server->get($header_key, $method)
                 : $this->param('_method', $method);
 
             // Ignore overrides that aren't a usable method name (e.g. "_method[]=x" gives an array)

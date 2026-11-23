@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Klein\Tests;
 
 use InvalidArgumentException;
+use JsonException;
 use Klein\DataCollection\HeaderDataCollection;
 use Klein\DataCollection\ResponseCookieDataCollection;
 use Klein\Exceptions\LockedResponseException;
@@ -24,7 +25,6 @@ use Klein\Response;
 use Klein\ResponseCookie;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
-use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 
 /**
  * ResponseTest
@@ -513,20 +513,6 @@ class ResponseTest extends AbstractKleinTestCase
         $response->file(__FILE__);
     }
 
-    #[WithoutErrorHandler]
-    public function testFileSendWithNonExistentFile()
-    {
-        $this->expectException(\RuntimeException::class);
-        // Ignore the file warning
-        $old_error_val = error_reporting();
-        error_reporting(E_ALL ^ E_WARNING);
-
-        $response = new Response();
-        $response->file(__DIR__ . '/some/bogus/path/that/does/not/exist');
-
-        error_reporting($old_error_val);
-    }
-
     /**
      * This uses some crazy exploitation to make sure that the
      * `fastcgi_finish_request()` function gets called.
@@ -594,6 +580,50 @@ class ResponseTest extends AbstractKleinTestCase
         static::assertSame('no-cache', $this->klein_app->response()->headers()->get('Pragma'));
         static::assertSame('no-store, no-cache', $this->klein_app->response()->headers()->get('Cache-Control'));
         static::assertSame('text/javascript', $this->klein_app->response()->headers()->get('Content-Type'));
+    }
+
+    public function testJSONWithUnencodableDataThrows()
+    {
+        $response = new Response('previous body');
+
+        try {
+            // Invalid UTF-8 used to give an empty 200 response
+            $response->json(['name' => "\xB1\x31"]);
+            static::fail('Expected a JsonException');
+        } catch (JsonException) {
+            static::assertSame('previous body', $response->body());
+            static::assertNull($response->headers()->get('Content-Type'));
+            static::assertFalse($response->isSent());
+        }
+    }
+
+    public static function unreadableFileProvider(): array
+    {
+        return [
+            'missing file' => [__DIR__ . '/some/bogus/path/that/does/not/exist'],
+            'directory' => [__DIR__],
+        ];
+    }
+
+    #[DataProvider('unreadableFileProvider')]
+    public function testFileSendWithUnreadableFileSendsNothing(string $path)
+    {
+        // No output, and no warnings from readfile()/filesize() either
+        $this->expectOutputString('');
+
+        $response = new Response('previous body');
+
+        try {
+            $response->file($path);
+            static::fail('Expected a RuntimeException');
+        } catch (\RuntimeException $e) {
+            static::assertSame('The file could not be read', $e->getMessage());
+            static::assertSame('previous body', $response->body());
+            static::assertNull($response->headers()->get('Content-Length'));
+            static::assertNull($response->headers()->get('Content-Disposition'));
+            static::assertFalse($response->isSent());
+            static::assertFalse($response->isLocked());
+        }
     }
 
     public static function validJsonpCallbackProvider(): array
