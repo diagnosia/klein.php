@@ -35,20 +35,12 @@ use Throwable;
 class Klein
 {
     /**
-     * Class constants
-     */
-
-    /**
      * The regular expression used to compile and match URL's
-     *
-     * @var string
      */
     const string ROUTE_COMPILE_REGEX = '`(\\\?(?:/|\.|))(?:\[([^:\]]*)(?::([^:\]]*))?\])(\?|)`';
 
     /**
      * The regular expression used to escape the non-named param section of a route URL
-     *
-     * @var string
      */
     const string ROUTE_ESCAPE_REGEX = '`(?<=^|\])[^\]\[\?]+?(?=\[|$)`';
 
@@ -56,8 +48,6 @@ class Klein
      * Dispatch route output handling
      *
      * Don't capture anything. Behave as normal.
-     *
-     * @var int
      */
     const int DISPATCH_NO_CAPTURE = 0;
 
@@ -65,8 +55,6 @@ class Klein
      * Dispatch route output handling
      *
      * Capture all output and return it from dispatch
-     *
-     * @var int
      */
     const int DISPATCH_CAPTURE_AND_RETURN = 1;
 
@@ -74,8 +62,6 @@ class Klein
      * Dispatch route output handling
      *
      * Capture all output and replace the response body with it
-     *
-     * @var int
      */
     const int DISPATCH_CAPTURE_AND_REPLACE = 2;
 
@@ -83,8 +69,6 @@ class Klein
      * Dispatch route output handling
      *
      * Capture all output and prepend it to the response body
-     *
-     * @var int
      */
     const int DISPATCH_CAPTURE_AND_PREPEND = 3;
 
@@ -92,14 +76,8 @@ class Klein
      * Dispatch route output handling
      *
      * Capture all output and append it to the response body
-     *
-     * @var int
      */
     const int DISPATCH_CAPTURE_AND_APPEND = 4;
-
-    /**
-     * Class properties
-     */
 
     /**
      * The types to detect in a defined match "block"
@@ -125,37 +103,27 @@ class Klein
 
     /**
      * Collection of the routes to match on dispatch
-     *
-     * @var RouteCollection
      */
     protected RouteCollection $routes;
 
     /**
      * The Route factory object responsible for creating Route instances
-     *
-     * @var AbstractRouteFactory
      */
     protected AbstractRouteFactory $route_factory;
 
     /**
      * A stack of error callback callables
-     *
-     * @var SplStack
      */
     protected SplStack $error_callbacks;
 
     /**
      * A stack of HTTP error callback callables
-     *
-     * @var SplStack
      */
     protected SplStack $http_error_callbacks;
 
     /**
      * A queue of callbacks to call after processing the dispatch loop
      * and before the response is sent
-     *
-     * @var SplQueue
      */
     protected SplQueue $after_filter_callbacks;
 
@@ -163,21 +131,13 @@ class Klein
      * The output buffer level used by the dispatch process
      *
      * 0 until the first dispatch, so no buffer is touched before
-     *
-     * @var int
      */
     private int $output_buffer_level = 0;
-
-    /**
-     * Route objects
-     */
 
     /**
      * The Request object passed to each matched route
      *
      * Null until the first dispatch
-     *
-     * @var Request|null
      */
     protected Request|null $request = null;
 
@@ -185,28 +145,18 @@ class Klein
      * The Response object passed to each matched route
      *
      * Null until the first dispatch
-     *
-     * @var AbstractResponse|null
      */
     protected AbstractResponse|null $response = null;
 
     /**
      * The service provider object passed to each matched route
-     *
-     * @var ServiceProvider
      */
     protected ServiceProvider $service;
 
     /**
      * A generic variable passed to each matched route
-     *
-     * @var mixed
      */
     protected mixed $app;
-
-    /**
-     * Methods
-     */
 
     /**
      * Constructor
@@ -214,10 +164,10 @@ class Klein
      * Create a new Klein instance with optionally injected dependencies
      * This DI allows for easy testing, object mocking, or class extension
      *
-     * @param ServiceProvider $service              Service provider object responsible for utilitarian behaviors
+     * @param ServiceProvider|null $service         Service provider object responsible for utilitarian behaviors
      * @param mixed $app                            An object passed to each route callback, defaults to an App instance
-     * @param RouteCollection $routes               Collection object responsible for containing all route instances
-     * @param AbstractRouteFactory $route_factory   A factory class responsible for creating Route instances
+     * @param RouteCollection|null $routes          Collection object responsible for containing all route instances
+     * @param AbstractRouteFactory|null $route_factory A factory class responsible for creating Route instances
      */
     public function __construct(
         ServiceProvider|null $service = null,
@@ -238,8 +188,6 @@ class Klein
 
     /**
      * Returns the routes object
-     *
-     * @return RouteCollection
      */
     public function routes(): RouteCollection
     {
@@ -268,8 +216,6 @@ class Klein
 
     /**
      * Returns the service object
-     *
-     * @return ServiceProvider
      */
     public function service(): ServiceProvider
     {
@@ -278,8 +224,6 @@ class Klein
 
     /**
      * Returns the app object
-     *
-     * @return mixed
      */
     public function app(): mixed
     {
@@ -344,8 +288,6 @@ class Klein
      * @param callable|string|array|int|null $method    HTTP Method to match (or the path or callback)
      * @param callable|string|int|null $path            Route URI path to match (or the callback)
      * @param callable|null $callback                   Callable callback method to execute on route match
-     *
-     * @return Route
      */
     public function respond(
         callable|string|array|int|null $method,
@@ -390,7 +332,6 @@ class Klein
      *
      * @param string $namespace         The namespace under which to collect the routes
      * @param callable|string $routes   The defined routes callable or filename to collect under the namespace
-     * @return void
      */
     public function with(string $namespace, callable|string $routes): void
     {
@@ -470,7 +411,6 @@ class Klein
      *
      * @param Request|null $request             The request object, created from the globals if null
      * @param AbstractResponse|null $response   The response object, a new Response if null
-     * @return void
      */
     private function prepareDispatch(Request|null $request, AbstractResponse|null $response): void
     {
@@ -494,7 +434,6 @@ class Klein
      *
      * @param string $uri           The request URI
      * @param string $req_method    The request method
-     * @return void
      */
     private function dispatchRoutes(string $uri, string $req_method): void
     {
@@ -581,7 +520,6 @@ class Klein
      * @param HttpExceptionInterface $http_exception    The HTTP exception that occurred
      * @param RouteCollection $matched                  The matched routes
      * @param array $methods_matched                    The matched methods
-     * @return void
      */
     private function handleHttpErrorKeepingLock(
         HttpExceptionInterface $http_exception,
@@ -637,7 +575,6 @@ class Klein
      *
      * @param array $methods_matched        The methods matched so far
      * @param string|array|null $method     The method(s) of the route
-     * @return array
      */
     private function mergeMatchedMethods(array $methods_matched, string|array|null $method): array
     {
@@ -648,7 +585,6 @@ class Klein
      * URL decodes the matched params and merges them into the request's named params
      *
      * @param array $params The params matched from the route's path
-     * @return void
      */
     private function mergeNamedParams(array $params): void
     {
@@ -673,7 +609,6 @@ class Klein
      * @param array $methods_matched    The matched methods
      * @param string $req_method        The request method
      * @throws HttpException            If no route matched (404) or none matched the method (405)
-     * @return void
      */
     private function requireRouteMatch(RouteCollection $matched, array $methods_matched, string $req_method): void
     {
@@ -723,8 +658,6 @@ class Klein
 
     /**
      * Checks if one of the output buffers started by dispatch is still active
-     *
-     * @return boolean
      */
     private function hasDispatchOutputBuffer(): bool
     {
@@ -760,7 +693,6 @@ class Klein
      *
      * @param string $req_method    The request method
      * @param int $capture          The DISPATCH_* capture behavior
-     * @return void
      */
     private function finishOutput(string $req_method, int $capture): void
     {
@@ -781,8 +713,6 @@ class Klein
 
     /**
      * Discards the output buffers started by dispatch
-     *
-     * @return void
      */
     private function cleanOutputBuffers(): void
     {
@@ -796,8 +726,6 @@ class Klein
 
     /**
      * Sends the output buffers started by dispatch
-     *
-     * @return void
      */
     private function flushOutputBuffers(): void
     {
@@ -844,7 +772,7 @@ class Klein
      *
      * @param Route $route      The route being matched
      * @param string $uri       The request URI
-     * @param array $params     Receives the regex matches; left untouched for a wildcard path
+     * @param array|null $params Receives the regex matches; left untouched for a wildcard path
      * @throws RoutePathCompilationException    If the route's path fails to compile
      * @return int|boolean|null                 The match result, null if the route should be skipped
      */
@@ -901,7 +829,6 @@ class Klein
      * @param Route $route          The route the expression belongs to
      * @param string $expression    The route's path expression, without a leading "!"
      * @throws RoutePathCompilationException    If the route's path fails to compile
-     * @return string
      */
     private function getRouteRegex(Route $route, string $expression): string
     {
@@ -934,7 +861,6 @@ class Klein
      * part of the key; otherwise apps on the same server could get each other's compiled routes
      *
      * @param string $expression    The route's path expression
-     * @return string
      */
     protected function getRouteRegexCacheKey(string $expression): string
     {
@@ -945,7 +871,6 @@ class Klein
      * Compiles a route string to a regular expression
      *
      * @param string $route     The route string to compile
-     * @return string
      */
     protected function compileRoute(string $route): string
     {
@@ -999,7 +924,6 @@ class Klein
      *
      * @param string $regex                          The regular expression to validate
      * @throws RegularExpressionCompilationException If the expression can't be compiled
-     * @return void
      */
     private function validateRegularExpression(string $regex): void
     {
@@ -1047,10 +971,9 @@ class Klein
      *
      * @link https://github.com/gbouthenot
      * @param string $route_name        The name of the route
-     * @param array $params             The array of placeholder fillers
+     * @param array|null $params        The array of placeholder fillers
      * @param boolean $flatten_regex    Optionally flatten custom regular expressions to "/"
      * @throws OutOfBoundsException     If the route requested doesn't exist
-     * @return string
      */
     public function getPathFor(string $route_name, array|null $params = null, bool $flatten_regex = true): string
     {
@@ -1100,7 +1023,6 @@ class Klein
      *
      * @param string $value     The param value
      * @param string $type      The match type of the param block
-     * @return string
      */
     protected static function encodePathParam(string $value, string $type): string
     {
@@ -1116,11 +1038,6 @@ class Klein
      *
      * This handles common exceptions and their output
      * to keep the "dispatch()" method DRY
-     *
-     * @param Route $route
-     * @param RouteCollection $matched
-     * @param array $methods_matched
-     * @return void
      */
     protected function handleRouteCallback(Route $route, RouteCollection $matched, array $methods_matched): void
     {
@@ -1156,7 +1073,6 @@ class Klein
      * A non-callable string is a URL to redirect to, with the error flashed
      *
      * @param callable|string $callback     The callable function to execute in the error handling chain
-     * @return void
      */
     public function onError(callable|string $callback): void
     {
@@ -1168,7 +1084,6 @@ class Klein
      *
      * @param Throwable $err The exception that occurred
      * @throws UnhandledException      If the error/exception isn't handled by an error callback
-     * @return void
      */
     protected function error(Throwable $err): void
     {
@@ -1233,7 +1148,6 @@ class Klein
      * a function that is only defined later
      *
      * @param callable|string $callback     The callable function to execute in the error handling chain
-     * @return void
      */
     public function onHttpError(callable|string $callback): void
     {
@@ -1246,7 +1160,6 @@ class Klein
      * @param HttpExceptionInterface $http_exception    The exception that occurred
      * @param RouteCollection $matched                  The collection of routes that were matched in dispatch
      * @param array $methods_matched                    The HTTP methods that were matched in dispatch
-     * @return void
      */
     protected function httpError(
         HttpExceptionInterface $http_exception,
@@ -1292,7 +1205,6 @@ class Klein
      * a function that is only defined later
      *
      * @param callable|string $callback     The callable function to execute in the after route chain
-     * @return void
      */
     public function afterDispatch(callable|string $callback): void
     {
@@ -1301,8 +1213,6 @@ class Klein
 
     /**
      * Runs through and executes the after dispatch callbacks
-     *
-     * @return void
      */
     protected function callAfterDispatchCallbacks(): void
     {
@@ -1318,10 +1228,6 @@ class Klein
             $this->error($e);
         }
     }
-
-    /**
-     * Method aliases
-     */
 
     /**
      * Quick alias to skip the current callback/route method from executing
@@ -1376,8 +1282,6 @@ class Klein
      * OPTIONS alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function options(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1391,8 +1295,6 @@ class Klein
      * HEAD alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function head(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1406,8 +1308,6 @@ class Klein
      * GET alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function get(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1421,8 +1321,6 @@ class Klein
      * POST alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function post(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1436,8 +1334,6 @@ class Klein
      * PUT alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function put(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1451,8 +1347,6 @@ class Klein
      * DELETE alias for "respond()"
      *
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function delete(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {
@@ -1469,8 +1363,6 @@ class Klein
      *
      * @link http://tools.ietf.org/html/rfc5789
      * @see Klein::respond()
-     * @param callable|string|int|null $path
-     * @param callable $callback
      */
     public function patch(callable|string|int|null $path = '*', callable|null $callback = null): Route
     {

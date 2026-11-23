@@ -24,62 +24,42 @@ use Klein\DataCollection\ServerDataCollection;
 class Request
 {
     /**
-     * Class properties
-     */
-
-    /**
      * Unique identifier for the request
-     *
-     * @var string|null
      */
     protected string|null $id = null;
 
     /**
      * GET (query) parameters
-     *
-     * @var DataCollection
      */
     protected DataCollection $params_get;
 
     /**
      * POST parameters
-     *
-     * @var DataCollection
      */
     protected DataCollection $params_post;
 
     /**
      * Named parameters
-     *
-     * @var DataCollection
      */
     protected DataCollection $params_named;
 
     /**
      * Client cookie data
-     *
-     * @var DataCollection
      */
     protected DataCollection $cookies;
 
     /**
      * Server created attributes
-     *
-     * @var ServerDataCollection
      */
     protected ServerDataCollection $server;
 
     /**
      * HTTP request headers
-     *
-     * @var HeaderDataCollection
      */
     protected HeaderDataCollection $headers;
 
     /**
      * Uploaded temporary files
-     *
-     * @var DataCollection
      */
     protected DataCollection $files;
 
@@ -87,25 +67,14 @@ class Request
      * The request body
      *
      * Null until read from php://input
-     *
-     * @var string|null
      */
     protected string|null $body = null;
-
-    /**
-     * Methods
-     */
 
     /**
      * Constructor
      *
      * Create a new Request object and define all of its request data
      *
-     * @param array  $params_get
-     * @param array  $params_post
-     * @param array  $cookies
-     * @param array  $server
-     * @param array  $files
      * @param string|null $body   The request body, read from php://input if null (or empty)
      */
     public function __construct(
@@ -133,7 +102,6 @@ class Request
      * Create a new request object using the built-in "superglobals"
      *
      * @link http://php.net/manual/en/language.variables.superglobals.php
-     * @return static
      */
     public static function createFromGlobals(): static
     {
@@ -147,7 +115,6 @@ class Request
      * Generates one on the first call
      *
      * @param boolean $hash     Whether or not to hash the ID on creation
-     * @return string
      */
     public function id(bool $hash = true): string
     {
@@ -164,8 +131,6 @@ class Request
 
     /**
      * Returns the GET parameters collection
-     *
-     * @return DataCollection
      */
     public function paramsGet(): DataCollection
     {
@@ -174,8 +139,6 @@ class Request
 
     /**
      * Returns the POST parameters collection
-     *
-     * @return DataCollection
      */
     public function paramsPost(): DataCollection
     {
@@ -184,8 +147,6 @@ class Request
 
     /**
      * Returns the named parameters collection
-     *
-     * @return DataCollection
      */
     public function paramsNamed(): DataCollection
     {
@@ -194,8 +155,6 @@ class Request
 
     /**
      * Returns the cookies collection
-     *
-     * @return DataCollection
      */
     public function cookies(): DataCollection
     {
@@ -204,8 +163,6 @@ class Request
 
     /**
      * Returns the server collection
-     *
-     * @return ServerDataCollection
      */
     public function server(): ServerDataCollection
     {
@@ -214,8 +171,6 @@ class Request
 
     /**
      * Returns the headers collection
-     *
-     * @return HeaderDataCollection
      */
     public function headers(): HeaderDataCollection
     {
@@ -224,8 +179,6 @@ class Request
 
     /**
      * Returns the files collection
-     *
-     * @return DataCollection
      */
     public function files(): DataCollection
     {
@@ -234,8 +187,6 @@ class Request
 
     /**
      * Gets the request body
-     *
-     * @return string
      */
     public function body(): string
     {
@@ -258,7 +209,6 @@ class Request
      * @param array|null $mask          The parameter mask array
      * @param boolean $fill_with_nulls  Whether or not to fill the returned array
      *  with null values to match the given mask
-     * @return array
      */
     public function params(array|null $mask = null, bool $fill_with_nulls = true): array
     {
@@ -283,7 +233,6 @@ class Request
      *
      * @param string|int $key   The name of the parameter to return
      * @param mixed $default    The default value of the parameter if it contains no value
-     * @return mixed
      */
     public function param(string|int $key, mixed $default = null): mixed
     {
@@ -300,7 +249,6 @@ class Request
      * from this instance while treating it as an instance property
      *
      * @param string $param     The name of the parameter
-     * @return boolean
      */
     public function __isset(string $param): bool
     {
@@ -317,7 +265,6 @@ class Request
      * while treating it as an instance property
      *
      * @param string $param     The name of the parameter
-     * @return mixed
      */
     public function __get(string $param): mixed
     {
@@ -335,7 +282,6 @@ class Request
      *
      * @param string $param     The name of the parameter
      * @param mixed $value      The value of the parameter
-     * @return void
      */
     public function __set(string $param, mixed $value): void
     {
@@ -349,7 +295,6 @@ class Request
      * while treating it as an instance property
      *
      * @param string $param     The name of the parameter
-     * @return void
      */
     public function __unset(string $param): void
     {
@@ -358,8 +303,6 @@ class Request
 
     /**
      * Is the request secure?
-     *
-     * @return boolean
      */
     public function isSecure(): bool
     {
@@ -375,8 +318,6 @@ class Request
 
     /**
      * Gets the request IP address
-     *
-     * @return string|null
      */
     public function ip(): string|null
     {
@@ -385,8 +326,6 @@ class Request
 
     /**
      * Gets the request user agent
-     *
-     * @return string|null
      */
     public function userAgent(): string|null
     {
@@ -397,8 +336,6 @@ class Request
 
     /**
      * Gets the request URI
-     *
-     * @return string
      */
     public function uri(): string
     {
@@ -407,8 +344,6 @@ class Request
 
     /**
      * Get the request's pathname
-     *
-     * @return string
      */
     public function pathname(): string
     {
@@ -437,7 +372,6 @@ class Request
      *
      * @param string|null $is          The method to check the current request method against
      * @param boolean $allow_override   Whether or not to allow HTTP method overriding via header or params
-     * @return string|boolean
      */
     public function method(string|null $is = null, bool $allow_override = true): string|bool
     {
@@ -474,7 +408,6 @@ class Request
      *
      * @param string|array $key  The name of the query param, or an array of params to merge
      * @param mixed $value      The value of the query param
-     * @return string
      */
     public function query(string|array $key, mixed $value = null): string
     {

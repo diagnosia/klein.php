@@ -24,10 +24,6 @@ use RuntimeException;
 class DispatchHaltedException extends RuntimeException implements KleinExceptionInterface
 {
     /**
-     * Constants
-     */
-
-    /**
      * Skip this current match/callback
      */
     const int SKIP_THIS = 1;
@@ -43,17 +39,9 @@ class DispatchHaltedException extends RuntimeException implements KleinException
     const int SKIP_REMAINING = 0;
 
     /**
-     * Properties
-     */
-
-    /**
      * The number of next matches to skip on a "next" skip
      */
     protected int $number_of_skips = 1;
-
-    /**
-     * Methods
-     */
 
     /**
      * Gets the number of matches to skip on a "next" skip

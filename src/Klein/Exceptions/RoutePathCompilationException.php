@@ -26,37 +26,19 @@ use Throwable;
 class RoutePathCompilationException extends RuntimeException implements KleinExceptionInterface
 {
     /**
-     * Constants
-     */
-
-    /**
      * The exception message format
-     *
-     * @var string
      */
     const string MESSAGE_FORMAT = 'Route failed to compile with path "%s".';
 
     /**
      * The extra failure message format
-     *
-     * @var string
      */
     const string FAILURE_MESSAGE_TITLE_FORMAT = 'Failed with message: "%s"';
 
     /**
-     * Properties
-     */
-
-    /**
      * The route that failed to compile
-     *
-     * @var Route|null
      */
     protected Route|null $route = null;
-
-    /**
-     * Methods
-     */
 
     /**
      * Create a RoutePathCompilationException from a route
@@ -64,7 +46,6 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      *
      * @param Route $route              The route that failed to compile
      * @param Throwable|null $previous  The previous exception
-     * @return static
      */
     public static function createFromRoute(Route $route, Throwable|null $previous = null): static
     {
@@ -87,7 +68,6 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      * Gets the value of route
      *
      * @sccess public
-     * @return Route|null
      */
     public function getRoute(): Route|null
     {
@@ -98,7 +78,6 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      * Sets the value of route
      *
      * @param Route $route The route that failed to compile
-     * @return static
      */
     protected function setRoute(Route $route): static
     {

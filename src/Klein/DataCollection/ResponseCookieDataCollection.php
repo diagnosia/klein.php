@@ -24,10 +24,6 @@ use Klein\ResponseCookie;
 class ResponseCookieDataCollection extends DataCollection
 {
     /**
-     * Methods
-     */
-
-    /**
      * Constructor
      *
      * @override (doesn't call our parent)
@@ -57,7 +53,6 @@ class ResponseCookieDataCollection extends DataCollection
      * @see DataCollection::set()
      * @param string|int $key               The name of the cookie to set
      * @param mixed $value      The cookie, or the (scalar) value of the cookie to set, mixed like the parent's
-     * @return static
      */
     public function set(string|int $key, mixed $value): static
     {

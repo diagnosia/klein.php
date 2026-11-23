@@ -25,60 +25,40 @@ use Klein\DataCollection\DataCollection;
 class ServiceProvider
 {
     /**
-     * Class properties
-     */
-
-    /**
      * The Request instance containing HTTP request data and behaviors
-     *
-     * @var Request|null
      */
     protected Request|null $request = null;
 
     /**
      * The Response instance containing HTTP response data and behaviors
-     *
-     * @var AbstractResponse|null
      */
     protected AbstractResponse|null $response = null;
 
     /**
      * The id of the current PHP session
-     *
-     * @var string|false|null
      */
     protected string|false|null $session_id = null;
 
     /**
      * The view layout
-     *
-     * @var string|null
      */
     protected string|null $layout = null;
 
     /**
      * The view to render
-     *
-     * @var string|null
      */
     protected string|null $view = null;
 
     /**
      * Shared data collection
-     *
-     * @var DataCollection
      */
     protected DataCollection $shared_data;
 
     /**
-     * Methods
-     */
-
-    /**
      * Constructor
      *
-     * @param Request $request              Object containing all HTTP request data and behaviors
-     * @param AbstractResponse $response    Object containing all HTTP response data and behaviors
+     * @param Request|null $request         Object containing all HTTP request data and behaviors
+     * @param AbstractResponse|null $response Object containing all HTTP response data and behaviors
      */
     public function __construct(Request|null $request = null, AbstractResponse|null $response = null)
     {
@@ -94,7 +74,6 @@ class ServiceProvider
      *
      * @param Request|null $request            Object containing all HTTP request data and behaviors
      * @param AbstractResponse|null $response  Object containing all HTTP response data and behaviors
-     * @return static
      */
     public function bind(Request|null $request = null, AbstractResponse|null $response = null): static
     {
@@ -112,8 +91,6 @@ class ServiceProvider
 
     /**
      * Returns the shared data collection object
-     *
-     * @return DataCollection
      */
     public function sharedData(): DataCollection
     {
@@ -149,7 +126,6 @@ class ServiceProvider
      * @param string $msg               The message to flash
      * @param string|array $type        The flash message type, or the params (with the "info" type)
      * @param array|null $params        Optional params to be parsed by markdown
-     * @return void
      */
     public function flash(string $msg, string|array $type = 'info', array|null $params = null): void
     {
@@ -168,7 +144,6 @@ class ServiceProvider
      * Returns and clears all flashes of optional $type
      *
      * @param string|null $type The name of the flash message type, all types if null
-     * @return array
      */
     public function flashes(string|null $type = null): array
     {
@@ -209,7 +184,6 @@ class ServiceProvider
      *
      * @param string $str   The text string to parse
      * @param mixed $args   Optional arguments to be parsed by markdown: an array, or the first of several arguments
-     * @return string
      */
     public static function markdown(string $str, mixed $args = null): string
     {
@@ -252,7 +226,6 @@ class ServiceProvider
      *
      * @param string|int|float|bool|null $str   The string to escape, other scalars (and null) are cast
      * @param int $flags    A bitmask of `htmlentities()` compatible flags
-     * @return string
      */
     public static function escape(string|int|float|bool|null $str, int $flags = ENT_QUOTES): string
     {
@@ -261,8 +234,6 @@ class ServiceProvider
 
     /**
      * Redirects the request to the current URL
-     *
-     * @return static
      */
     public function refresh(): static
     {
@@ -276,8 +247,6 @@ class ServiceProvider
      *
      * Only a referrer on the request's own host is followed, otherwise (or without one) this refreshes,
      * since the Referer header can point anywhere (an open redirect)
-     *
-     * @return static
      */
     public function back(): static
     {
@@ -298,7 +267,6 @@ class ServiceProvider
      * Checks if a URL is an absolute HTTP(S) URL on the request's host (and port)
      *
      * @param string $url   The URL to check
-     * @return boolean
      */
     protected function isOwnHostUrl(string $url): bool
     {
@@ -342,8 +310,6 @@ class ServiceProvider
 
     /**
      * Renders the current view
-     *
-     * @return void
      */
     public function yieldView(): void
     {
@@ -355,7 +321,6 @@ class ServiceProvider
      *
      * @param string $view  The view to render
      * @param array $data   The data to render in the view
-     * @return void
      */
     public function render(string $view, array $data = []): void
     {
@@ -391,7 +356,6 @@ class ServiceProvider
      *
      * @param string $view  The view to render
      * @param array $data   The data to render in the view
-     * @return void
      */
     public function partial(string $view, array $data = []): void
     {
@@ -406,7 +370,6 @@ class ServiceProvider
      *
      * @param string $method        The name of the validator method
      * @param callable $callback    The callback to perform on validation
-     * @return void
      */
     public function addValidator(string $method, callable $callback): void
     {
@@ -418,7 +381,6 @@ class ServiceProvider
      *
      * @param mixed $string     The string to validate, other scalars are cast and anything else fails
      * @param string|bool|null $err The custom exception message to throw or `false` to return the result as boolean
-     * @return Validator
      */
     public function validate(mixed $string, null|string|bool $err = null): Validator
     {
@@ -430,7 +392,6 @@ class ServiceProvider
      *
      * @param string $param     The name of the parameter to validate
      * @param string|bool|null $err The custom exception message to throw or `false` to return the result as boolean
-     * @return Validator
      */
     public function validateParam(string $param, null|string|bool $err = null): Validator
     {
@@ -444,7 +405,6 @@ class ServiceProvider
      * from this instance while treating it as an instance property
      *
      * @param string $key     The name of the shared data
-     * @return boolean
      */
     public function __isset(string $key): bool
     {
@@ -458,7 +418,6 @@ class ServiceProvider
      * while treating it as an instance property
      *
      * @param string $key     The name of the shared data
-     * @return mixed
      */
     public function __get(string $key): mixed
     {
@@ -473,7 +432,6 @@ class ServiceProvider
      *
      * @param string $key     The name of the shared data
      * @param mixed $value      The value of the shared data
-     * @return void
      */
     public function __set(string $key, mixed $value): void
     {
@@ -487,7 +445,6 @@ class ServiceProvider
      * while treating it as an instance property
      *
      * @param string $key     The name of the shared data
-     * @return void
      */
     public function __unset(string $key): void
     {

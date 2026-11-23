@@ -28,14 +28,8 @@ class Response extends AbstractResponse
      * The allowed JSONP callback names: a JavaScript identifier, optionally dotted (e.g. "jQuery123" or "app.cb")
      *
      * Anything else could inject script into the JSONP response
-     *
-     * @var string
      */
     const string JSONP_CALLBACK_REGEX = '/^[A-Za-z_$][0-9A-Za-z_$]*(?:\.[A-Za-z_$][0-9A-Za-z_$]*)*$/D';
-
-    /**
-     * Methods
-     */
 
     /**
      * Enable response chunking
@@ -43,7 +37,6 @@ class Response extends AbstractResponse
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
      * @param string|null $str  An optional string to send as a response "chunk"
-     * @return static
      */
     public function chunk(string|null $str = null): static
     {
@@ -62,7 +55,6 @@ class Response extends AbstractResponse
      * Dump a variable
      *
      * @param mixed $obj    The variable to dump
-     * @return static
      */
     public function dump(mixed $obj): static
     {
@@ -90,7 +82,6 @@ class Response extends AbstractResponse
      * @param string|null $filename  The file's name, the path's base name if null
      * @param string|null $mimetype  The MIME type of the file, detected from the file if null
      * @throws RuntimeException Thrown if the file could not be read (before anything is sent)
-     * @return static
      */
     public function file(string $path, string|null $filename = null, string|null $mimetype = null): static
     {
@@ -159,7 +150,6 @@ class Response extends AbstractResponse
      * filename as is, so they are replaced there and the exact name is added as UTF-8 "filename*"
      *
      * @param string $filename  The file's name
-     * @return string
      */
     protected static function attachmentDisposition(string $filename): string
     {
@@ -189,7 +179,6 @@ class Response extends AbstractResponse
      * @param string|null $jsonp_prefix The name of the JSON-P function prefix, see JSONP_CALLBACK_REGEX
      * @throws InvalidArgumentException If the JSON-P function prefix isn't a valid callback name
      * @throws JsonException            If the object can't be encoded (e.g. invalid UTF-8), before anything is sent
-     * @return static
      */
     public function json(mixed $object, string|null $jsonp_prefix = null): static
     {

@@ -24,10 +24,6 @@ use Klein\Route;
 class RouteCollection extends DataCollection
 {
     /**
-     * Methods
-     */
-
-    /**
      * Constructor
      *
      * @override (doesn't call our parent)
@@ -56,7 +52,6 @@ class RouteCollection extends DataCollection
      * @see DataCollection::set()
      * @param string|int $key               The name of the route to set
      * @param mixed $value      The route (Route or callable) to set, mixed like the parent's
-     * @return static
      */
     public function set(string|int $key, mixed $value): static
     {
@@ -71,9 +66,6 @@ class RouteCollection extends DataCollection
      * Add a route instance to the collection
      *
      * This will auto-generate a name
-     *
-     * @param Route $route
-     * @return static
      */
     public function addRoute(Route $route): static
     {
@@ -93,9 +85,6 @@ class RouteCollection extends DataCollection
      * This allows a more generic form that
      * will take a Route instance, string callable
      * or any other Route class compatible callback
-     *
-     * @param Route|callable $route
-     * @return static
      */
     public function add(Route|callable $route): static
     {
@@ -115,8 +104,6 @@ class RouteCollection extends DataCollection
      *
      * Thankfully, because routes are all objects, this doesn't
      * take much memory as its simply moving references around
-     *
-     * @return static
      */
     public function prepareNamed(): static
     {

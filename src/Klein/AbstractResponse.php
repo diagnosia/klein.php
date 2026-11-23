@@ -26,76 +26,50 @@ use Stringable;
 abstract class AbstractResponse
 {
     /**
-     * Properties
-     */
-
-    /**
      * The default response HTTP status code
-     *
-     * @var int
      */
     protected static int $default_status_code = 200;
 
     /**
      * The HTTP version of the response
-     *
-     * @var string
      */
     protected string $protocol_version = '1.1';
 
     /**
      * The response body
-     *
-     * @var string
      */
     protected string $body = '';
 
     /**
      * HTTP response status
-     *
-     * @var HttpStatus
      */
     protected HttpStatus $status;
 
     /**
      * HTTP response headers
-     *
-     * @var HeaderDataCollection
      */
     protected HeaderDataCollection $headers;
 
     /**
      * HTTP response cookies
-     *
-     * @var ResponseCookieDataCollection
      */
     protected ResponseCookieDataCollection $cookies;
 
     /**
      * Whether or not the response is "locked" from
      * any further modification
-     *
-     * @var boolean
      */
     protected bool $locked = false;
 
     /**
      * Whether or not the response has been sent
-     *
-     * @var boolean
      */
     protected bool $sent = false;
 
     /**
      * Whether the response has been chunked or not
-     *
-     * @var boolean
      */
     public bool $chunked = false;
-
-    /**
-     * Methods
-     */
 
     /**
      * Constructor
@@ -130,9 +104,6 @@ abstract class AbstractResponse
      * Simply calling this method without any arguments returns the current protocol version.
      * Calling with an integer argument, however, attempts to set the protocol version to what
      * was provided by the argument.
-     *
-     * @param string|null $protocol_version
-     * @return string|static
      */
     public function protocolVersion(string|null $protocol_version = null): string|static
     {
@@ -155,7 +126,6 @@ abstract class AbstractResponse
      * Calling with an argument, however, sets the response body to what was provided by the argument.
      *
      * @param string|Stringable|int|float|bool|null $body  The body content, cast to string
-     * @return string|static
      */
     public function body(string|Stringable|int|float|bool|null $body = null): string|static
     {
@@ -173,8 +143,6 @@ abstract class AbstractResponse
 
     /**
      * Returns the status object
-     *
-     * @return HttpStatus
      */
     public function status(): HttpStatus
     {
@@ -183,8 +151,6 @@ abstract class AbstractResponse
 
     /**
      * Returns the headers collection
-     *
-     * @return HeaderDataCollection
      */
     public function headers(): HeaderDataCollection
     {
@@ -193,8 +159,6 @@ abstract class AbstractResponse
 
     /**
      * Returns the cookies collection
-     *
-     * @return ResponseCookieDataCollection
      */
     public function cookies(): ResponseCookieDataCollection
     {
@@ -209,7 +173,6 @@ abstract class AbstractResponse
      * was provided by the argument.
      *
      * @param int|null $code    The HTTP status code to send
-     * @return int|static
      */
     public function code(int|null $code = null): int|static
     {
@@ -229,7 +192,6 @@ abstract class AbstractResponse
      * Prepend a string to the response's content body
      *
      * @param string|Stringable|int|float|bool|null $content   The content to prepend, cast to string
-     * @return static
      */
     public function prepend(string|Stringable|int|float|bool|null $content): static
     {
@@ -245,7 +207,6 @@ abstract class AbstractResponse
      * Append a string to the response's content body
      *
      * @param string|Stringable|int|float|bool|null $content   The content to append, cast to string
-     * @return static
      */
     public function append(string|Stringable|int|float|bool|null $content): static
     {
@@ -259,8 +220,6 @@ abstract class AbstractResponse
 
     /**
      * Check if the response is locked
-     *
-     * @return boolean
      */
     public function isLocked(): bool
     {
@@ -275,7 +234,6 @@ abstract class AbstractResponse
      * when its locked
      *
      * @throws LockedResponseException  If the response is locked
-     * @return static
      */
     public function requireUnlocked(): static
     {
@@ -288,8 +246,6 @@ abstract class AbstractResponse
 
     /**
      * Lock the response from further modification
-     *
-     * @return static
      */
     public function lock(): static
     {
@@ -300,8 +256,6 @@ abstract class AbstractResponse
 
     /**
      * Unlock the response from further modification
-     *
-     * @return static
      */
     public function unlock(): static
     {
@@ -314,8 +268,6 @@ abstract class AbstractResponse
      * Generates an HTTP compatible status header line string
      *
      * Creates the string based off of the response's properties
-     *
-     * @return string
      */
     protected function httpStatusLine(): string
     {
@@ -327,7 +279,6 @@ abstract class AbstractResponse
      *
      * @param boolean $cookies_also Whether or not to also send the cookies after sending the normal headers
      * @param boolean $override     Whether or not to override the check if headers have already been sent
-     * @return static
      */
     public function sendHeaders(bool $cookies_also = true, bool $override = false): static
     {
@@ -354,7 +305,6 @@ abstract class AbstractResponse
      * Send our HTTP response cookies
      *
      * @param boolean $override     Whether or not to override the check if headers have already been sent
-     * @return static
      */
     public function sendCookies(bool $override = false): static
     {
@@ -385,8 +335,6 @@ abstract class AbstractResponse
 
     /**
      * Send our body's contents
-     *
-     * @return static
      */
     public function sendBody(): static
     {
@@ -400,7 +348,6 @@ abstract class AbstractResponse
      *
      * @param boolean $override             Whether or not to override the check if the response has already been sent
      * @throws ResponseAlreadySentException If the response has already been sent
-     * @return static
      */
     public function send(bool $override = false): static
     {
@@ -428,8 +375,6 @@ abstract class AbstractResponse
 
     /**
      * Check if the response has been sent
-     *
-     * @return boolean
      */
     public function isSent(): bool
     {
@@ -441,7 +386,6 @@ abstract class AbstractResponse
      *
      * @link https://github.com/klein/klein.php/wiki/Response-Chunking
      * @link http://bit.ly/hg3gHb
-     * @return static
      */
     public function chunk(): static
     {
@@ -467,7 +411,6 @@ abstract class AbstractResponse
      *
      * @param string $key       The name of the HTTP response header
      * @param string|Stringable|int|float|bool|null $value The value to set the header with
-     * @return static
      */
     public function header(string $key, string|Stringable|int|float|bool|null $value): static
     {
@@ -487,7 +430,6 @@ abstract class AbstractResponse
      * @param boolean $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param boolean $httponly     Flag of whether the cookie should only be accessible over the HTTP protocol
      * @param string|null $samesite The SameSite attribute ("Strict", "Lax" or "None"; "None" requires $secure)
-     * @return static
      */
     public function cookie(
         string|int $key,
@@ -513,8 +455,6 @@ abstract class AbstractResponse
 
     /**
      * Tell the browser not to cache the response
-     *
-     * @return static
      */
     public function noCache(): static
     {
@@ -529,7 +469,6 @@ abstract class AbstractResponse
      *
      * @param string $url   The URL to redirect to
      * @param int $code     The HTTP status code to use for redirection
-     * @return static
      */
     public function redirect(string $url, int $code = 302): static
     {

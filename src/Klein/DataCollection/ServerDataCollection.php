@@ -27,22 +27,14 @@ namespace Klein\DataCollection;
 class ServerDataCollection extends DataCollection
 {
     /**
-     * Class properties
-     */
-
-    /**
      * The prefix of HTTP headers normally
      * stored in the Server data
-     *
-     * @var string
      */
     protected static string $http_header_prefix = 'HTTP_';
 
     /**
      * The list of HTTP headers that for some
      * reason aren't prefixed in PHP...
-     *
-     * @var array
      */
     protected static array $http_nonprefixed_headers = [
         'CONTENT_LENGTH',
@@ -51,15 +43,10 @@ class ServerDataCollection extends DataCollection
     ];
 
     /**
-     * Methods
-     */
-
-    /**
      * Quickly check if a string has a passed prefix
      *
      * @param string $string    The string to check
      * @param string $prefix    The prefix to test
-     * @return boolean
      */
     public static function hasPrefix(string $string, string $prefix): bool
     {
@@ -71,8 +58,6 @@ class ServerDataCollection extends DataCollection
      *
      * PHP is weird... it puts all of the HTTP request
      * headers in the $_SERVER array. This handles that
-     *
-     * @return array
      */
     public function getHeaders(): array
     {

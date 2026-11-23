@@ -24,10 +24,6 @@ use InvalidArgumentException;
 class ResponseCookie
 {
     /**
-     * Class properties
-     */
-
-    /**
      * The name of the cookie
      */
     protected string $name;
@@ -79,17 +75,13 @@ class ResponseCookie
     const array SAME_SITE_VALUES = ['strict' => 'Strict', 'lax' => 'Lax', 'none' => 'None'];
 
     /**
-     * Methods
-     */
-
-    /**
      * Constructor
      *
      * @param string|int                  $name   The name of the cookie (array keys like "123" become ints)
      * @param string|int|float|bool|null  $value  The value to set the cookie with, scalars are cast to string
      * @param int|string|null             $expire The time that the cookie should expire, as a (numeric) Unix timestamp
-     * @param string  $path         The path of which to restrict the cookie
-     * @param string  $domain       The domain of which to restrict the cookie
+     * @param string|null $path     The path of which to restrict the cookie
+     * @param string|null $domain   The domain of which to restrict the cookie
      * @param bool    $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param bool    $http_only    Flag of whether the cookie should only be accessible over the HTTP protocol
      * @param string|null $same_site The SameSite attribute ("Strict", "Lax" or "None"; "None" requires $secure)
@@ -125,8 +117,6 @@ class ResponseCookie
 
     /**
      * Sets the cookie's name
-     *
-     * @return static
      */
     public function setName(string|int $name): static
     {

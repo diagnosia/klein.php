@@ -24,10 +24,6 @@ use TypeError;
 class Route
 {
     /**
-     * Properties
-     */
-
-    /**
      * The callback method to execute when the route is matched
      *
      * Any valid "callable" type is allowed
@@ -70,10 +66,6 @@ class Route
      * Mostly used for reverse routing
      */
     protected string|null $name;
-
-    /**
-     * Methods
-     */
 
     /**
      * Constructor
@@ -193,7 +185,6 @@ class Route
      * Allows the ability to arbitrarily call this instance like a function
      *
      * @param mixed ...$args Generic arguments, passed on to the callback
-     * @return mixed
      */
     public function __invoke(mixed ...$args): mixed
     {

@@ -26,18 +26,12 @@ use RuntimeException;
 class HttpException extends RuntimeException implements HttpExceptionInterface
 {
     /**
-     * Methods
-     */
-
-    /**
      * Create an HTTP exception from nothing but an HTTP code
      *
      * Checked here, so e.g. abort(999) fails in the route callback (and goes through the error
      * callbacks) instead of later, while the HTTP error callbacks set the response code
      *
-     * @param int $code
      * @throws InvalidArgumentException If the code isn't a valid HTTP status code
-     * @return static
      */
     public static function createFromCode(int $code): static
     {

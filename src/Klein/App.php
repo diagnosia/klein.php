@@ -26,10 +26,6 @@ use Klein\Exceptions\UnknownServiceException;
 class App
 {
     /**
-     * Class properties
-     */
-
-    /**
      * The array of app services
      *
      * @var array<string, callable(): mixed>
@@ -47,7 +43,6 @@ class App
      *
      * @param string $name              The name of the service
      * @throws UnknownServiceException  If a non-registered service is attempted to fetched
-     * @return mixed
      */
     public function __get(string $name): mixed
     {
@@ -68,7 +63,6 @@ class App
      * @param string $method          The callable method to execute
      * @param array $args               The argument array to pass to our callback
      * @throws BadMethodCallException   If a non-registered method is attempted to be called
-     * @return mixed
      */
     public function __call(string $method, array $args): mixed
     {
@@ -85,7 +79,6 @@ class App
      * @param string $name                  The name of the service
      * @param callable $closure             The callable function to execute when requesting our service
      * @throws DuplicateServiceException    If an attempt is made to register two services with the same name
-     * @return void
      */
     public function register(string $name, callable $closure): void
     {

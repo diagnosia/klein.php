@@ -25,15 +25,11 @@ class HttpStatus
 {
     /**
      * The HTTP status code
-     *
-     * @var int
      */
     protected int $code;
 
     /**
      * The HTTP status message
-     *
-     * @var string|null
      */
     protected string|null $message;
 
@@ -136,8 +132,6 @@ class HttpStatus
 
     /**
      * Get the HTTP status code
-     *
-     * @return int
      */
     public function getCode(): int
     {
@@ -146,8 +140,6 @@ class HttpStatus
 
     /**
      * Get the HTTP status message
-     *
-     * @return string|null
      */
     public function getMessage(): string|null
     {
@@ -157,9 +149,7 @@ class HttpStatus
     /**
      * Set the HTTP status code
      *
-     * @param int $code
      * @throws InvalidArgumentException If the code isn't a valid HTTP status code (100-599, RFC 9110)
-     * @return static
      */
     public function setCode(int $code): static
     {
@@ -175,9 +165,6 @@ class HttpStatus
      * Checks if a code is a valid HTTP status code
      *
      * RFC 9110 defines the range 100-599, anything else breaks the status line
-     *
-     * @param int $code
-     * @return boolean
      */
     public static function isValidCode(int $code): bool
     {
@@ -186,9 +173,6 @@ class HttpStatus
 
     /**
      * Set the HTTP status message
-     *
-     * @param string $message
-     * @return static
      */
     public function setMessage(string $message): static
     {
@@ -198,8 +182,6 @@ class HttpStatus
 
     /**
      * Get a string representation of our HTTP status
-     *
-     * @return string
      */
     public function getFormattedString(): string
     {
@@ -218,8 +200,6 @@ class HttpStatus
      * Allows the ability to arbitrarily use an instance of this class as a string
      * This method will be automatically called, returning a string representation
      * of this instance
-     *
-     * @return string
      */
     public function __toString(): string
     {
@@ -231,9 +211,6 @@ class HttpStatus
      *
      * Returns null if no corresponding message was
      * found for the passed in code
-     *
-     * @param int $int
-     * @return string|null
      */
     public static function getMessageFromCode(int $int): string|null
     {

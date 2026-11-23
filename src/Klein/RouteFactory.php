@@ -22,25 +22,12 @@ namespace Klein;
 class RouteFactory extends AbstractRouteFactory
 {
     /**
-     * Constants
-     */
-
-    /**
      * The value given to path's when they are entered as null values
-     *
-     * @var string
      */
     const string NULL_PATH_VALUE = '*';
 
     /**
-     * Methods
-     */
-
-    /**
      * Check if the path is null or equal to our match-all, null-like value
-     *
-     * @param string|null $path
-     * @return boolean
      */
     protected function pathIsNull(string|null $path): bool
     {
@@ -50,9 +37,6 @@ class RouteFactory extends AbstractRouteFactory
     /**
      * Quick check to see whether or not to count the route
      * as a match when counting total matches
-     *
-     * @param string|null $path
-     * @return boolean
      */
     protected function shouldPathStringCauseRouteMatch(string|null $path): bool
     {
@@ -66,9 +50,6 @@ class RouteFactory extends AbstractRouteFactory
      * This method wraps the path string in a regular expression syntax baesd
      * on whether the string is a catch-all or custom regular expression.
      * It also adds the namespace in a specific part, based on the style of expression
-     *
-     * @param string|null $path
-     * @return string
      */
     protected function preprocessPathString(string|null $path): string
     {
@@ -107,7 +88,6 @@ class RouteFactory extends AbstractRouteFactory
      * @param string|array|null $method     HTTP Method to match
      * @param boolean $count_match          Ignored: whether a route counts as a match depends on its path
      * @param string|null $name             Ignored: set it with Route::setName() on the returned route
-     * @return Route
      */
     public function build(
         callable $callback,

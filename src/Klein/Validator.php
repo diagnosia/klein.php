@@ -20,10 +20,6 @@ use Klein\Exceptions\ValidationException;
 class Validator
 {
     /**
-     * Class properties
-     */
-
-    /**
      * The available validator methods
      *
      * @var array<string, callable>
@@ -51,10 +47,6 @@ class Validator
      * Flag for whether the default validation methods have been added or not
      */
     protected static bool $default_added = false;
-
-    /**
-     * Methods
-     */
 
     /**
      * Sets up the validator chain with the string and optional error message
@@ -205,7 +197,6 @@ class Validator
      *
      * @param string $method        The name of the validator method
      * @param callable $callback    The callback to perform on validation
-     * @return void
      */
     public static function addValidator(string $method, callable $callback): void
     {
@@ -222,7 +213,6 @@ class Validator
      * @param array $args               The argument array to pass to our callback
      * @throws BadMethodCallException   If an attempt was made to call a validator modifier that doesn't exist
      * @throws ValidationException      If the validation check returns false
-     * @return Validator|boolean
      */
     public function __call(string $method, array $args): Validator|bool
     {

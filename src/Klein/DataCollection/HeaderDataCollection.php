@@ -22,15 +22,9 @@ namespace Klein\DataCollection;
 class HeaderDataCollection extends DataCollection
 {
     /**
-     * Constants
-     */
-
-    /**
      * Normalization option
      *
      * Don't normalize
-     *
-     * @var int
      */
     const int NORMALIZE_NONE = 0;
 
@@ -38,8 +32,6 @@ class HeaderDataCollection extends DataCollection
      * Normalization option
      *
      * Normalize the outer whitespace of the header
-     *
-     * @var int
      */
     const int NORMALIZE_TRIM = 1;
 
@@ -47,8 +39,6 @@ class HeaderDataCollection extends DataCollection
      * Normalization option
      *
      * Normalize the delimiters of the header
-     *
-     * @var int
      */
     const int NORMALIZE_DELIMITERS = 2;
 
@@ -56,8 +46,6 @@ class HeaderDataCollection extends DataCollection
      * Normalization option
      *
      * Normalize the case of the header
-     *
-     * @var int
      */
     const int NORMALIZE_CASE = 4;
 
@@ -65,8 +53,6 @@ class HeaderDataCollection extends DataCollection
      * Normalization option
      *
      * Normalize the header into canonical format
-     *
-     * @var int
      */
     const int NORMALIZE_CANONICAL = 8;
 
@@ -74,26 +60,14 @@ class HeaderDataCollection extends DataCollection
      * Normalization option
      *
      * Normalize using all normalization techniques
-     *
-     * @var int
      */
     const int NORMALIZE_ALL = -1;
 
     /**
-     * Properties
-     */
-
-    /**
      * The header key normalization technique/style to
      * use when accessing headers in the collection
-     *
-     * @var int
      */
     protected int $normalization = self::NORMALIZE_ALL;
-
-    /**
-     * Methods
-     */
 
     /**
      * Constructor
@@ -113,8 +87,6 @@ class HeaderDataCollection extends DataCollection
 
     /**
      * Get the header key normalization technique/style to use
-     *
-     * @return int
      */
     public function getNormalization(): int
     {
@@ -123,9 +95,6 @@ class HeaderDataCollection extends DataCollection
 
     /**
      * Set the header key normalization technique/style to use
-     *
-     * @param int $normalization
-     * @return static
      */
     public function setNormalization(int $normalization): static
     {
@@ -142,7 +111,6 @@ class HeaderDataCollection extends DataCollection
      * @see DataCollection::get()
      * @param string|int $key       The key of the header to return
      * @param mixed  $default_val   The default value of the header if it contains no value
-     * @return mixed
      */
     public function get(string|int $key, mixed $default_val = null): mixed
     {
@@ -159,7 +127,6 @@ class HeaderDataCollection extends DataCollection
      * @see DataCollection::set()
      * @param string|int $key   The key of the header to set
      * @param mixed  $value     The value of the header to set
-     * @return static
      */
     public function set(string|int $key, mixed $value): static
     {
@@ -175,7 +142,6 @@ class HeaderDataCollection extends DataCollection
      *
      * @see DataCollection::exists()
      * @param string|int $key   The key of the header
-     * @return boolean
      */
     public function exists(string|int $key): bool
     {
@@ -191,7 +157,6 @@ class HeaderDataCollection extends DataCollection
      *
      * @see DataCollection::remove()
      * @param string|int $key   The key of the header
-     * @return void
      */
     public function remove(string|int $key): void
     {
@@ -204,7 +169,6 @@ class HeaderDataCollection extends DataCollection
      * Normalize a header key based on our set normalization style
      *
      * @param string|int $key The ("field") key of the header
-     * @return string
      */
     protected function normalizeKey(string|int $key): string
     {
@@ -236,7 +200,6 @@ class HeaderDataCollection extends DataCollection
      * to a more standard hyphen (-) character
      *
      * @param string $key The ("field") key of the header
-     * @return string
      */
     public static function normalizeKeyDelimiters(string $key): string
     {
@@ -251,7 +214,6 @@ class HeaderDataCollection extends DataCollection
      *
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
      * @param string $key The ("field") key of the header
-     * @return string
      */
     public static function canonicalizeKey(string $key): string
     {
@@ -275,7 +237,6 @@ class HeaderDataCollection extends DataCollection
      * @param string $name              The name ("field") of the header
      * @param boolean $make_lowercase   Whether or not to lowercase the name
      * @deprecated Use the normalization options and the other normalization methods instead
-     * @return string
      */
     public static function normalizeName(string $name, bool $make_lowercase = true): string
     {

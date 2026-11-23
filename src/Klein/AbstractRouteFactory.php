@@ -22,10 +22,6 @@ namespace Klein;
 abstract class AbstractRouteFactory
 {
     /**
-     * Properties
-     */
-
-    /**
      * The namespace of which to collect the routes in
      * when matching, so you can define routes under a
      * common endpoint
@@ -33,13 +29,9 @@ abstract class AbstractRouteFactory
     protected string|null $namespace;
 
     /**
-     * Methods
-     */
-
-    /**
      * Constructor
      *
-     * @param string $namespace The initial namespace to set
+     * @param string|null $namespace The initial namespace to set
      */
     public function __construct(string|null $namespace = null)
     {
@@ -88,7 +80,6 @@ abstract class AbstractRouteFactory
      * @param string|array|null $method     HTTP Method to match
      * @param boolean $count_match          Whether or not to count the route as a match when counting total matches
      * @param string|null $name             The name of the route
-     * @return Route
      */
     abstract public function build(
         callable $callback,
