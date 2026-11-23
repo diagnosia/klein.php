@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -66,72 +68,118 @@ class Validator
      */
     public static function addDefault(): void
     {
-        static::$methods['null'] = function (null|string $str): bool {
-            return $str === null || $str === '';
-        };
-        static::$methods['len'] = function (null|string $str, int $min, null|int $max = null): bool {
-            if ($str === null)
+        static::addDefaultTypeValidators();
+        static::addDefaultFilterValidators();
+        static::addDefaultCharacterValidators();
+
+        static::$default_added = true;
+    }
+
+    /**
+     * Adds the default validators for empty values, lengths and number types
+     */
+    protected static function addDefaultTypeValidators(): void
+    {
+        static::$methods['null'] = static fn(null|string $str): bool => $str === null || $str === '';
+        static::$methods['len'] = static function (null|string $str, int $min, null|int $max = null): bool {
+            if ($str === null) {
                 return false;
+            }
+
             $len = strlen($str);
             return null === $max ? $len === $min : $len >= $min && $len <= $max;
         };
-        static::$methods['int'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['int'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return (string) $str === (string) (int) $str;
         };
-        static::$methods['float'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['float'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return (string) $str === (string) (float) $str;
         };
-        static::$methods['email'] = function (null|string $str): bool {
-            if ($str === null)
+    }
+
+    /**
+     * Adds the default validators based on "filter_var" (email, URL, IP)
+     */
+    protected static function addDefaultFilterValidators(): void
+    {
+        static::$methods['email'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return filter_var($str, FILTER_VALIDATE_EMAIL) !== false;
         };
-        static::$methods['url'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['url'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return filter_var($str, FILTER_VALIDATE_URL) !== false;
         };
-        static::$methods['ip'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['ip'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return filter_var($str, FILTER_VALIDATE_IP) !== false;
         };
-        static::$methods['remoteip'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['remoteip'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return filter_var($str, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false;
         };
-        static::$methods['alnum'] = function (null|string $str): bool {
-            if ($str === null)
+    }
+
+    /**
+     * Adds the default validators for characters, substrings and patterns
+     */
+    protected static function addDefaultCharacterValidators(): void
+    {
+        static::$methods['alnum'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return ctype_alnum($str);
         };
-        static::$methods['alpha'] = function (null|string $str): bool {
-            if ($str === null)
+        static::$methods['alpha'] = static function (null|string $str): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return ctype_alpha($str);
         };
-        static::$methods['contains'] = function (null|string $str, string $needle): bool {
-            if ($str === null)
+        static::$methods['contains'] = static function (null|string $str, string $needle): bool {
+            if ($str === null) {
                 return false;
+            }
+
             return str_contains($str, $needle);
         };
-        static::$methods['regex'] = function (null|string $str, string $pattern): bool {
-            if ($str === null)
+        static::$methods['regex'] = static function (null|string $str, string $pattern): bool {
+            if ($str === null) {
                 return false;
-            return preg_match($pattern, $str);
-        };
-        static::$methods['chars'] = function (null|string $str, string $chars): bool {
-            if ($str === null)
-                return false;
-            return preg_match("/^[$chars]++$/i", $str);
-        };
+            }
 
-        static::$default_added = true;
+            return preg_match($pattern, $str) === 1;
+        };
+        static::$methods['chars'] = static function (null|string $str, string $chars): bool {
+            if ($str === null) {
+                return false;
+            }
+
+            return preg_match("/^[{$chars}]++$/i", $str) === 1;
+        };
     }
 
     /**
@@ -162,43 +210,27 @@ class Validator
     {
         $reverse = false;
         $validator = $method;
-        $method_substr = substr($method, 0, 2);
+        $method_substr = substr($method, offset: 0, length: 2);
 
         if ($method_substr === 'is') { // is<$validator>()
-            $validator = substr($method, 2);
-        } elseif ($method_substr === 'no') { // not<$validator>()
-            $validator = substr($method, 3);
+            $validator = substr($method, offset: 2);
+        }
+
+        if ($method_substr === 'no') { // not<$validator>()
+            $validator = substr($method, offset: 3);
             $reverse = true;
         }
 
         $validator = strtolower($validator);
 
-        if (!$validator || !isset(static::$methods[$validator])) {
+        if (!$validator || (static::$methods[$validator] ?? null) === null) {
             throw new BadMethodCallException('Unknown method ' . $method . '()');
         }
 
         $validator = static::$methods[$validator];
         array_unshift($args, $this->str);
 
-        switch (count($args)) {
-            case 1:
-                $result = $validator($args[0]);
-                break;
-            case 2:
-                $result = $validator($args[0], $args[1]);
-                break;
-            case 3:
-                $result = $validator($args[0], $args[1], $args[2]);
-                break;
-            case 4:
-                $result = $validator($args[0], $args[1], $args[2], $args[3]);
-                break;
-            default:
-                $result = call_user_func_array($validator, $args);
-                break;
-        }
-
-        $result = (bool) ($result ^ $reverse);
+        $result = (bool) ($validator(...$args) ^ $reverse);
 
         if ($this->err === false) {
             return $result;
@@ -206,7 +238,9 @@ class Validator
 
         if ($result === false) {
             throw new ValidationException(
-                $this->err ?? 'Validation failed for ' . $method . '() with value: ' . var_export($this->str, true),
+                is_string($this->err)
+                    ? $this->err
+                    : 'Validation failed for ' . $method . '() with value: ' . var_export($this->str, return: true),
             );
         }
 

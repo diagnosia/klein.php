@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -35,9 +37,7 @@ class AppTest extends AbstractKleinTestCase
 
     protected function getTestCallable($message = self::TEST_CALLBACK_MESSAGE)
     {
-        return function () use ($message) {
-            return $message;
-        };
+        return static fn() => $message;
     }
 
     /**
@@ -53,10 +53,10 @@ class AppTest extends AbstractKleinTestCase
 
         $app->register($func_name, $this->getTestCallable());
 
-        return array(
+        return [
             'app' => $app,
             'func_name' => $func_name,
-        );
+        ];
     }
 
     #[Depends('testRegisterFiller')]
@@ -67,8 +67,8 @@ class AppTest extends AbstractKleinTestCase
 
         $returned = $app->$func_name;
 
-        $this->assertNotNull($returned);
-        $this->assertSame(self::TEST_CALLBACK_MESSAGE, $returned);
+        static::assertNotNull($returned);
+        static::assertSame(self::TEST_CALLBACK_MESSAGE, $returned);
     }
 
     public function testGetBadMethod()
@@ -86,8 +86,8 @@ class AppTest extends AbstractKleinTestCase
 
         $returned = $app->{$func_name}();
 
-        $this->assertNotNull($returned);
-        $this->assertSame(self::TEST_CALLBACK_MESSAGE, $returned);
+        static::assertNotNull($returned);
+        static::assertSame(self::TEST_CALLBACK_MESSAGE, $returned);
     }
 
     public function testCallBadMethod()

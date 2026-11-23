@@ -34,16 +34,12 @@ class ValidationsTest extends AbstractKleinTestCase
         $this->klein_app->service()->bind(new Request(), new Response());
 
         // Setup our error handler
-        $this->klein_app->onError(array($this, 'errorHandler'));
+        $this->klein_app->onError([$this, 'errorHandler']);
     }
 
     public function errorHandler($response, $message, $type, $exception)
     {
-        if (!is_null($message) && $message !== '') {
-            echo $message;
-        } else {
-            echo 'fail';
-        }
+        echo !is_null($message) && $message !== '' ? $message : 'fail';
     }
 
     protected function validator($string, $error_message = null)
@@ -55,27 +51,29 @@ class ValidationsTest extends AbstractKleinTestCase
     {
         $custom_message = 'This is a custom error message...';
 
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) use ($custom_message) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) use (
+            $custom_message,
+        ) {
             $service->validateParam('test_param', $custom_message)->notNull()->isLen(0);
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame($custom_message, $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
+        static::assertSame($custom_message, $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
     }
 
     public function testStringLengthExact()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isLen(2);
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/ab')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/ab')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')),
         );
@@ -83,29 +81,29 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testStringLengthRange()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isLen(3, 5);
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dogg')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/doggg')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dogg')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/doggg')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/t')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/te')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/testin')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/testing')),
         );
@@ -113,32 +111,32 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testInt()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isInt();
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/12318935')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/12318935')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2.5')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2,5')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/~2')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2 5')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')),
         );
@@ -146,33 +144,33 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testFloat()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isFloat();
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2.5')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/3.14')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/2.5')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/3.14')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2.')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2,5')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/~2')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2 5')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')),
         );
@@ -180,24 +178,24 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testEmail()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isEmail();
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test@test.com')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test@test.co.uk')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test@test.com')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test@test.co.uk')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test@')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/2 5')),
         );
@@ -272,29 +270,29 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testAlpha()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isAlpha();
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/Test')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/TesT')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/Test')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/TesT')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/test1')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/1test')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/@test')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/-test')),
         );
@@ -302,23 +300,23 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testAlnum()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isAlnum();
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/Test')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/TesT')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test1')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/1test')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/Test')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/TesT')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/test1')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/1test')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/@test')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/-test')),
         );
@@ -326,22 +324,22 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testContains()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->contains('dog');
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/bigdog')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dogbig')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-dog')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/catdogbear')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/bigdog')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dogbig')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-dog')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/catdogbear')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/DOG')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/doog')),
         );
@@ -349,21 +347,21 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testChars()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isChars('c-f');
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cdef')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cfed')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cf')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cdef')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cfed')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cf')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cdefg')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog')),
         );
@@ -371,29 +369,29 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testRegex()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isRegex('/cat-[dog|bear|thing]/');
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-dog')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-bear')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-thing')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-dog')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-bear')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-thing')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog-cat')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/catdog')),
         );
@@ -401,26 +399,26 @@ class ValidationsTest extends AbstractKleinTestCase
 
     public function testNotRegex()
     {
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->notRegex('/cat-[dog|bear|thing]/');
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog-cat')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/catdog')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/dog-cat')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/catdog')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-dog')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-bear')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/cat-thing')),
         );
@@ -429,35 +427,35 @@ class ValidationsTest extends AbstractKleinTestCase
     public function testCustomValidator()
     {
         // Add our custom validator
-        $this->klein_app->service()->addValidator('donkey', function ($string, $color) {
+        $this->klein_app->service()->addValidator('donkey', static function ($string, $color) {
             $regex_str = $color . '[-_]?donkey';
 
             return preg_match('/' . $regex_str . '/', $string);
         });
 
-        $this->klein_app->respond('/[:test_param]', function ($request, $response, $service) {
+        $this->klein_app->respond('/[:test_param]', static function ($request, $response, $service) {
             $service->validateParam('test_param')->notNull()->isDonkey('brown');
 
             // We should only get here if we passed our validations
             echo 'yup!';
         });
 
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/browndonkey')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/brown-donkey')));
-        $this->assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/brown_donkey')));
-        $this->assertStringStartsWith(
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/browndonkey')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/brown-donkey')));
+        static::assertSame('yup!', $this->dispatchAndReturnOutput(MockRequestFactory::create('/brown_donkey')));
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/bluedonkey')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/blue-donkey')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/blue_donkey')),
         );
-        $this->assertStringStartsWith(
+        static::assertStringStartsWith(
             'Validation failed for',
             $this->dispatchAndReturnOutput(MockRequestFactory::create('/brown_donk')),
         );
@@ -467,7 +465,7 @@ class ValidationsTest extends AbstractKleinTestCase
     public function testCustomValidatorWithManyArgs()
     {
         // Add our custom validator
-        $this->klein_app->service()->addValidator('booleanEqual', function ($string, $args) {
+        $this->klein_app->service()->addValidator('booleanEqual', static function ($string, $args) {
             // Get the args
             $args = func_get_args();
             array_shift($args);
@@ -475,46 +473,36 @@ class ValidationsTest extends AbstractKleinTestCase
             $previous = null;
 
             foreach ($args as $arg) {
-                if (null !== $previous) {
-                    if ((bool) $arg !== (bool) $previous) {
-                        return false;
-                    }
-                } else {
+                if (null === $previous) {
                     $previous = $arg;
+
+                    continue;
+                }
+
+                if ((bool) $arg !== (bool) $previous) {
+                    return false;
                 }
             }
 
             return true;
         });
 
-        $this->klein_app
-            ->service()
-            ->validateParam('tRUe')
-            ->isBooleanEqual(1, true, 'true');
+        $this->klein_app->service()->validateParam('tRUe')->isBooleanEqual(1, true, 'true');
 
-        $this->klein_app
-            ->service()
-            ->validateParam('false')
-            ->isBooleanEqual(0, null, '', [], '0', false);
+        $this->klein_app->service()->validateParam('false')->isBooleanEqual(0, null, '', [], '0', false);
     }
 
     public function testValidatorReturnsResult()
     {
-        $result = $this->klein_app
-            ->service()
-            ->validateParam('12', false)
-            ->isInt();
+        $result = $this->klein_app->service()->validateParam('12', false)->isInt();
 
-        $this->assertNotNull($result);
-        $this->assertFalse($result);
+        static::assertNotNull($result);
+        static::assertFalse($result);
     }
 
     public function testValidatorThatDoesntExist()
     {
         $this->expectException(BadMethodCallException::class);
-        $result = $this->klein_app
-            ->service()
-            ->validateParam('12')
-            ->isALongNameOfAThingThatDoesntExist();
+        $result = $this->klein_app->service()->validateParam('12')->isALongNameOfAThingThatDoesntExist();
     }
 }

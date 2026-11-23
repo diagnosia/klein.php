@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -26,7 +28,7 @@ class RouteFactory extends AbstractRouteFactory
     /**
      * The value given to path's when they are entered as null values
      *
-     * @type string
+     * @var string
      */
     const NULL_PATH_VALUE = '*';
 
@@ -75,39 +77,26 @@ class RouteFactory extends AbstractRouteFactory
 
         // If a custom regular expression (or negated custom regex)
         if (
-            $this->namespace && (isset($path[0]) && $path[0] === '@')
-            || isset($path[0]) && $path[0] === '!' && isset($path[1]) && $path[1] === '@'
+            $this->namespace && ($path[0] ?? null) === '@'
+            || ($path[0] ?? null) === '!' && ($path[1] ?? null) === '@'
         ) {
             // Is it negated?
-            if ($path[0] === '!') {
-                $negate = true;
-                $path = substr($path, 2);
-            } else {
-                $negate = false;
-                $path = substr($path, 1);
-            }
+            $negate = $path[0] === '!';
+            $path = substr($path, $negate ? 2 : 1);
 
             // Regex anchored to front of string
-            if ($path[0] === '^') {
-                $path = substr($path, 1);
-            } else {
-                $path = '.*' . $path;
-            }
+            $path = $path[0] === '^' ? substr($path, offset: 1) : '.*' . $path;
 
-            if ($negate) {
-                $path = '@^' . $this->namespace . '(?!' . $path . ')';
-            } else {
-                $path = '@^' . $this->namespace . $path;
-            }
-        } elseif ($this->namespace && $this->pathIsNull($path)) {
-            // Empty route with namespace is a match-all
-            $path = '@^' . $this->namespace . '(/|$)';
-        } else {
-            // Just prepend our namespace
-            $path = $this->namespace . $path;
+            return $negate ? '@^' . $this->namespace . '(?!' . $path . ')' : '@^' . $this->namespace . $path;
         }
 
-        return $path;
+        if ($this->namespace && $this->pathIsNull($path)) {
+            // Empty route with namespace is a match-all
+            return '@^' . $this->namespace . '(/|$)';
+        }
+
+        // Just prepend our namespace
+        return $this->namespace . $path;
     }
 
     /**

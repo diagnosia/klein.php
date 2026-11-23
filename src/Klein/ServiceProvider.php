@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -29,42 +31,42 @@ class ServiceProvider
     /**
      * The Request instance containing HTTP request data and behaviors
      *
-     * @type Request
+     * @var Request
      */
     protected $request;
 
     /**
      * The Response instance containing HTTP response data and behaviors
      *
-     * @type AbstractResponse
+     * @var AbstractResponse
      */
     protected $response;
 
     /**
      * The id of the current PHP session
      *
-     * @type string|boolean
+     * @var string|boolean
      */
     protected $session_id;
 
     /**
      * The view layout
      *
-     * @type string
+     * @var string
      */
     protected $layout;
 
     /**
      * The view to render
      *
-     * @type string
+     * @var string
      */
     protected $view;
 
     /**
      * Shared data collection
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $shared_data;
 
@@ -97,8 +99,8 @@ class ServiceProvider
     public function bind(Request|null $request = null, AbstractResponse|null $response = null)
     {
         // Keep references
-        $this->request = $request ?: $this->request;
-        $this->response = $response ?: $this->response;
+        $this->request = $request ?? $this->request;
+        $this->response = $response ?? $this->response;
 
         return $this;
     }
@@ -131,7 +133,8 @@ class ServiceProvider
             // Attempt to start a session
             session_start();
 
-            $this->session_id = session_id() ?: false;
+            $session_id = session_id();
+            $this->session_id = $session_id === '' ? false : $session_id;
         }
 
         return $this->session_id;
@@ -152,11 +155,8 @@ class ServiceProvider
             $params = $type;
             $type = 'info';
         }
-        if (!isset($_SESSION['__flashes'])) {
-            $_SESSION['__flashes'] = array($type => []);
-        } elseif (!isset($_SESSION['__flashes'][$type])) {
-            $_SESSION['__flashes'][$type] = [];
-        }
+        $_SESSION['__flashes'] ??= [];
+        $_SESSION['__flashes'][$type] ??= [];
         $_SESSION['__flashes'][$type][] = $this->markdown($msg, $params);
     }
 
@@ -170,20 +170,23 @@ class ServiceProvider
     {
         $this->startSession();
 
-        if (!isset($_SESSION['__flashes'])) {
+        if (($_SESSION['__flashes'] ?? null) === null) {
             return [];
         }
 
         if (null === $type) {
             $flashes = $_SESSION['__flashes'];
             unset($_SESSION['__flashes']);
-        } else {
-            $flashes = [];
-            if (isset($_SESSION['__flashes'][$type])) {
-                $flashes = $_SESSION['__flashes'][$type];
-                unset($_SESSION['__flashes'][$type]);
-            }
+
+            return $flashes;
         }
+
+        if (($_SESSION['__flashes'][$type] ?? null) === null) {
+            return [];
+        }
+
+        $flashes = $_SESSION['__flashes'][$type];
+        unset($_SESSION['__flashes'][$type]);
 
         return $flashes;
     }
@@ -203,16 +206,16 @@ class ServiceProvider
     public static function markdown($str, $args = null)
     {
         // Create our markdown parse/conversion regex's
-        $md = array(
+        $md = [
             '/\[([^\]]++)\]\(([^\)]++)\)/' => '<a href="$2">$1</a>',
             '/\*\*([^\*]++)\*\*/' => '<strong>$1</strong>',
             '/\*([^\*]++)\*/' => '<em>$1</em>',
-        );
+        ];
 
         // Let's make our arguments more "magical"
         $args = func_get_args(); // Grab all of our passed args
         $str = array_shift($args); // Remove the initial arg from the array (and set the $str to it)
-        if (isset($args[0]) && is_array($args[0])) {
+        if (is_array($args[0] ?? null)) {
             /**
              * If our "second" argument (now the first array item is an array)
              * just use the array as the arguments and forget the rest
@@ -222,7 +225,7 @@ class ServiceProvider
 
         // Encode our args so we can insert them into an HTML string
         foreach ($args as &$arg) {
-            $arg = htmlentities($arg ?? '', ENT_QUOTES, 'UTF-8');
+            $arg = htmlentities((string) ($arg ?? ''), ENT_QUOTES, encoding: 'UTF-8');
         }
 
         // Actually do our markdown conversion
@@ -242,7 +245,7 @@ class ServiceProvider
      */
     public static function escape($str, $flags = ENT_QUOTES)
     {
-        return htmlentities($str, $flags, 'UTF-8');
+        return htmlentities($str, $flags, encoding: 'UTF-8');
     }
 
     /**
@@ -268,9 +271,11 @@ class ServiceProvider
 
         if (null !== $referer) {
             $this->response->redirect($referer);
-        } else {
-            $this->refresh();
+
+            return $this;
         }
+
+        $this->refresh();
 
         return $this;
     }
@@ -316,16 +321,21 @@ class ServiceProvider
     {
         $original_view = $this->view;
 
-        if (!empty($data)) {
+        if ([] !== $data) {
             $this->shared_data->merge($data);
         }
 
         $this->view = $view;
 
-        if (null === $this->layout) {
+        // The view may set a layout while it renders; only the one set before counts
+        $layout = $this->layout;
+
+        if (null === $layout) {
             $this->yieldView();
-        } else {
-            require $this->layout;
+        }
+
+        if (null !== $layout) {
+            require $layout;
         }
 
         if (false !== $this->response->chunked) {

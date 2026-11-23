@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -25,7 +27,7 @@ class HttpStatusTest extends AbstractKleinTestCase
         $code = 404;
         $message = 'Not Found'; // HTTP 1.1 404 status message
 
-        $this->assertSame($message, HttpStatus::getMessageFromCode($code));
+        static::assertSame($message, HttpStatus::getMessageFromCode($code));
     }
 
     public function testManualEntryViaConstructor()
@@ -36,8 +38,8 @@ class HttpStatusTest extends AbstractKleinTestCase
 
         $http_status = new HttpStatus($code, $message);
 
-        $this->assertSame($code, $http_status->getCode());
-        $this->assertSame($message, $http_status->getMessage());
+        static::assertSame($code, $http_status->getCode());
+        static::assertSame($message, $http_status->getMessage());
     }
 
     public function testManualEntryViaSetters()
@@ -51,9 +53,9 @@ class HttpStatusTest extends AbstractKleinTestCase
         $http_status->setCode($code);
         $http_status->setMessage($message);
 
-        $this->assertNotSame($constructor_code, $http_status->getCode());
-        $this->assertSame($code, $http_status->getCode());
-        $this->assertSame($message, $http_status->getMessage());
+        static::assertNotSame($constructor_code, $http_status->getCode());
+        static::assertSame($code, $http_status->getCode());
+        static::assertSame($message, $http_status->getMessage());
     }
 
     public function testAutomaticMessage()
@@ -63,8 +65,8 @@ class HttpStatusTest extends AbstractKleinTestCase
 
         $http_status = new HttpStatus($code);
 
-        $this->assertSame($code, $http_status->getCode());
-        $this->assertSame($expected_message, $http_status->getMessage());
+        static::assertSame($code, $http_status->getCode());
+        static::assertSame($expected_message, $http_status->getMessage());
     }
 
     public function testStringOutput()
@@ -79,6 +81,6 @@ class HttpStatusTest extends AbstractKleinTestCase
 
         $this->expectOutputString($expected_string);
 
-        $this->assertSame($expected_string, $http_status->getFormattedString());
+        static::assertSame($expected_string, $http_status->getFormattedString());
     }
 }

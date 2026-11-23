@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -35,9 +37,9 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
 
         $sample_other_cookie = new ResponseCookie('Chris', 'is a boss', 60, '/app/', 'github.com', true, true);
 
-        return array(
-            array($sample_cookie, $sample_other_cookie),
-        );
+        return [
+            [$sample_cookie, $sample_other_cookie],
+        ];
     }
 
     /*
@@ -53,8 +55,8 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
         // Set our data from our test data
         $data_collection->set('first', $sample_cookie);
 
-        $this->assertSame($sample_cookie, $data_collection->get('first'));
-        $this->assertTrue($data_collection->get('first') instanceof ResponseCookie);
+        static::assertSame($sample_cookie, $data_collection->get('first'));
+        static::assertTrue($data_collection->get('first') instanceof ResponseCookie);
     }
 
     public function testSetStringConvertsToCookie()
@@ -65,25 +67,25 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
         // Set our data from our test data
         $data_collection->set('first', 'value');
 
-        $this->assertNotSame('value', $data_collection->get('first'));
-        $this->assertTrue($data_collection->get('first') instanceof ResponseCookie);
+        static::assertNotSame('value', $data_collection->get('first'));
+        static::assertTrue($data_collection->get('first') instanceof ResponseCookie);
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testConstructorRoutesThroughSet($sample_cookie, $sample_other_cookie)
     {
-        $array_of_cookie_instances = array(
+        $array_of_cookie_instances = [
             $sample_cookie,
             $sample_other_cookie,
             new ResponseCookie('test'),
-        );
+        ];
 
         // Create our collection with NO data
         $data_collection = new ResponseCookieDataCollection($array_of_cookie_instances);
-        $this->assertSame($array_of_cookie_instances, $data_collection->all());
+        static::assertSame($array_of_cookie_instances, $data_collection->all());
 
         foreach ($data_collection as $cookie) {
-            $this->assertTrue($cookie instanceof ResponseCookie);
+            static::assertTrue($cookie instanceof ResponseCookie);
         }
     }
 }

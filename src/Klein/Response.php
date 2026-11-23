@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -38,7 +40,7 @@ class Response extends AbstractResponse
 
         if (null !== $str) {
             // printf("%x\r\n", strlen($str));
-            echo "$str\r\n";
+            echo "{$str}\r\n";
             flush();
         }
 
@@ -54,7 +56,7 @@ class Response extends AbstractResponse
     public function dump($obj)
     {
         if (is_array($obj) || is_object($obj)) {
-            $obj = print_r($obj, true);
+            $obj = print_r($obj, return: true);
         }
 
         $this->append('<pre>' . htmlentities($obj, ENT_QUOTES) . "</pre><br />\n");
@@ -152,14 +154,11 @@ class Response extends AbstractResponse
 
         $json = json_encode($object);
 
-        if (null !== $jsonp_prefix) {
-            // Should ideally be application/json-p once adopted
-            $this->header('Content-Type', 'text/javascript');
-            $this->body("$jsonp_prefix($json);");
-        } else {
-            $this->header('Content-Type', 'application/json');
-            $this->body($json);
-        }
+        $is_jsonp = null !== $jsonp_prefix;
+
+        // JSONP should ideally be application/json-p once adopted
+        $this->header('Content-Type', $is_jsonp ? 'text/javascript' : 'application/json');
+        $this->body($is_jsonp ? "{$jsonp_prefix}({$json});" : $json);
 
         $this->send();
 

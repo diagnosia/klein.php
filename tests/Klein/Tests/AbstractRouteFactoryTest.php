@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -13,7 +15,6 @@
 namespace Klein\Tests;
 
 use Klein\AbstractRouteFactory;
-use Klein\Route;
 
 /**
  * AbstractRouteFactoryTest
@@ -26,21 +27,22 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
 
     protected function getDefaultMethodsToMock()
     {
-        return array(
+        return [
             'build',
-        );
+        ];
     }
 
     protected function getMockForFactory()
     {
-        return $this->createMock('\Klein\AbstractRouteFactory');
+        return $this->createMock(AbstractRouteFactory::class);
     }
 
     protected function getMockBuilderForFactory(array|null $methods_to_mock = null)
     {
-        $methods_to_mock = $methods_to_mock ?: $this->getDefaultMethodsToMock();
+        $methods_to_mock =
+            $methods_to_mock === null || $methods_to_mock === [] ? $this->getDefaultMethodsToMock() : $methods_to_mock;
 
-        return $this->getMockBuilder('\Klein\AbstractRouteFactory')->onlyMethods($methods_to_mock);
+        return $this->getMockBuilder(AbstractRouteFactory::class)->onlyMethods($methods_to_mock);
     }
 
     /**
@@ -49,7 +51,7 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
 
     public function testNamespaceGetSet()
     {
-        $this->markTestSkipped('not working yet');
+        static::markTestSkipped('not working yet');
 
         // Test data
         $test_namespace = '/users';
@@ -57,23 +59,23 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         // Empty constructor
         $factory = $this->getMockForFactory();
 
-        $this->assertNull($factory->getNamespace());
+        static::assertNull($factory->getNamespace());
 
         // Set in constructor
         $factory = $this->getMockBuilderForFactory()->setConstructorArgs([$test_namespace])->getMock();
 
-        $this->assertSame($test_namespace, $factory->getNamespace());
+        static::assertSame($test_namespace, $factory->getNamespace());
 
         // Set in method
         $factory = $this->getMockForFactory();
         $factory->setNamespace($test_namespace);
 
-        $this->assertSame($test_namespace, $factory->getNamespace());
+        static::assertSame($test_namespace, $factory->getNamespace());
     }
 
     public function testAppendNamespace()
     {
-        $this->markTestSkipped('not working yet');
+        static::markTestSkipped('not working yet');
 
         // Test data
         $test_namespace = '/users';
@@ -83,6 +85,6 @@ class AbstractRouteFactoryTest extends AbstractKleinTestCase
         $factory->setNamespace($test_namespace);
         $factory->appendNamespace($test_namespace_append);
 
-        $this->assertSame($test_namespace . $test_namespace_append, $factory->getNamespace());
+        static::assertSame($test_namespace . $test_namespace_append, $factory->getNamespace());
     }
 }

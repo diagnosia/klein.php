@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -12,7 +14,6 @@
 
 namespace Klein;
 
-use Exception;
 use Klein\DataCollection\RouteCollection;
 use Klein\Exceptions\DispatchHaltedException;
 use Klein\Exceptions\HttpException;
@@ -40,14 +41,14 @@ class Klein
     /**
      * The regular expression used to compile and match URL's
      *
-     * @type string
+     * @var string
      */
     const ROUTE_COMPILE_REGEX = '`(\\\?(?:/|\.|))(?:\[([^:\]]*)(?::([^:\]]*))?\])(\?|)`';
 
     /**
      * The regular expression used to escape the non-named param section of a route URL
      *
-     * @type string
+     * @var string
      */
     const ROUTE_ESCAPE_REGEX = '`(?<=^|\])[^\]\[\?]+?(?=\[|$)`';
 
@@ -56,7 +57,7 @@ class Klein
      *
      * Don't capture anything. Behave as normal.
      *
-     * @type int
+     * @var int
      */
     const DISPATCH_NO_CAPTURE = 0;
 
@@ -65,7 +66,7 @@ class Klein
      *
      * Capture all output and return it from dispatch
      *
-     * @type int
+     * @var int
      */
     const DISPATCH_CAPTURE_AND_RETURN = 1;
 
@@ -74,7 +75,7 @@ class Klein
      *
      * Capture all output and replace the response body with it
      *
-     * @type int
+     * @var int
      */
     const DISPATCH_CAPTURE_AND_REPLACE = 2;
 
@@ -83,7 +84,7 @@ class Klein
      *
      * Capture all output and prepend it to the response body
      *
-     * @type int
+     * @var int
      */
     const DISPATCH_CAPTURE_AND_PREPEND = 3;
 
@@ -92,7 +93,7 @@ class Klein
      *
      * Capture all output and append it to the response body
      *
-     * @type int
+     * @var int
      */
     const DISPATCH_CAPTURE_AND_APPEND = 4;
 
@@ -110,9 +111,9 @@ class Klein
      * - hexadecimal:   '[h:color]'
      * - slug:          '[s:article]'
      *
-     * @type array
+     * @var array
      */
-    protected $match_types = array(
+    protected $match_types = [
         'i' => '[0-9]++',
         'a' => '[0-9A-Za-z]++',
         'h' => '[0-9A-Fa-f]++',
@@ -120,33 +121,33 @@ class Klein
         '*' => '.+?',
         '**' => '.++',
         '' => '[^/]+?',
-    );
+    ];
 
     /**
      * Collection of the routes to match on dispatch
      *
-     * @type RouteCollection
+     * @var RouteCollection
      */
     protected $routes;
 
     /**
      * The Route factory object responsible for creating Route instances
      *
-     * @type AbstractRouteFactory
+     * @var AbstractRouteFactory
      */
     protected $route_factory;
 
     /**
      * A stack of error callback callables
      *
-     * @type SplStack
+     * @var SplStack
      */
     protected $error_callbacks;
 
     /**
      * A stack of HTTP error callback callables
      *
-     * @type SplStack
+     * @var SplStack
      */
     protected $http_error_callbacks;
 
@@ -154,14 +155,14 @@ class Klein
      * A queue of callbacks to call after processing the dispatch loop
      * and before the response is sent
      *
-     * @type SplQueue
+     * @var SplQueue
      */
     protected $after_filter_callbacks;
 
     /**
      * The output buffer level used by the dispatch process
      *
-     * @type int
+     * @var int
      */
     private $output_buffer_level;
 
@@ -172,28 +173,28 @@ class Klein
     /**
      * The Request object passed to each matched route
      *
-     * @type Request
+     * @var Request
      */
     protected $request;
 
     /**
      * The Response object passed to each matched route
      *
-     * @type AbstractResponse
+     * @var AbstractResponse
      */
     protected $response;
 
     /**
      * The service provider object passed to each matched route
      *
-     * @type ServiceProvider
+     * @var ServiceProvider
      */
     protected $service;
 
     /**
      * A generic variable passed to each matched route
      *
-     * @type mixed
+     * @var mixed
      */
     protected $app;
 
@@ -219,10 +220,10 @@ class Klein
         AbstractRouteFactory|null $route_factory = null,
     ) {
         // Instanciate and fall back to defaults
-        $this->service = $service ?: new ServiceProvider();
-        $this->app = $app ?: new App();
-        $this->routes = $routes ?: new RouteCollection();
-        $this->route_factory = $route_factory ?: new RouteFactory();
+        $this->service = $service ?? new ServiceProvider();
+        $this->app = $app ?? new App();
+        $this->routes = $routes ?? new RouteCollection();
+        $this->route_factory = $route_factory ?? new RouteFactory();
 
         $this->error_callbacks = new SplStack();
         $this->http_error_callbacks = new SplStack();
@@ -301,11 +302,11 @@ class Klein
         $method = array_pop($args);
 
         // Return a named parameter array
-        return array(
+        return [
             'method' => $method,
             'path' => $path,
             'callback' => $callback,
-        );
+        ];
     }
 
     /**
@@ -382,14 +383,13 @@ class Klein
         $this->route_factory->appendNamespace($namespace);
 
         if (is_callable($routes)) {
-            if (is_string($routes)) {
-                $routes($this);
-            } else {
-                call_user_func($routes, $this);
-            }
-        } else {
-            require $routes;
+            call_user_func($routes, $this);
+            $this->route_factory->setNamespace($previous);
+
+            return;
         }
+
+        require $routes;
 
         $this->route_factory->setNamespace($previous);
     }
@@ -412,9 +412,51 @@ class Klein
         $send_response = true,
         $capture = self::DISPATCH_NO_CAPTURE,
     ) {
+        $this->prepareDispatch($request, $response);
+
+        $req_method = $this->request->method();
+
+        $this->dispatchRoutes($this->request->pathname(), $req_method);
+
+        try {
+            if ($this->response->chunked) {
+                $this->response->chunk();
+            }
+
+            // Output capturing behavior (chunk() never resets the chunked flag)
+            if (!$this->response->chunked) {
+                if (self::DISPATCH_CAPTURE_AND_RETURN === $capture) {
+                    return $this->drainOutputBuffers();
+                }
+
+                $capture = $this->captureOutput($capture);
+            }
+
+            $this->finishOutput($req_method, $capture);
+        } catch (LockedResponseException) { // @mago-expect lint:no-empty-catch-clause
+            // Do nothing, since this is an automated behavior
+        }
+
+        // Run our after dispatch callbacks
+        $this->callAfterDispatchCallbacks();
+
+        if ($send_response && !$this->response->isSent()) {
+            $this->response->send();
+        }
+    }
+
+    /**
+     * Sets up the request, response, service, named routes and output buffering for a dispatch
+     *
+     * @param Request|null $request             The request object, created from the globals if null
+     * @param AbstractResponse|null $response   The response object, a new Response if null
+     * @return void
+     */
+    private function prepareDispatch(Request|null $request, AbstractResponse|null $response)
+    {
         // Set/Initialize our objects to be sent in each callback
-        $this->request = $request ?: Request::createFromGlobals();
-        $this->response = $response ?: new Response();
+        $this->request = $request ?? Request::createFromGlobals();
+        $this->response = $response ?? new Response();
 
         // Bind our objects to our service
         $this->service->bind($this->request, $this->response);
@@ -422,20 +464,25 @@ class Klein
         // Prepare any named routes
         $this->routes->prepareNamed();
 
-        // Grab some data from the request
-        $uri = $this->request->pathname();
-        $req_method = $this->request->method();
+        // Start output buffering
+        ob_start();
+        $this->output_buffer_level = ob_get_level();
+    }
 
+    /**
+     * Matches the routes against the request and runs the callbacks of the matching ones
+     *
+     * @param string $uri           The request URI
+     * @param string $req_method    The request method
+     * @return void
+     */
+    private function dispatchRoutes($uri, $req_method)
+    {
         // Set up some variables for matching
         $skip_num = 0;
         $matched = $this->routes->cloneEmpty(); // Get a clone of the routes collection, as it may have been injected
         $methods_matched = [];
         $params = [];
-        $apc = function_exists('apcu_fetch');
-
-        // Start output buffering
-        ob_start();
-        $this->output_buffer_level = ob_get_level();
 
         try {
             foreach ($this->routes as $route) {
@@ -450,132 +497,26 @@ class Klein
                 $path = $route->getPath();
                 $count_match = $route->getCountMatch();
 
-                // Keep track of whether this specific request method was matched
-                $method_match = null;
-
-                // Was a method specified? If so, check it against the current request method
-                if (is_array($method)) {
-                    foreach ($method as $test) {
-                        if (strcasecmp($req_method, $test) === 0) {
-                            $method_match = true;
-                        } elseif (
-                            strcasecmp($req_method, 'HEAD') === 0
-                            && (strcasecmp($test, 'HEAD') === 0 || strcasecmp($test, 'GET') === 0)
-                        ) {
-                            // Test for HEAD request (like GET)
-                            $method_match = true;
-                        }
-                    }
-
-                    if (null === $method_match) {
-                        $method_match = false;
-                    }
-                } elseif (null !== $method && strcasecmp($req_method, $method) !== 0) {
-                    $method_match = false;
-
-                    // Test for HEAD request (like GET)
-                    if (
-                        strcasecmp($req_method, 'HEAD') === 0
-                        && (strcasecmp($method, 'HEAD') === 0 || strcasecmp($method, 'GET') === 0)
-                    ) {
-                        $method_match = true;
-                    }
-                } elseif (null !== $method && strcasecmp($req_method, $method) === 0) {
-                    $method_match = true;
-                }
-
                 // If the method was matched or if it wasn't even passed (in the route callback)
-                $possible_match = null === $method_match || $method_match;
+                $possible_match = false !== $this->matchRouteMethod($req_method, $method);
 
                 // ! is used to negate a match
-                if (isset($path[0]) && $path[0] === '!') {
-                    $negate = true;
-                    $i = 1;
-                } else {
-                    $negate = false;
-                    $i = 0;
-                }
+                $negate = ($path[0] ?? null) === '!';
 
-                // Check for a wildcard (match all)
-                if ($path === '*') {
-                    $match = true;
-                } elseif (
-                    $path === '404' && $matched->isEmpty() && count($methods_matched) <= 0
-                    || $path === '405' && $matched->isEmpty() && count($methods_matched) > 0
-                ) {
-                    // Warn user of deprecation
-                    trigger_error(
-                        'Use of 404/405 "routes" is deprecated. Use $klein->onHttpError() instead.',
-                        E_USER_DEPRECATED,
-                    );
-                    // TODO: Possibly remove in future, here for backwards compatibility
-                    $this->onHttpError($route);
-
+                if ($this->handleDeprecatedHttpErrorRoute($route, $matched, $methods_matched)) {
                     continue;
-                } elseif (isset($path[$i]) && $path[$i] === '@') {
-                    // @ is used to specify custom regex
-
-                    $match = preg_match('`' . substr($path, $i + 1) . '`', $uri, $params);
-                } else {
-                    // Compiling and matching regular expressions is relatively
-                    // expensive, so try and match by a substring first
-
-                    $expression = null;
-                    $regex = false;
-                    $j = 0;
-                    $n = isset($path[$i]) ? $path[$i] : null;
-
-                    // Find the longest non-regex substring and match it against the URI
-                    while (true) {
-                        if (!isset($path[$i])) {
-                            break;
-                        } elseif (false === $regex) {
-                            $c = $n;
-                            $regex = $c === '[' || $c === '(' || $c === '.';
-                            if (false === $regex && false !== isset($path[$i + 1])) {
-                                $n = $path[$i + 1];
-                                $regex = $n === '?' || $n === '+' || $n === '*' || $n === '{';
-                            }
-                            if (false === $regex && $c !== '/' && (!isset($uri[$j]) || $c !== $uri[$j])) {
-                                continue 2;
-                            }
-                            $j++;
-                        }
-                        $expression .= $path[$i++];
-                    }
-
-                    try {
-                        // Check if there's a cached regex string
-                        if (false !== $apc) {
-                            $regex = apcu_fetch("route:$expression");
-                            if (false === $regex) {
-                                $regex = $this->compileRoute($expression);
-                                apcu_store("route:$expression", $regex);
-                            }
-                        } else {
-                            $regex = $this->compileRoute($expression);
-                        }
-                    } catch (RegularExpressionCompilationException $e) {
-                        throw RoutePathCompilationException::createFromRoute($route, $e);
-                    }
-
-                    $match = preg_match($regex, $uri, $params);
                 }
 
-                if (isset($match) && $match ^ $negate) {
-                    if ($possible_match) {
-                        if (!empty($params)) {
-                            /**
-                             * URL Decode the params according to RFC 3986
-                             * @link http://www.faqs.org/rfcs/rfc3986
-                             *
-                             * Decode here AFTER matching as per @chriso's suggestion
-                             * @link https://github.com/klein/klein.php/issues/117#issuecomment-21093915
-                             */
-                            $params = array_map('rawurldecode', $params);
+                $match = $this->matchRoutePath($route, $uri, $params);
 
-                            $this->request->paramsNamed()->merge($params);
-                        }
+                // The literal part of the path didn't match the URI, so skip the route
+                if (null === $match) {
+                    continue;
+                }
+
+                if ($match ^ $negate) {
+                    if ($possible_match) {
+                        $this->mergeNamedParams($params);
 
                         // Handle our response callback
                         try {
@@ -594,105 +535,349 @@ class Klein
                             }
                         }
 
-                        if ($path !== '*') {
-                            $count_match && $matched->add($route);
+                        if ($count_match && $path !== '*') {
+                            $matched->add($route);
                         }
                     }
 
                     // Don't bother counting this as a method match if the route isn't supposed to match anyway
                     if ($count_match) {
-                        // Keep track of possibly matched methods
-                        $methods_matched = array_merge($methods_matched, (array) $method);
-                        $methods_matched = array_filter($methods_matched);
-                        $methods_matched = array_unique($methods_matched);
+                        $methods_matched = $this->mergeMatchedMethods($methods_matched, $method);
                     }
                 }
             }
 
-            // Handle our 404/405 conditions
-            if ($matched->isEmpty() && count($methods_matched) > 0) {
-                // Add our methods to our allow header
-                $this->response->header('Allow', implode(', ', $methods_matched));
-
-                if (strcasecmp($req_method, 'OPTIONS') !== 0) {
-                    throw HttpException::createFromCode(405);
-                }
-            } elseif ($matched->isEmpty()) {
-                throw HttpException::createFromCode(404);
-            }
+            $this->requireRouteMatch($matched, $methods_matched, $req_method);
         } catch (HttpExceptionInterface $e) {
-            // Grab our original response lock state
-            $locked = $this->response->isLocked();
-
-            // Call our http error handlers
-            $this->httpError($e, $matched, $methods_matched);
-
-            // Make sure we return our response to its original lock state
-            if (!$locked) {
-                $this->response->unlock();
-            }
-        } catch (Throwable $e) { // PHP 7 compatibility
-            $this->error($e);
-        } catch (Exception $e) { // TODO: Remove this catch block once PHP 5.x support is no longer necessary.
+            $this->handleHttpErrorKeepingLock($e, $matched, $methods_matched);
+        } catch (Throwable $e) {
             $this->error($e);
         }
+    }
+
+    /**
+     * Calls the HTTP error handlers, restoring the response's lock state afterwards
+     *
+     * @param HttpExceptionInterface $http_exception    The HTTP exception that occurred
+     * @param RouteCollection $matched                  The matched routes
+     * @param array $methods_matched                    The matched methods
+     * @return void
+     */
+    private function handleHttpErrorKeepingLock(
+        HttpExceptionInterface $http_exception,
+        RouteCollection $matched,
+        array $methods_matched,
+    ) {
+        // Grab our original response lock state
+        $locked = $this->response->isLocked();
+
+        // Call our http error handlers
+        $this->httpError($http_exception, $matched, $methods_matched);
+
+        // Make sure we return our response to its original lock state
+        if (!$locked) {
+            $this->response->unlock();
+        }
+    }
+
+    /**
+     * Registers a deprecated 404/405 "route" as HTTP error callback, if it is one and is due
+     *
+     * @param Route $route              The route to check
+     * @param RouteCollection $matched  The routes matched so far
+     * @param array $methods_matched    The methods matched so far
+     * @return boolean                  Whether the route was handled as a deprecated 404/405 "route"
+     */
+    private function handleDeprecatedHttpErrorRoute(Route $route, RouteCollection $matched, array $methods_matched)
+    {
+        $path = $route->getPath();
+
+        if ($path !== '404' && $path !== '405' || !$matched->isEmpty()) {
+            return false;
+        }
+
+        if (($path === '404') !== count($methods_matched) <= 0) {
+            return false;
+        }
+
+        // Warn user of deprecation
+        trigger_error('Use of 404/405 "routes" is deprecated. Use $klein->onHttpError() instead.', E_USER_DEPRECATED);
+
+        // Deprecated (see the notice above), kept for backwards compatibility
+        $this->onHttpError($route);
+
+        return true;
+    }
+
+    /**
+     * Adds a route's method(s) to the possibly matched methods
+     *
+     * @param array $methods_matched        The methods matched so far
+     * @param string|array|null $method     The method(s) of the route
+     * @return array
+     */
+    private function mergeMatchedMethods(array $methods_matched, $method)
+    {
+        return array_unique(array_filter(array_merge($methods_matched, (array) $method)));
+    }
+
+    /**
+     * URL decodes the matched params and merges them into the request's named params
+     *
+     * @param array $params The params matched from the route's path
+     * @return void
+     */
+    private function mergeNamedParams(array $params)
+    {
+        if ([] === $params) {
+            return;
+        }
+
+        /**
+         * URL Decode the params according to RFC 3986
+         * @link http://www.faqs.org/rfcs/rfc3986
+         *
+         * Decode here AFTER matching as per @chriso's suggestion
+         * @link https://github.com/klein/klein.php/issues/117#issuecomment-21093915
+         */
+        $this->request->paramsNamed()->merge(array_map('rawurldecode', $params));
+    }
+
+    /**
+     * Throws the 404/405 HTTP exceptions if no route matched
+     *
+     * @param RouteCollection $matched  The matched routes
+     * @param array $methods_matched    The matched methods
+     * @param string $req_method        The request method
+     * @throws HttpException            If no route matched (404) or none matched the method (405)
+     * @return void
+     */
+    private function requireRouteMatch(RouteCollection $matched, array $methods_matched, $req_method)
+    {
+        if (!$matched->isEmpty()) {
+            return;
+        }
+
+        if (count($methods_matched) === 0) {
+            throw HttpException::createFromCode(404);
+        }
+
+        // Add our methods to our allow header
+        $this->response->header('Allow', implode(', ', $methods_matched));
+
+        if (strcasecmp($req_method, 'OPTIONS') !== 0) {
+            throw HttpException::createFromCode(405);
+        }
+    }
+
+    /**
+     * Ends the output buffers started by dispatch, passing each one's content to an optional consumer
+     *
+     * @param callable|null $consumer   Receives the content of each buffer, innermost first
+     * @return string|false|null        The content of the last (outermost) buffer, null if there was none
+     */
+    private function drainOutputBuffers(callable|null $consumer = null)
+    {
+        $content = null;
+
+        while (ob_get_level() >= $this->output_buffer_level) {
+            $content = ob_get_clean();
+
+            if (null !== $consumer) {
+                $consumer($content);
+            }
+        }
+
+        return $content;
+    }
+
+    /**
+     * Captures the output into the response body according to the capture behavior
+     *
+     * @param int $capture  The DISPATCH_* capture behavior (other than DISPATCH_CAPTURE_AND_RETURN)
+     * @return int          The capture behavior, DISPATCH_NO_CAPTURE if it isn't a handled one
+     */
+    private function captureOutput($capture)
+    {
+        switch ($capture) {
+            case self::DISPATCH_CAPTURE_AND_REPLACE:
+                $this->drainOutputBuffers($this->response->body(...));
+                return $capture;
+            case self::DISPATCH_CAPTURE_AND_PREPEND:
+                $this->drainOutputBuffers($this->response->prepend(...));
+                return $capture;
+            case self::DISPATCH_CAPTURE_AND_APPEND:
+                $this->drainOutputBuffers($this->response->append(...));
+                return $capture;
+            default:
+                // If not a handled capture strategy, default to no capture
+                return self::DISPATCH_NO_CAPTURE;
+        }
+    }
+
+    /**
+     * Discards the output for HEAD requests, otherwise sends it if it isn't captured
+     *
+     * @param string $req_method    The request method
+     * @param int $capture          The DISPATCH_* capture behavior
+     * @return void
+     */
+    private function finishOutput($req_method, $capture)
+    {
+        // Test for HEAD request (like GET)
+        if (strcasecmp($req_method, 'HEAD') === 0) {
+            // HEAD requests shouldn't return a body
+            $this->response->body('');
+
+            $this->cleanOutputBuffers();
+
+            return;
+        }
+
+        if (self::DISPATCH_NO_CAPTURE === $capture) {
+            $this->flushOutputBuffers();
+        }
+    }
+
+    /**
+     * Discards the output buffers started by dispatch
+     *
+     * @return void
+     */
+    private function cleanOutputBuffers()
+    {
+        while (ob_get_level() >= $this->output_buffer_level) {
+            ob_end_clean();
+        }
+    }
+
+    /**
+     * Sends the output buffers started by dispatch
+     *
+     * @return void
+     */
+    private function flushOutputBuffers()
+    {
+        while (ob_get_level() >= $this->output_buffer_level) {
+            ob_end_flush();
+        }
+    }
+
+    /**
+     * Checks a route's method(s) against the request method
+     *
+     * HEAD requests also match routes for GET
+     *
+     * @param string $req_method            The request method
+     * @param string|array|null $method     The method(s) of the route
+     * @return boolean|null                 null if the route doesn't specify a method
+     */
+    private function matchRouteMethod($req_method, $method)
+    {
+        if (null === $method) {
+            return null;
+        }
+
+        $is_head_request = strcasecmp($req_method, 'HEAD') === 0;
+
+        foreach ((array) $method as $test) {
+            if (strcasecmp($req_method, $test) === 0) {
+                return true;
+            }
+
+            if ($is_head_request && (strcasecmp($test, 'HEAD') === 0 || strcasecmp($test, 'GET') === 0)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Matches a route's path against the request URI
+     *
+     * @param Route $route      The route being matched
+     * @param string $uri       The request URI
+     * @param array $params     Receives the regex matches; left untouched for a wildcard path
+     * @throws RoutePathCompilationException    If the route's path fails to compile
+     * @return int|boolean|null                 The match result, null if the route should be skipped
+     */
+    private function matchRoutePath(Route $route, $uri, &$params)
+    {
+        $path = $route->getPath();
+        // Skip a leading "!", which negates the match
+        $i = ($path[0] ?? null) === '!' ? 1 : 0;
+        // Check for a wildcard (match all)
+        if ($path === '*') {
+            return true;
+        }
+
+        // @ is used to specify custom regex
+        if (($path[$i] ?? null) === '@') {
+            return preg_match('`' . substr($path, $i + 1) . '`', $uri, $params);
+        }
+
+        // Compiling and matching regular expressions is relatively
+        // expensive, so try and match by a substring first
+
+        $expression = null;
+        $regex = false;
+        $j = 0;
+        $n = $path[$i] ?? null;
+
+        // Find the longest non-regex substring and match it against the URI
+        while (true) {
+            if (($path[$i] ?? null) === null) {
+                break;
+            }
+
+            if (false === $regex) {
+                $c = $n;
+                $regex = $c === '[' || $c === '(' || $c === '.';
+                if (false === $regex && ($path[$i + 1] ?? null) !== null) {
+                    $n = $path[$i + 1];
+                    $regex = $n === '?' || $n === '+' || $n === '*' || $n === '{';
+                }
+                if (false === $regex && $c !== '/' && $c !== ($uri[$j] ?? null)) {
+                    return null;
+                }
+                $j++;
+            }
+            $expression .= $path[$i++];
+        }
+
+        return preg_match($this->getRouteRegex($route, $expression), $uri, $params);
+    }
+
+    /**
+     * Gets the compiled regular expression of a route's path, cached in APCu if available
+     *
+     * @param Route $route          The route the expression belongs to
+     * @param string $expression    The route's path expression, without a leading "!"
+     * @throws RoutePathCompilationException    If the route's path fails to compile
+     * @return string
+     */
+    private function getRouteRegex(Route $route, $expression)
+    {
+        // Whether compiled route regexes can be cached in APCu
+        $apc = function_exists('apcu_fetch');
 
         try {
-            if ($this->response->chunked) {
-                $this->response->chunk();
-            } else {
-                // Output capturing behavior
-                switch ($capture) {
-                    case self::DISPATCH_CAPTURE_AND_RETURN:
-                        $buffed_content = null;
-                        while (ob_get_level() >= $this->output_buffer_level) {
-                            $buffed_content = ob_get_clean();
-                        }
-                        return $buffed_content;
-                    case self::DISPATCH_CAPTURE_AND_REPLACE:
-                        while (ob_get_level() >= $this->output_buffer_level) {
-                            $this->response->body(ob_get_clean());
-                        }
-                        break;
-                    case self::DISPATCH_CAPTURE_AND_PREPEND:
-                        while (ob_get_level() >= $this->output_buffer_level) {
-                            $this->response->prepend(ob_get_clean());
-                        }
-                        break;
-                    case self::DISPATCH_CAPTURE_AND_APPEND:
-                        while (ob_get_level() >= $this->output_buffer_level) {
-                            $this->response->append(ob_get_clean());
-                        }
-                        break;
-                    default:
-                        // If not a handled capture strategy, default to no capture
-                        $capture = self::DISPATCH_NO_CAPTURE;
+            // Check if there's a cached regex string
+            $regex = $apc ? apcu_fetch("route:{$expression}") : false;
+
+            if (false === $regex) {
+                $regex = $this->compileRoute($expression);
+
+                if ($apc) {
+                    apcu_store("route:{$expression}", $regex);
                 }
             }
-
-            // Test for HEAD request (like GET)
-            if (strcasecmp($req_method, 'HEAD') === 0) {
-                // HEAD requests shouldn't return a body
-                $this->response->body('');
-
-                while (ob_get_level() >= $this->output_buffer_level) {
-                    ob_end_clean();
-                }
-            } elseif (self::DISPATCH_NO_CAPTURE === $capture) {
-                while (ob_get_level() >= $this->output_buffer_level) {
-                    ob_end_flush();
-                }
-            }
-        } catch (LockedResponseException $e) {
-            // Do nothing, since this is an automated behavior
+        } catch (RegularExpressionCompilationException $e) {
+            throw RoutePathCompilationException::createFromRoute($route, $e);
         }
 
-        // Run our after dispatch callbacks
-        $this->callAfterDispatchCallbacks();
-
-        if ($send_response && !$this->response->isSent()) {
-            $this->response->send();
-        }
+        return $regex;
     }
 
     /**
@@ -706,9 +891,7 @@ class Klein
         // First escape all of the non-named param (non [block]s) for regex-chars
         $route = preg_replace_callback(
             static::ROUTE_ESCAPE_REGEX,
-            function ($match) {
-                return preg_quote($match[0]);
-            },
+            static fn($match) => preg_quote($match[0], delimiter: '`'),
             $route,
         );
 
@@ -718,29 +901,28 @@ class Klein
         // Now let's actually compile the path
         $route = preg_replace_callback(
             static::ROUTE_COMPILE_REGEX,
-            function ($match) use ($match_types) {
+            static function ($match) use ($match_types) {
                 list(, $pre, $type, $param, $optional) = $match;
 
-                if (isset($match_types[$type])) {
+                if (($match_types[$type] ?? null) !== null) {
                     $type = $match_types[$type];
                 }
 
                 // Older versions of PCRE require the 'P' in (?P<named>)
-                $pattern =
+                return (
                     '(?:'
                     . ($pre !== '' ? $pre : null)
                     . '('
-                    . ($param !== '' ? "?P<$param>" : null)
+                    . ($param !== '' ? "?P<{$param}>" : null)
                     . $type
                     . '))'
-                    . ($optional !== '' ? '?' : null);
-
-                return $pattern;
+                    . ($optional !== '' ? '?' : null)
+                );
             },
             $route,
         );
 
-        $regex = "`^$route$`";
+        $regex = "`^{$route}$`";
 
         // Check if our regular expression is valid
         $this->validateRegularExpression($regex);
@@ -763,11 +945,11 @@ class Klein
         $error_string = null;
 
         // Set an error handler temporarily
-        set_error_handler(function ($errno, $errstr) use (&$error_string) {
+        set_error_handler(static function ($errno, $errstr) use (&$error_string) {
             $error_string = $errstr;
         }, E_NOTICE | E_WARNING);
 
-        if (false === preg_match($regex, '') || !empty($error_string)) {
+        if (false === preg_match($regex, subject: '') || ($error_string ?? '') !== '') {
             // Remove our temporary error handler
             restore_error_handler();
 
@@ -819,12 +1001,14 @@ class Klein
         // Use our compilation regex to reverse the path's compilation from its definition
         $reversed_path = preg_replace_callback(
             static::ROUTE_COMPILE_REGEX,
-            function ($match) use ($params) {
+            static function ($match) use ($params) {
                 list($block, $pre, , $param, $optional) = $match;
 
-                if (isset($params[$param])) {
+                if (($params[$param] ?? null) !== null) {
                     return $pre . $params[$param];
-                } elseif ($optional) {
+                }
+
+                if ($optional) {
                     return '';
                 }
 
@@ -834,14 +1018,12 @@ class Klein
         );
 
         // If the path and reversed_path are the same, the regex must have not matched/replaced
-        if ($path === $reversed_path && $flatten_regex && strpos($path, '@') === 0) {
+        if ($path === $reversed_path && $flatten_regex && str_starts_with($path, '@')) {
             // If the path is a custom regular expression and we're "flattening", just return a slash
-            $path = '/';
-        } else {
-            $path = $reversed_path;
+            return '/';
         }
 
-        return $path;
+        return $reversed_path;
     }
 
     /**
@@ -871,13 +1053,15 @@ class Klein
 
         if ($returned instanceof AbstractResponse) {
             $this->response = $returned;
-        } else {
-            // Otherwise, attempt to append the returned data
-            try {
-                $this->response->append($returned);
-            } catch (LockedResponseException $e) {
-                // Do nothing, since this is an automated behavior
-            }
+
+            return;
+        }
+
+        // Otherwise, attempt to append the returned data
+        try {
+            $this->response->append($returned);
+        } catch (LockedResponseException) { // @mago-expect lint:no-empty-catch-clause
+            // Do nothing, since this is an automated behavior
         }
     }
 
@@ -895,59 +1079,27 @@ class Klein
     /**
      * Routes an exception through the error callbacks
      *
-     * TODO: Change the `$err` parameter to type-hint against `Throwable` once
-     * PHP 5.x support is no longer necessary.
-     *
-     * @param Exception|Throwable $err The exception that occurred
+     * @param Throwable $err The exception that occurred
      * @throws UnhandledException      If the error/exception isn't handled by an error callback
      * @return void
      */
-    protected function error($err)
+    protected function error(Throwable $err)
     {
-        $type = get_class($err);
-        $msg = $err->getMessage();
-
         try {
-            if (!$this->error_callbacks->isEmpty()) {
-                foreach ($this->error_callbacks as $callback) {
-                    if (is_callable($callback)) {
-                        if (is_string($callback)) {
-                            $callback($this, $msg, $type, $err);
-
-                            return;
-                        } else {
-                            call_user_func($callback, $this, $msg, $type, $err);
-
-                            return;
-                        }
-                    } else {
-                        if (null !== $this->service && null !== $this->response) {
-                            $this->service->flash($err);
-                            $this->response->redirect($callback);
-                        }
-                    }
-                }
-            } else {
+            if ($this->error_callbacks->isEmpty()) {
                 $this->response->code(500);
 
-                while (ob_get_level() >= $this->output_buffer_level) {
-                    ob_end_clean();
-                }
+                $this->cleanOutputBuffers();
 
-                throw new UnhandledException($msg, $err->getCode(), $err);
-            }
-        } catch (Throwable $e) { // PHP 7 compatibility
-            // Make sure to clean the output buffer before bailing
-            while (ob_get_level() >= $this->output_buffer_level) {
-                ob_end_clean();
+                throw new UnhandledException($err->getMessage(), (int) $err->getCode(), $err);
             }
 
-            throw $e;
-        } catch (Exception $e) { // TODO: Remove this catch block once PHP 5.x support is no longer necessary.
-            // Make sure to clean the output buffer before bailing
-            while (ob_get_level() >= $this->output_buffer_level) {
-                ob_end_clean();
+            if ($this->callErrorCallbacks($err)) {
+                return;
             }
+        } catch (Throwable $e) {
+            // Make sure to clean the output buffer before bailing
+            $this->cleanOutputBuffers();
 
             throw $e;
         }
@@ -955,6 +1107,35 @@ class Klein
         // Lock our response, since we probably don't want
         // anything else messing with our error code/body
         $this->response->lock();
+    }
+
+    /**
+     * Runs the error callbacks until the first callable one
+     *
+     * Non-callable callbacks are treated as URLs to redirect to, with the error flashed
+     *
+     * @param Throwable $err    The exception that occurred
+     * @return boolean          Whether a callable callback handled the error
+     */
+    private function callErrorCallbacks(Throwable $err)
+    {
+        $type = get_class($err);
+        $msg = $err->getMessage();
+
+        foreach ($this->error_callbacks as $callback) {
+            if (is_callable($callback)) {
+                call_user_func($callback, $this, $msg, $type, $err);
+
+                return true;
+            }
+
+            if (null !== $this->service && null !== $this->response) {
+                $this->service->flash((string) $err);
+                $this->response->redirect($callback);
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -986,19 +1167,19 @@ class Klein
             foreach ($this->http_error_callbacks as $callback) {
                 if ($callback instanceof Route) {
                     $this->handleRouteCallback($callback, $matched, $methods_matched);
-                } elseif (is_callable($callback)) {
-                    if (is_string($callback)) {
-                        $callback($http_exception->getCode(), $this, $matched, $methods_matched, $http_exception);
-                    } else {
-                        call_user_func(
-                            $callback,
-                            $http_exception->getCode(),
-                            $this,
-                            $matched,
-                            $methods_matched,
-                            $http_exception,
-                        );
-                    }
+
+                    continue;
+                }
+
+                if (is_callable($callback)) {
+                    call_user_func(
+                        $callback,
+                        $http_exception->getCode(),
+                        $this,
+                        $matched,
+                        $methods_matched,
+                        $http_exception,
+                    );
                 }
             }
         }
@@ -1030,17 +1211,13 @@ class Klein
     {
         try {
             foreach ($this->after_filter_callbacks as $callback) {
-                if (is_callable($callback)) {
-                    if (is_string($callback)) {
-                        $callback($this);
-                    } else {
-                        call_user_func($callback, $this);
-                    }
+                if (!is_callable($callback)) {
+                    continue;
                 }
+
+                call_user_func($callback, $this);
             }
-        } catch (Throwable $e) { // PHP 7 compatibility
-            $this->error($e);
-        } catch (Exception $e) { // TODO: Remove this catch block once PHP 5.x support is no longer necessary.
+        } catch (Throwable $e) {
             $this->error($e);
         }
     }

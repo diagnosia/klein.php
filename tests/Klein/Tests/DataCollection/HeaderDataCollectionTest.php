@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -36,14 +38,16 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
      */
     protected static function prepareSampleData(array &$sample_data): void
     {
-        if (isset($sample_data[static::$nonexistent_key])) {
+        if (($sample_data[static::$nonexistent_key] ?? null) !== null) {
             unset($sample_data[static::$nonexistent_key]);
         }
 
         foreach ($sample_data as &$data) {
-            if (is_array($data)) {
-                static::prepareSampleData($data);
+            if (!is_array($data)) {
+                continue;
             }
+
+            static::prepareSampleData($data);
         }
 
         reset($sample_data);
@@ -55,13 +59,13 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
     public static function sampleDataProvider(): array
     {
         // Populate our sample data
-        $sample_data = array(
+        $sample_data = [
             'HOST' => 'localhost:8000',
             'CONNECTION' => 'keep-alive',
             'CONTENT_LENGTH' => '137',
             'USER_AGENT' =>
                 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31'
-                . ' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
+                    . ' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
             'CACHE_CONTROL' => 'no-cache',
             'ORIGIN' => 'chrome-extension://fdmmgilgnpjigdojojpjoooidkmcomcm',
             'AUTHORIZATION' => 'Basic MTIzOjQ1Ng==',
@@ -70,15 +74,15 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
             'ACCEPT_ENCODING' => 'gzip,deflate,sdch',
             'ACCEPT_LANGUAGE' => 'en-US,en;q=0.8',
             'ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
-        );
+        ];
 
         static::prepareSampleData($sample_data);
 
         $data_collection = new HeaderDataCollection($sample_data);
 
-        return array(
-            array($sample_data, $data_collection),
-        );
+        return [
+            [$sample_data, $data_collection],
+        ];
     }
 
     /*
@@ -88,20 +92,20 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
     #[DataProvider('sampleDataProvider')]
     public function testConstructorCorrectlyFormatted($sample_data, $data_collection)
     {
-        $this->assertNotSame($sample_data, $data_collection->all());
-        $this->assertArrayNotHasKey('HOST', $data_collection->all());
-        $this->assertContains('localhost:8000', $data_collection->all());
+        static::assertNotSame($sample_data, $data_collection->all());
+        static::assertArrayNotHasKey('HOST', $data_collection->all());
+        static::assertContains('localhost:8000', $data_collection->all());
     }
 
     public function testGetSetNormalization()
     {
         $data_collection = new HeaderDataCollection();
 
-        $this->assertIsInt($data_collection->getNormalization());
+        static::assertIsInt($data_collection->getNormalization());
 
         $data_collection->setNormalization(HeaderDataCollection::NORMALIZE_TRIM & HeaderDataCollection::NORMALIZE_CASE);
 
-        $this->assertSame(
+        static::assertSame(
             HeaderDataCollection::NORMALIZE_TRIM & HeaderDataCollection::NORMALIZE_CASE,
             $data_collection->getNormalization(),
         );
@@ -112,17 +116,17 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
     {
         $default = 'WOOT!';
 
-        $this->assertSame($sample_data['USER_AGENT'], $data_collection->get('user-agent'));
-        $this->assertSame($default, $data_collection->get(static::$nonexistent_key, $default));
-        $this->assertNull($data_collection->get(static::$nonexistent_key));
+        static::assertSame($sample_data['USER_AGENT'], $data_collection->get('user-agent'));
+        static::assertSame($default, $data_collection->get(static::$nonexistent_key, $default));
+        static::assertNull($data_collection->get(static::$nonexistent_key));
     }
 
     public function testSet()
     {
         // Test data
-        $data = array(
+        $data = [
             'DOG_NAME' => 'cooper',
-        );
+        ];
 
         // Create our collection with NO data
         $data_collection = new HeaderDataCollection();
@@ -131,28 +135,28 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
         $data_collection->set(key($data), current($data));
 
         // Make sure the set worked, but the key is different
-        $this->assertSame(current($data), $data_collection->get(key($data)));
-        $this->assertArrayNotHasKey(key($data), $data_collection->all());
+        static::assertSame(current($data), $data_collection->get(key($data)));
+        static::assertArrayNotHasKey(key($data), $data_collection->all());
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testExists($sample_data, $data_collection)
     {
         // Make sure the set worked, but the key is different
-        $this->assertTrue($data_collection->exists('HOST'));
-        $this->assertFalse($data_collection->exists(static::$nonexistent_key));
-        $this->assertArrayNotHasKey('HOST', $data_collection->all());
+        static::assertTrue($data_collection->exists('HOST'));
+        static::assertFalse($data_collection->exists(static::$nonexistent_key));
+        static::assertArrayNotHasKey('HOST', $data_collection->all());
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testRemove($sample_data, $data_collection)
     {
-        $this->assertTrue($data_collection->exists('HOST'));
-        $this->assertArrayNotHasKey('HOST', $data_collection->all());
+        static::assertTrue($data_collection->exists('HOST'));
+        static::assertArrayNotHasKey('HOST', $data_collection->all());
 
         $data_collection->remove('HOST');
 
-        $this->assertFalse($data_collection->exists('HOST'));
+        static::assertFalse($data_collection->exists('HOST'));
     }
 
     public function testNormalizeKeyDelimiters()
@@ -162,9 +166,9 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
 
         $canonicalized_key = HeaderDataCollection::normalizeKeyDelimiters($header);
 
-        $this->assertNotSame($header, $canonicalized_key);
+        static::assertNotSame($header, $canonicalized_key);
 
-        $this->assertSame('Access-Control-Allow-Origin', $canonicalized_key);
+        static::assertSame('Access-Control-Allow-Origin', $canonicalized_key);
     }
 
     public function testCanonicalizeKey()
@@ -174,9 +178,9 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
 
         $canonicalized_key = HeaderDataCollection::canonicalizeKey($header);
 
-        $this->assertNotSame($header, $canonicalized_key);
+        static::assertNotSame($header, $canonicalized_key);
 
-        $this->assertSame('Content-Type', $canonicalized_key);
+        static::assertSame('Content-Type', $canonicalized_key);
     }
 
     public function testNameNormalizing()
@@ -193,9 +197,9 @@ class HeaderDataCollectionTest extends AbstractKleinTestCase
 
         error_reporting($old_error_val);
 
-        $this->assertNotSame($header, $normalized_key);
+        static::assertNotSame($header, $normalized_key);
 
-        $this->assertSame('content-type', $normalized_key);
-        $this->assertSame('content-TYPE', $normalized_key_without_canonicalization);
+        static::assertSame('content-type', $normalized_key);
+        static::assertSame('content-TYPE', $normalized_key_without_canonicalization);
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -10,9 +12,7 @@
  * @license     MIT
  */
 
-// Set some configuration values
-ini_set('session.use_cookies', 0); // Don't send headers when testing sessions
-ini_set('session.cache_limiter', ''); // Don't send cache headers when testing sessions
+// The session ini settings for the tests are in phpunit.xml.dist
 
 // Load our autoloader, and add our Test class namespace
 $autoloader = require __DIR__ . '/../vendor/autoload.php';

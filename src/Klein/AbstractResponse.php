@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -16,7 +18,6 @@ use Klein\DataCollection\HeaderDataCollection;
 use Klein\DataCollection\ResponseCookieDataCollection;
 use Klein\Exceptions\LockedResponseException;
 use Klein\Exceptions\ResponseAlreadySentException;
-use Klein\ResponseCookie;
 
 /**
  * AbstractResponse
@@ -30,42 +31,42 @@ abstract class AbstractResponse
     /**
      * The default response HTTP status code
      *
-     * @type int
+     * @var int
      */
     protected static $default_status_code = 200;
 
     /**
      * The HTTP version of the response
      *
-     * @type string
+     * @var string
      */
     protected $protocol_version = '1.1';
 
     /**
      * The response body
      *
-     * @type string
+     * @var string
      */
     protected $body;
 
     /**
      * HTTP response status
      *
-     * @type HttpStatus
+     * @var HttpStatus
      */
     protected $status;
 
     /**
      * HTTP response headers
      *
-     * @type HeaderDataCollection
+     * @var HeaderDataCollection
      */
     protected $headers;
 
     /**
      * HTTP response cookies
      *
-     * @type ResponseCookieDataCollection
+     * @var ResponseCookieDataCollection
      */
     protected $cookies;
 
@@ -73,21 +74,21 @@ abstract class AbstractResponse
      * Whether or not the response is "locked" from
      * any further modification
      *
-     * @type boolean
+     * @var boolean
      */
     protected $locked = false;
 
     /**
      * Whether or not the response has been sent
      *
-     * @type boolean
+     * @var boolean
      */
     protected $sent = false;
 
     /**
      * Whether the response has been chunked or not
      *
-     * @type boolean
+     * @var boolean
      */
     public $chunked = false;
 
@@ -106,7 +107,10 @@ abstract class AbstractResponse
      */
     public function __construct($body = '', $status_code = null, array $headers = [])
     {
-        $status_code = $status_code ?: static::$default_status_code;
+        // Any empty status code (null, 0, '') falls back to the default
+        if (!$status_code) {
+            $status_code = static::$default_status_code;
+        }
 
         // Set our body and code using our internal methods
         $this->body($body);
@@ -332,7 +336,7 @@ abstract class AbstractResponse
 
         // Iterate through our Headers data collection and send each header
         foreach ($this->headers as $key => $value) {
-            header($key . ': ' . $value, false);
+            header($key . ': ' . $value, replace: false);
         }
 
         if ($cookies_also) {

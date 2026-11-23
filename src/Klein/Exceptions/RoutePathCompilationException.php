@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -12,7 +14,6 @@
 
 namespace Klein\Exceptions;
 
-use Exception;
 use Klein\Route;
 use RuntimeException;
 use Throwable;
@@ -31,14 +32,14 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
     /**
      * The exception message format
      *
-     * @type string
+     * @var string
      */
     const MESSAGE_FORMAT = 'Route failed to compile with path "%s".';
 
     /**
      * The extra failure message format
      *
-     * @type string
+     * @var string
      */
     const FAILURE_MESSAGE_TITLE_FORMAT = 'Failed with message: "%s"';
 
@@ -49,7 +50,7 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
     /**
      * The route that failed to compile
      *
-     * @type Route
+     * @var Route
      */
     protected $route;
 
@@ -61,20 +62,20 @@ class RoutePathCompilationException extends RuntimeException implements KleinExc
      * Create a RoutePathCompilationException from a route
      * and an optional previous exception
      *
-     * TODO: Change the `$previous` parameter to type-hint against `Throwable`
-     * once PHP 5.x support is no longer necessary.
-     *
-     * @param Route $route          The route that failed to compile
-     * @param Exception|Throwable $previous   The previous exception
+     * @param Route $route              The route that failed to compile
+     * @param Throwable|null $previous  The previous exception
      * @return RoutePathCompilationException
      */
-    public static function createFromRoute(Route $route, $previous = null)
+    public static function createFromRoute(Route $route, Throwable|null $previous = null)
     {
         $error = null !== $previous ? $previous->getMessage() : null;
-        $code = null !== $previous ? $previous->getCode() : null;
+        $code = null !== $previous ? (int) $previous->getCode() : 0;
 
-        $message = sprintf(static::MESSAGE_FORMAT, $route->getPath());
-        $message .= ' ' . sprintf(static::FAILURE_MESSAGE_TITLE_FORMAT, $error);
+        $message = sprintf(
+            static::MESSAGE_FORMAT . ' ' . static::FAILURE_MESSAGE_TITLE_FORMAT,
+            $route->getPath(),
+            $error,
+        );
 
         $exception = new static($message, $code, $previous);
         $exception->setRoute($route);

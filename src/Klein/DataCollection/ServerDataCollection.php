@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -32,7 +34,7 @@ class ServerDataCollection extends DataCollection
      * The prefix of HTTP headers normally
      * stored in the Server data
      *
-     * @type string
+     * @var string
      */
     protected static $http_header_prefix = 'HTTP_';
 
@@ -40,13 +42,13 @@ class ServerDataCollection extends DataCollection
      * The list of HTTP headers that for some
      * reason aren't prefixed in PHP...
      *
-     * @type array
+     * @var array
      */
-    protected static $http_nonprefixed_headers = array(
+    protected static $http_nonprefixed_headers = [
         'CONTENT_LENGTH',
         'CONTENT_TYPE',
         'CONTENT_MD5',
-    );
+    ];
 
     /**
      * Methods
@@ -61,11 +63,7 @@ class ServerDataCollection extends DataCollection
      */
     public static function hasPrefix($string, $prefix)
     {
-        if (strpos($string, $prefix) === 0) {
-            return true;
-        }
-
-        return false;
+        return str_starts_with($string, $prefix);
     }
 
     /**
@@ -83,10 +81,14 @@ class ServerDataCollection extends DataCollection
 
         foreach ($this->attributes as $key => $value) {
             // Does our server attribute have our header prefix?
-            if (self::hasPrefix($key, self::$http_header_prefix)) {
+            if (self::hasPrefix((string) $key, self::$http_header_prefix)) {
                 // Add our server attribute to our header array
                 $headers[substr($key, strlen(self::$http_header_prefix))] = $value;
-            } elseif (in_array($key, self::$http_nonprefixed_headers)) {
+
+                continue;
+            }
+
+            if (in_array($key, self::$http_nonprefixed_headers, strict: true)) {
                 // Add our server attribute to our header array
                 $headers[$key] = $value;
             }

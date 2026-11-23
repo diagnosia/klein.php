@@ -1,26 +1,43 @@
-FROM ubuntu:24.04
+# Development image for running the test suite and code checks (Klein is a library, there is no app to serve).
+# Follows the enterprise base image (diagnosia-enterprise/docker-base-image): official php image on
+# Debian 13 (trixie), PECL extensions pinned and installed with PIE, composer from its bin image.
+ARG PHP_VERSION=8.5.13
+
+FROM composer/composer:2.10.3-bin AS composer
+# PIE, the PHP Foundation's installer for PECL extensions: https://github.com/php/pie
+FROM ghcr.io/php/pie:1.5.5-bin AS pie
+
+FROM php:${PHP_VERSION}-cli-trixie
 
 ENV TZ=UTC
+ENV LANG="C.UTF-8"
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-USER root
+# git and unzip are needed by composer; vim for interactive debugging shells
+RUN apt-get update && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends ca-certificates curl git unzip vim \
+    && apt-get -y autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# PECL extensions, compiled against the PHP of the base image. mbstring, curl and xml are already part
+# of the php image. apcu is used for the route regex cache (src/Klein/Klein.php), pcov for coverage
+# and xdebug for debugging. The php image ships the compiler toolchain ($PHPIZE_DEPS) PIE needs.
+COPY --from=pie /pie /usr/local/bin/pie
+RUN pie install apcu/apcu:5.1.28 \
+    && pie install pecl/pcov:1.0.12 \
+    && pie install xdebug/xdebug:3.5.3 \
+    && rm -rf /tmp/* ~/.pie ~/.cache \
+    && php -m > /dev/null
+
+# php.ini-development (dev image: errors displayed) plus the timezone default from the enterprise base image
+RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
+    && printf '[PHP]\ndate.timezone = UTC\n' > "$PHP_INI_DIR/conf.d/00-base.ini"
+
+COPY --from=composer /composer /usr/bin/composer
+
 WORKDIR /app
 
-RUN apt-get update && apt-get upgrade -y \
-   && mkdir -p /etc/apt/keyrings \
-   && apt-get install -y gnupg gosu curl zip unzip git supervisor sqlite3 vim rsync ca-certificates \
-   && curl -sS 'https://keyserver.ubuntu.com/pks/lookup?op=get&search=0xb8dc7e53946656efbce4c1dd71daeaab4ad4cab6' | gpg --dearmor | tee /etc/apt/keyrings/ppa_ondrej_php.gpg > /dev/null \
-   && echo "deb [signed-by=/etc/apt/keyrings/ppa_ondrej_php.gpg] https://ppa.launchpadcontent.net/ondrej/php/ubuntu noble main" > /etc/apt/sources.list.d/ppa_ondrej_php.list \
-   && apt-get update \
-   && apt-get install -y \
-   php8.5-cli \
-   php8.5-fpm \
-   php8.5-curl \
-   php8.5-apcu \
-   php8.5-mbstring \
-   php8.5-xml \
-   php8.5-pcov \
-   && php -r "readfile('https://getcomposer.org/installer');" | php -- --version=2.9.2 --install-dir=/usr/bin/ --filename=composer \
-   && apt-get -y autoremove \
-   && apt-get clean \
-   && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+CMD ["bash"]

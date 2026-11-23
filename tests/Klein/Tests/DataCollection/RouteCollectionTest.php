@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -32,7 +34,7 @@ class RouteCollectionTest extends AbstractKleinTestCase
     public static function sampleDataProvider(): array
     {
         $sample_route = new Route(
-            function () {
+            static function () {
                 echo 'woot!';
             },
             '/test/path',
@@ -41,7 +43,7 @@ class RouteCollectionTest extends AbstractKleinTestCase
         );
 
         $sample_other_route = new Route(
-            function () {
+            static function () {
                 echo 'huh?';
             },
             '/test/dafuq',
@@ -50,7 +52,7 @@ class RouteCollectionTest extends AbstractKleinTestCase
         );
 
         $sample_named_route = new Route(
-            function () {
+            static function () {
                 echo 'TREVOR!';
             },
             '/trevor/is/weird',
@@ -59,9 +61,9 @@ class RouteCollectionTest extends AbstractKleinTestCase
             'trevor',
         );
 
-        return array(
-            array($sample_route, $sample_other_route, $sample_named_route),
-        );
+        return [
+            [$sample_route, $sample_other_route, $sample_named_route],
+        ];
     }
 
     /*
@@ -77,8 +79,8 @@ class RouteCollectionTest extends AbstractKleinTestCase
         // Set our data from our test data
         $routes->set('first', $sample_route);
 
-        $this->assertSame($sample_route, $routes->get('first'));
-        $this->assertTrue($routes->get('first') instanceof Route);
+        static::assertSame($sample_route, $routes->get('first'));
+        static::assertTrue($routes->get('first') instanceof Route);
     }
 
     public function testSetCallableConvertsToRoute()
@@ -87,38 +89,38 @@ class RouteCollectionTest extends AbstractKleinTestCase
         $routes = new RouteCollection();
 
         // Set our data
-        $routes->set('first', function () {});
+        $routes->set('first', static function () {});
 
-        $this->assertNotSame('value', $routes->get('first'));
-        $this->assertTrue($routes->get('first') instanceof Route);
+        static::assertNotSame('value', $routes->get('first'));
+        static::assertTrue($routes->get('first') instanceof Route);
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testConstructorRoutesThroughAdd($sample_route, $sample_other_route, $sample_named_route)
     {
-        $array_of_route_instances = array(
+        $array_of_route_instances = [
             $sample_route,
             $sample_other_route,
-            new Route(function () {}),
-        );
+            new Route(static function () {}),
+        ];
 
         // Create our collection
         $routes = new RouteCollection($array_of_route_instances);
-        $this->assertSame($array_of_route_instances, array_values($routes->all()));
-        $this->assertNotSame(array_keys($array_of_route_instances), $routes->keys());
+        static::assertSame($array_of_route_instances, array_values($routes->all()));
+        static::assertNotSame(array_keys($array_of_route_instances), $routes->keys());
 
         foreach ($routes as $route) {
-            $this->assertTrue($route instanceof Route);
+            static::assertTrue($route instanceof Route);
         }
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testAddRoute($sample_route, $sample_other_route, $sample_named_route)
     {
-        $array_of_routes = array(
+        $array_of_routes = [
             $sample_route,
             $sample_other_route,
-        );
+        ];
 
         // Create our collection
         $routes = new RouteCollection();
@@ -127,7 +129,7 @@ class RouteCollectionTest extends AbstractKleinTestCase
             $routes->addRoute($route);
         }
 
-        $this->assertSame($array_of_routes, array_values($routes->all()));
+        static::assertSame($array_of_routes, array_values($routes->all()));
     }
 
     public function testAddCallableConvertsToRoute()
@@ -135,23 +137,23 @@ class RouteCollectionTest extends AbstractKleinTestCase
         // Create our collection with NO data
         $routes = new RouteCollection();
 
-        $callable = function () {};
+        $callable = static function () {};
 
         // Add our data
         $routes->add($callable);
 
-        $this->assertNotSame($callable, current($routes->all()));
-        $this->assertTrue(current($routes->all()) instanceof Route);
+        static::assertNotSame($callable, current($routes->all()));
+        static::assertTrue(current($routes->all()) instanceof Route);
     }
 
     #[DataProvider('sampleDataProvider')]
     public function testPrepareNamed($sample_route, $sample_other_route, $sample_named_route)
     {
-        $array_of_routes = array(
+        $array_of_routes = [
             $sample_route,
             $sample_other_route,
             $sample_named_route,
-        );
+        ];
 
         $route_name = $sample_named_route->getName();
 
@@ -163,9 +165,9 @@ class RouteCollectionTest extends AbstractKleinTestCase
         // Prepare the named routes
         $routes->prepareNamed();
 
-        $this->assertNotSame($original_keys, $routes->keys());
-        $this->assertSame(count($original_keys), count($routes->keys()));
-        $this->assertSame($sample_named_route, $routes->get($route_name));
+        static::assertNotSame($original_keys, $routes->keys());
+        static::assertSame(count($original_keys), count($routes->keys()));
+        static::assertSame($sample_named_route, $routes->get($route_name));
     }
 
     #[DataProvider('sampleDataProvider')]
@@ -186,7 +188,7 @@ class RouteCollectionTest extends AbstractKleinTestCase
             $routes = new RouteCollection($array_of_routes);
             $routes->prepareNamed();
 
-            $this->assertSame(array_values($routes->all()), array_values($array_of_routes));
+            static::assertSame(array_values($routes->all()), array_values($array_of_routes));
         }
     }
 }

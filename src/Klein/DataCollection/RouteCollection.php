@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -127,9 +129,11 @@ class RouteCollection extends DataCollection
             if (null !== $route_name) {
                 // Add the route to the new set with the new name
                 $prepared->set($route_name, $route);
-            } else {
-                $prepared->add($route);
+
+                continue;
             }
+
+            $prepared->add($route);
         }
 
         // Replace our collection's items with our newly prepared collection's items

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -35,7 +37,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
     /**
      * Collection of data attributes
      *
-     * @type array
+     * @var array
      */
     protected $attributes = [];
 
@@ -76,11 +78,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
              * Make sure that the returned array has at least the values
              * passed into the mask, since the user will expect them to exist
              */
-            if ($fill_with_nulls) {
-                $keys = $mask;
-            } else {
-                $keys = [];
-            }
+            $keys = $fill_with_nulls ? $mask : [];
 
             /*
              * Remove all of the values from the keys
@@ -115,11 +113,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
              * Make sure that each key in the mask has at least a
              * null value, since the user will expect the key to exist
              */
-            if ($fill_with_nulls) {
-                $attributes = array_fill_keys($mask, null);
-            } else {
-                $attributes = [];
-            }
+            $attributes = $fill_with_nulls ? array_fill_keys($mask, value: null) : [];
 
             /*
              * Remove all of the keys from the attributes
@@ -142,11 +136,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function get($key, $default_val = null)
     {
-        if (isset($this->attributes[$key])) {
-            return $this->attributes[$key];
-        }
-
-        return $default_val;
+        return $this->attributes[$key] ?? $default_val;
     }
 
     /**
@@ -190,13 +180,11 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
     public function merge(array $attributes = [], $hard = false)
     {
         // Don't waste our time with an "array_merge" call if the array is empty
-        if (!empty($attributes)) {
+        if ([] !== $attributes) {
             // Hard merge?
-            if ($hard) {
-                $this->attributes = array_replace($this->attributes, $attributes);
-            } else {
-                $this->attributes = array_merge($this->attributes, $attributes);
-            }
+            $this->attributes = $hard
+                ? array_replace($this->attributes, $attributes)
+                : array_merge($this->attributes, $attributes);
         }
 
         return $this;
@@ -244,7 +232,7 @@ class DataCollection implements IteratorAggregate, ArrayAccess, Countable
      */
     public function isEmpty()
     {
-        return empty($this->attributes);
+        return [] === $this->attributes;
     }
 
     /**

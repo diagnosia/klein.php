@@ -24,14 +24,14 @@ class HttpStatus
     /**
      * The HTTP status code
      *
-     * @type int
+     * @var int
      */
     protected $code;
 
     /**
      * The HTTP status message
      *
-     * @type string
+     * @var string
      */
     protected $message;
 
@@ -39,9 +39,9 @@ class HttpStatus
      * HTTP 1.1 status messages based on code
      *
      * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
-     * @type array
+     * @var array
      */
-    protected static $http_messages = array(
+    protected static $http_messages = [
         // Informational 1xx
         100 => 'Continue',
         101 => 'Switching Protocols',
@@ -92,7 +92,7 @@ class HttpStatus
         503 => 'Service Unavailable',
         504 => 'Gateway Timeout',
         505 => 'HTTP Version Not Supported',
-    );
+    ];
 
     /**
      * Constructor
@@ -196,10 +196,6 @@ class HttpStatus
      */
     public static function getMessageFromCode($int)
     {
-        if (isset(static::$http_messages[$int])) {
-            return static::$http_messages[$int];
-        } else {
-            return null;
-        }
+        return static::$http_messages[$int] ?? null;
     }
 }

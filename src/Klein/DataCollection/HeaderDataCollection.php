@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -28,7 +30,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Don't normalize
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_NONE = 0;
 
@@ -37,7 +39,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Normalize the outer whitespace of the header
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_TRIM = 1;
 
@@ -46,7 +48,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Normalize the delimiters of the header
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_DELIMITERS = 2;
 
@@ -55,7 +57,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Normalize the case of the header
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_CASE = 4;
 
@@ -64,7 +66,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Normalize the header into canonical format
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_CANONICAL = 8;
 
@@ -73,7 +75,7 @@ class HeaderDataCollection extends DataCollection
      *
      * Normalize using all normalization techniques
      *
-     * @type int
+     * @var int
      */
     const NORMALIZE_ALL = -1;
 
@@ -85,7 +87,7 @@ class HeaderDataCollection extends DataCollection
      * The header key normalization technique/style to
      * use when accessing headers in the collection
      *
-     * @type int
+     * @var int
      */
     protected $normalization = self::NORMALIZE_ALL;
 
@@ -206,20 +208,20 @@ class HeaderDataCollection extends DataCollection
      */
     protected function normalizeKey($key)
     {
-        if ($this->normalization & static::NORMALIZE_TRIM) {
-            $key = trim($key);
-        }
+        // The normalization steps, applied in this order if their flag is set
+        $normalizers = [
+            static::NORMALIZE_TRIM => trim(...),
+            static::NORMALIZE_DELIMITERS => static::normalizeKeyDelimiters(...),
+            static::NORMALIZE_CASE => strtolower(...),
+            static::NORMALIZE_CANONICAL => static::canonicalizeKey(...),
+        ];
 
-        if ($this->normalization & static::NORMALIZE_DELIMITERS) {
-            $key = static::normalizeKeyDelimiters($key);
-        }
+        foreach ($normalizers as $flag => $normalizer) {
+            if (!($this->normalization & $flag)) {
+                continue;
+            }
 
-        if ($this->normalization & static::NORMALIZE_CASE) {
-            $key = strtolower($key);
-        }
-
-        if ($this->normalization & static::NORMALIZE_CANONICAL) {
-            $key = static::canonicalizeKey($key);
+            $key = $normalizer($key);
         }
 
         return $key;
@@ -236,7 +238,7 @@ class HeaderDataCollection extends DataCollection
      */
     public static function normalizeKeyDelimiters($key)
     {
-        return str_replace(array(' ', '_'), '-', $key);
+        return str_replace([' ', '_'], replace: '-', subject: $key);
     }
 
     /**
@@ -287,6 +289,6 @@ class HeaderDataCollection extends DataCollection
         }
 
         // Do some formatting and return
-        return str_replace(array(' ', '_'), '-', trim($name));
+        return str_replace([' ', '_'], replace: '-', subject: trim($name));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -28,63 +30,63 @@ class Request
     /**
      * Unique identifier for the request
      *
-     * @type string
+     * @var string
      */
     protected $id;
 
     /**
      * GET (query) parameters
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $params_get;
 
     /**
      * POST parameters
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $params_post;
 
     /**
      * Named parameters
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $params_named;
 
     /**
      * Client cookie data
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $cookies;
 
     /**
      * Server created attributes
      *
-     * @type ServerDataCollection
+     * @var ServerDataCollection
      */
     protected $server;
 
     /**
      * HTTP request headers
      *
-     * @type HeaderDataCollection
+     * @var HeaderDataCollection
      */
     protected $headers;
 
     /**
      * Uploaded temporary files
      *
-     * @type DataCollection
+     * @var DataCollection
      */
     protected $files;
 
     /**
      * The request body
      *
-     * @type string
+     * @var string
      */
     protected $body;
 
@@ -237,7 +239,7 @@ class Request
     {
         // Only get it once
         if (null === $this->body) {
-            $this->body = @file_get_contents('php://input');
+            $this->body = file_get_contents('php://input');
         }
 
         return $this->body;
@@ -261,11 +263,7 @@ class Request
          * Make sure that each key in the mask has at least a
          * null value, since the user will expect the key to exist
          */
-        if (null !== $mask && $fill_with_nulls) {
-            $attributes = array_fill_keys($mask, null);
-        } else {
-            $attributes = [];
-        }
+        $attributes = null !== $mask && $fill_with_nulls ? array_fill_keys($mask, value: null) : [];
 
         // Merge our params in the get, post, cookies, named order
         return array_merge(
@@ -289,7 +287,7 @@ class Request
         // Get all of our request params
         $params = $this->params();
 
-        return isset($params[$key]) ? $params[$key] : $default;
+        return $params[$key] ?? $default;
     }
 
     /**
@@ -306,7 +304,7 @@ class Request
         // Get all of our request params
         $params = $this->params();
 
-        return isset($params[$param]);
+        return ($params[$param] ?? null) !== null;
     }
 
     /**
@@ -362,7 +360,14 @@ class Request
      */
     public function isSecure()
     {
-        return $this->server->get('HTTPS') == true;
+        $https = $this->server->get('HTTPS');
+
+        // IIS (with ISAPI) sets "off" for requests that weren't made through HTTPS
+        if (is_string($https) && strcasecmp($https, 'off') === 0) {
+            return false;
+        }
+
+        return (bool) $https;
     }
 
     /**
@@ -405,7 +410,12 @@ class Request
         $uri = $this->uri();
 
         // Strip the query string from the URI
-        $uri = strstr($uri, '?', true) ?: $uri;
+        $without_query = strstr($uri, needle: '?', before_needle: true);
+
+        // Keep the URI as is when it has no query string (or nothing before it)
+        if ($without_query) {
+            $uri = $without_query;
+        }
 
         return $uri;
     }
@@ -431,11 +441,9 @@ class Request
         // Override
         if ($allow_override && $method === 'POST') {
             // For legacy servers, override the HTTP method with the X-HTTP-Method-Override header or _method parameter
-            if ($this->server->exists('X_HTTP_METHOD_OVERRIDE')) {
-                $method = $this->server->get('X_HTTP_METHOD_OVERRIDE', $method);
-            } else {
-                $method = $this->param('_method', $method);
-            }
+            $method = $this->server->exists('X_HTTP_METHOD_OVERRIDE')
+                ? $this->server->get('X_HTTP_METHOD_OVERRIDE', $method)
+                : $this->param('_method', $method);
 
             $method = strtoupper($method);
         }
@@ -461,18 +469,14 @@ class Request
 
         parse_str($this->server()->get('QUERY_STRING'), $query);
 
-        if (is_array($key)) {
-            $query = array_merge($query, $key);
-        } else {
-            $query[$key] = $value;
-        }
+        $query = is_array($key) ? array_merge($query, $key) : array_replace($query, [$key => $value]);
 
         $request_uri = $this->uri();
 
-        if (strpos($request_uri, '?') !== false) {
-            $request_uri = strstr($request_uri, '?', true);
+        if (str_contains($request_uri, '?')) {
+            $request_uri = strstr($request_uri, needle: '?', before_needle: true);
         }
 
-        return $request_uri . (!empty($query) ? '?' . http_build_query($query) : null);
+        return $request_uri . ([] !== $query ? '?' . http_build_query($query) : null);
     }
 }

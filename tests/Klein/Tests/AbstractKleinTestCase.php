@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -94,7 +96,7 @@ abstract class AbstractKleinTestCase extends TestCase
     {
         // Did we not pass an instance?
         if (is_null($app_context)) {
-            $app_context = $this->klein_app ?: new Klein();
+            $app_context = $this->klein_app ?? new Klein();
         }
 
         $route_directory = __DIR__ . '/routes/';
@@ -102,12 +104,14 @@ abstract class AbstractKleinTestCase extends TestCase
         $route_namespaces = [];
 
         foreach ($route_files as $file) {
-            if (is_file($route_directory . $file)) {
-                $route_namespace = '/' . basename($file, '.php');
-                $route_namespaces[] = $route_namespace;
-
-                $app_context->with($route_namespace, $route_directory . $file);
+            if (!is_file($route_directory . $file)) {
+                continue;
             }
+
+            $route_namespace = '/' . basename($file, suffix: '.php');
+            $route_namespaces[] = $route_namespace;
+
+            $app_context->with($route_namespace, $route_directory . $file);
         }
 
         return $route_namespaces;

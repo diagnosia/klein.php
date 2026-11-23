@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Klein\Tests;
 
-use InvalidArgumentException;
 use Klein\Route;
 use TypeError;
 
@@ -25,7 +24,7 @@ class RouteTest extends AbstractKleinTestCase
 {
     protected function getTestCallable()
     {
-        return function () {
+        return static function () {
             echo 'dog';
         };
     }
@@ -39,15 +38,15 @@ class RouteTest extends AbstractKleinTestCase
         // Callback set in constructor
         $route = new Route($test_callable);
 
-        $this->assertSame($test_callable, $route->getCallback());
-        $this->assertIsCallable($route->getCallback());
+        static::assertSame($test_callable, $route->getCallback());
+        static::assertIsCallable($route->getCallback());
 
         // Callback set in method
         $route = new Route($test_callable);
         $route->setCallback($test_class_callable);
 
-        $this->assertSame($test_class_callable, $route->getCallback());
-        $this->assertIsCallable($route->getCallback());
+        static::assertSame($test_class_callable, $route->getCallback());
+        static::assertIsCallable($route->getCallback());
     }
 
     public function testPathGetSet()
@@ -59,18 +58,18 @@ class RouteTest extends AbstractKleinTestCase
         // Empty constructor
         $route = new Route($test_callable);
 
-        $this->assertNull($route->getPath());
+        static::assertNull($route->getPath());
 
         // Set in constructor
         $route = new Route($test_callable, $test_path);
 
-        $this->assertSame($test_path, $route->getPath());
+        static::assertSame($test_path, $route->getPath());
 
         // Set in method
         $route = new Route($test_callable);
         $route->setPath($test_path);
 
-        $this->assertSame($test_path, $route->getPath());
+        static::assertSame($test_path, $route->getPath());
     }
 
     public function testMethodGetSet()
@@ -78,23 +77,23 @@ class RouteTest extends AbstractKleinTestCase
         // Test data
         $test_callable = $this->getTestCallable();
         $test_method_string = 'POST';
-        $test_method_array = array('POST', 'PATCH');
+        $test_method_array = ['POST', 'PATCH'];
 
         // Empty constructor
         $route = new Route($test_callable);
 
-        $this->assertNull($route->getMethod());
+        static::assertNull($route->getMethod());
 
         // Set in constructor
         $route = new Route($test_callable, null, $test_method_string);
 
-        $this->assertSame($test_method_string, $route->getMethod());
+        static::assertSame($test_method_string, $route->getMethod());
 
         // Set in method
         $route = new Route($test_callable);
         $route->setMethod($test_method_array);
 
-        $this->assertSame($test_method_array, $route->getMethod());
+        static::assertSame($test_method_array, $route->getMethod());
     }
 
     public function testCountMatchGetSet()
@@ -106,18 +105,18 @@ class RouteTest extends AbstractKleinTestCase
         // Empty constructor
         $route = new Route($test_callable);
 
-        $this->assertTrue($route->getCountMatch());
+        static::assertTrue($route->getCountMatch());
 
         // Set in constructor
         $route = new Route($test_callable, null, null, $test_count_match);
 
-        $this->assertSame($test_count_match, $route->getCountMatch());
+        static::assertSame($test_count_match, $route->getCountMatch());
 
         // Set in count_match
         $route = new Route($test_callable);
         $route->setCountMatch($test_count_match);
 
-        $this->assertSame($test_count_match, $route->getCountMatch());
+        static::assertSame($test_count_match, $route->getCountMatch());
     }
 
     public function testNameGetSet()
@@ -129,31 +128,29 @@ class RouteTest extends AbstractKleinTestCase
         // Empty constructor
         $route = new Route($test_callable);
 
-        $this->assertNull($route->getName());
+        static::assertNull($route->getName());
 
         // Set in constructor
         $route = new Route($test_callable, null, null, false, $test_name);
 
-        $this->assertSame($test_name, $route->getName());
+        static::assertSame($test_name, $route->getName());
 
         // Set in method
         $route = new Route($test_callable);
         $route->setName($test_name);
 
-        $this->assertSame($test_name, $route->getName());
+        static::assertSame($test_name, $route->getName());
     }
 
     public function testInvokeMethod()
     {
         // Test data
-        $test_callable = function ($id, $name) {
-            return array($id, $name);
-        };
-        $test_arguments = array(7, 'Trevor');
+        $test_callable = static fn($id, $name) => [$id, $name];
+        $test_arguments = [7, 'Trevor'];
 
         $route = new Route($test_callable);
 
-        $this->assertSame(
+        static::assertSame(
             call_user_func_array($test_callable, $test_arguments),
             call_user_func_array($route, $test_arguments),
         );

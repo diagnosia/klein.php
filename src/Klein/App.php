@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -30,7 +32,7 @@ class App
     /**
      * The array of app services
      *
-     * @type array
+     * @var array
      */
     protected $services = [];
 
@@ -49,7 +51,7 @@ class App
      */
     public function __get($name)
     {
-        if (!isset($this->services[$name])) {
+        if (($this->services[$name] ?? null) === null) {
             throw new UnknownServiceException('Unknown service ' . $name);
         }
         $service = $this->services[$name];
@@ -70,7 +72,7 @@ class App
      */
     public function __call($method, $args)
     {
-        if (!isset($this->services[$method]) || !is_callable($this->services[$method])) {
+        if (!is_callable($this->services[$method] ?? null)) {
             throw new BadMethodCallException('Unknown method ' . $method . '()');
         }
 
@@ -87,11 +89,11 @@ class App
      */
     public function register($name, $closure)
     {
-        if (isset($this->services[$name])) {
+        if (($this->services[$name] ?? null) !== null) {
             throw new DuplicateServiceException('A service is already registered under ' . $name);
         }
 
-        $this->services[$name] = function () use ($closure) {
+        $this->services[$name] = static function () use ($closure) {
             static $instance;
             if (null === $instance) {
                 $instance = $closure();

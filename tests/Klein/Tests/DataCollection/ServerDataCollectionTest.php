@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -31,7 +33,7 @@ class ServerDataCollectionTest extends AbstractKleinTestCase
     public static function sampleDataProvider(): array
     {
         // Populate our sample data
-        $sample_data = array(
+        $sample_data = [
             'DOCUMENT_ROOT' => '/cygdrive/d/Trevor/tmp',
             'REMOTE_ADDR' => '::1',
             'REMOTE_PORT' => '58526',
@@ -49,7 +51,7 @@ class ServerDataCollectionTest extends AbstractKleinTestCase
             'HTTP_CONTENT_LENGTH' => '137',
             'HTTP_USER_AGENT' =>
                 'Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.31'
-                . ' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
+                    . ' (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31',
             'HTTP_CACHE_CONTROL' => 'no-cache',
             'HTTP_ORIGIN' => 'chrome-extension://fdmmgilgnpjigdojojpjoooidkmcomcm',
             'HTTP_AUTHORIZATION' => 'Basic MTIzOjQ1Ng==',
@@ -60,15 +62,15 @@ class ServerDataCollectionTest extends AbstractKleinTestCase
             'HTTP_ACCEPT_CHARSET' => 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
             'PHP_AUTH_USER' => '123',
             'PHP_AUTH_PW' => '456',
-            'REQUEST_TIME_FLOAT' => 1366699956.0699,
-            'REQUEST_TIME' => 1366699956,
-        );
+            'REQUEST_TIME_FLOAT' => 1_366_699_956.0699,
+            'REQUEST_TIME' => 1_366_699_956,
+        ];
 
         $data_collection = new ServerDataCollection($sample_data);
 
-        return array(
-            array($sample_data, $data_collection),
-        );
+        return [
+            [$sample_data, $data_collection],
+        ];
     }
 
     /*
@@ -77,9 +79,9 @@ class ServerDataCollectionTest extends AbstractKleinTestCase
 
     public function testHasPrefix()
     {
-        $this->assertTrue(ServerDataCollection::hasPrefix('dog_wierd', 'dog'));
-        $this->assertTrue(ServerDataCollection::hasPrefix('_dog_wierd', '_dog'));
-        $this->assertFalse(ServerDataCollection::hasPrefix('_dog_wierd', 'dog'));
+        static::assertTrue(ServerDataCollection::hasPrefix('dog_wierd', 'dog'));
+        static::assertTrue(ServerDataCollection::hasPrefix('_dog_wierd', '_dog'));
+        static::assertFalse(ServerDataCollection::hasPrefix('_dog_wierd', 'dog'));
     }
 
     #[DataProvider('sampleDataProvider')]
@@ -88,13 +90,13 @@ class ServerDataCollectionTest extends AbstractKleinTestCase
         $http_headers = $data_collection->getHeaders();
 
         // We should have less headers than our sample data provided for key/values
-        $this->assertLessThan(count($sample_data), count($http_headers));
+        static::assertLessThan(count($sample_data), count($http_headers));
 
         // Test for the stripping of the prefix
-        $this->assertArrayNotHasKey('HTTP_USER_AGENT', $http_headers);
-        $this->assertArrayHasKey('USER_AGENT', $http_headers);
+        static::assertArrayNotHasKey('HTTP_USER_AGENT', $http_headers);
+        static::assertArrayHasKey('USER_AGENT', $http_headers);
 
         // Make sure non-headers didn't end up in there
-        $this->assertArrayNotHasKey('REQUEST_URI', $http_headers);
+        static::assertArrayNotHasKey('REQUEST_URI', $http_headers);
     }
 }

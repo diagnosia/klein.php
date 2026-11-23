@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -34,13 +36,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $service = new ServiceProvider();
 
         // Make sure our attributes are first null
-        $this->assertFalse($service->isBond());
+        static::assertFalse($service->isBond());
 
         // New service with injected dependencies
         $service = new ServiceProvider($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
-        $this->assertTrue($service->isBond());
+        static::assertTrue($service->isBond());
     }
 
     public function testBinder()
@@ -48,25 +50,25 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $service = new ServiceProvider();
 
         // Make sure our attributes are first null
-        $this->assertFalse($service->isBond());
+        static::assertFalse($service->isBond());
 
         // New service with injected dependencies
         $return_val = $service->bind($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
-        $this->assertTrue($service->isBond());
+        static::assertTrue($service->isBond());
 
         // Make sure we're chainable
-        $this->assertEquals($service, $return_val);
-        $this->assertSame($service, $return_val);
+        static::assertEquals($service, $return_val);
+        static::assertSame($service, $return_val);
     }
 
     public function testSharedDataGetter()
     {
         $service = new ServiceProvider();
 
-        $this->assertIsObject($service->sharedData());
-        $this->assertTrue($service->sharedData() instanceof DataCollection);
+        static::assertIsObject($service->sharedData());
+        static::assertTrue($service->sharedData() instanceof DataCollection);
     }
 
     public function testStartSession()
@@ -75,7 +77,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         $returned = $service->startSession();
 
-        $this->assertSame(session_id(), $returned);
+        static::assertSame(session_id(), $returned);
 
         // Clean up
         session_destroy();
@@ -94,7 +96,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         $returned = $service->startSession();
 
-        $this->assertNull($returned);
+        static::assertNull($returned);
 
         // Clean up
         session_destroy();
@@ -105,27 +107,27 @@ class ServiceProviderTest extends AbstractKleinTestCase
     {
         // Test data
         $test_session_key = '__flashes';
-        $test_flashes = array(
-            array(
+        $test_flashes = [
+            [
                 'message' => 'Test info message',
                 'type' => 'info',
-            ),
-            array(
+            ],
+            [
                 'message' => 'Test error message',
                 'type' => 'error',
-            ),
-        );
+            ],
+        ];
 
         $service = new ServiceProvider();
 
-        $this->assertEmpty($_SESSION);
+        static::assertEmpty($_SESSION);
 
         $service->flash($test_flashes[0]['message'], $test_flashes[0]['type']);
         $service->flash($test_flashes[1]['message'], $test_flashes[1]['type']);
 
-        $this->assertNotEmpty($_SESSION);
-        $this->assertSame($test_flashes[0]['message'], $_SESSION[$test_session_key][$test_flashes[0]['type']][0]);
-        $this->assertSame($test_flashes[1]['message'], $_SESSION[$test_session_key][$test_flashes[1]['type']][0]);
+        static::assertNotEmpty($_SESSION);
+        static::assertSame($test_flashes[0]['message'], $_SESSION[$test_session_key][$test_flashes[0]['type']][0]);
+        static::assertSame($test_flashes[1]['message'], $_SESSION[$test_session_key][$test_flashes[1]['type']][0]);
 
         // Clean up
         session_destroy();
@@ -138,20 +140,20 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $test_session_key = '__flashes';
         $test_type = 'info';
         $test_message = 'Test message by %s %s';
-        $test_params = array(
+        $test_params = [
             'Trevor',
             'Suarez',
-        );
+        ];
         $test_processed = 'Test message by ' . $test_params[0] . ' ' . $test_params[1];
 
         $service = new ServiceProvider();
 
-        $this->assertEmpty($_SESSION);
+        static::assertEmpty($_SESSION);
 
         $service->flash($test_message, $test_params);
 
-        $this->assertNotEmpty($_SESSION);
-        $this->assertSame($test_processed, $_SESSION[$test_session_key][$test_type][0]);
+        static::assertNotEmpty($_SESSION);
+        static::assertSame($test_processed, $_SESSION[$test_session_key][$test_type][0]);
 
         // Clean up
         session_destroy();
@@ -162,33 +164,33 @@ class ServiceProviderTest extends AbstractKleinTestCase
     {
         // Test data
         $test_session_key = '__flashes';
-        $test_flashes = array(
-            array(
+        $test_flashes = [
+            [
                 'message' => 'Test info message',
                 'type' => 'info',
-            ),
-            array(
+            ],
+            [
                 'message' => 'Test error message',
                 'type' => 'error',
-            ),
-            array(
+            ],
+            [
                 'message' => 'Test second error message',
                 'type' => 'error',
-            ),
-            array(
+            ],
+            [
                 'message' => 'Test whatever message',
                 'type' => 'whatever',
-            ),
-        );
-        $test_error_flashes = array(
+            ],
+        ];
+        $test_error_flashes = [
             $test_flashes[1]['message'],
             $test_flashes[2]['message'],
-        );
+        ];
 
         $service = new ServiceProvider();
 
-        $this->assertEmpty($_SESSION);
-        $this->assertEmpty($service->flashes());
+        static::assertEmpty($_SESSION);
+        static::assertEmpty($service->flashes());
 
         $service->flash($test_flashes[0]['message'], $test_flashes[0]['type']);
         $service->flash($test_flashes[1]['message'], $test_flashes[1]['type']);
@@ -197,12 +199,12 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         // Test error flashes only
         $error_flashes = $service->flashes('error');
-        $this->assertCount(2, $error_flashes);
-        $this->assertSame($test_error_flashes, $error_flashes);
+        static::assertCount(2, $error_flashes);
+        static::assertSame($test_error_flashes, $error_flashes);
 
         // Test the rest
         $all_flashes = $service->flashes();
-        $this->assertCount(count($test_flashes) - count($error_flashes), $all_flashes);
+        static::assertCount(count($test_flashes) - count($error_flashes), $all_flashes);
 
         // Clean up
         session_destroy();
@@ -212,20 +214,20 @@ class ServiceProviderTest extends AbstractKleinTestCase
     public function testMarkdownParser()
     {
         // Test basic markdown conversion
-        $this->assertSame(
+        static::assertSame(
             '<strong>dog</strong> <em>cat</em> <a href="src">name</a>',
             ServiceProvider::markdown('**dog** *cat* [name](src)'),
         );
 
         // Test array arguments
-        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown('**%s** *%d* **%X**', array(
+        static::assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown('**%s** *%d* **%X**', [
             'huh',
             '12',
             205,
-        )));
+        ]));
 
         // Test variable number of arguments
-        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
+        static::assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
             '**%s** *%d* **%X**',
             'huh',
             '12',
@@ -233,9 +235,9 @@ class ServiceProviderTest extends AbstractKleinTestCase
         ));
 
         // Test second array argument overrides other arguments
-        $this->assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
+        static::assertSame('<strong>huh</strong> <em>12</em> <strong>CD</strong>', ServiceProvider::markdown(
             '**%s** *%d* **%X**',
-            array('huh', '12', 205),
+            ['huh', '12', 205],
             'dog',
             'cheese',
         ));
@@ -243,7 +245,7 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
     public function testEscapeCharacters()
     {
-        $this->assertSame(
+        static::assertSame(
             'H&egrave;&egrave;&egrave;llo! A&amp;W root beer is now 20% off!!',
             ServiceProvider::escape('Hèèèllo! A&W root beer is now 20% off!!'),
         );
@@ -251,24 +253,21 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
     public function testRefresh()
     {
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             $service->refresh();
         });
 
         $this->klein_app->dispatch();
 
-        $this->assertSame(
+        static::assertSame(
             $this->klein_app->request()->uri(),
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('location'),
+            $this->klein_app->response()->headers()->get('location'),
         );
-        $this->assertTrue($this->klein_app->response()->isLocked());
+        static::assertTrue($this->klein_app->response()->isLocked());
 
         // Make sure we got a 3xx response code
-        $this->assertGreaterThan(299, $this->klein_app->response()->code());
-        $this->assertLessThan(400, $this->klein_app->response()->code());
+        static::assertGreaterThan(299, $this->klein_app->response()->code());
+        static::assertLessThan(400, $this->klein_app->response()->code());
     }
 
     public function testBack()
@@ -278,41 +277,35 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $request = new Request();
         $request->server()->set('HTTP_REFERER', $url);
 
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             $service->back();
         });
 
         $this->klein_app->dispatch($request);
 
-        $this->assertSame(
-            $url,
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('location'),
-        );
-        $this->assertTrue($this->klein_app->response()->isLocked());
+        static::assertSame($url, $this->klein_app->response()->headers()->get('location'));
+        static::assertTrue($this->klein_app->response()->isLocked());
 
         // Make sure we got a 3xx response code
-        $this->assertGreaterThan(299, $this->klein_app->response()->code());
-        $this->assertLessThan(400, $this->klein_app->response()->code());
+        static::assertGreaterThan(299, $this->klein_app->response()->code());
+        static::assertLessThan(400, $this->klein_app->response()->code());
     }
 
     public function testBackWithoutRefererSet()
     {
         $request = new Request();
 
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             $service->back();
         });
 
         $this->klein_app->dispatch($request);
 
-        $this->assertTrue($this->klein_app->response()->isLocked());
+        static::assertTrue($this->klein_app->response()->isLocked());
 
         // Make sure we got a 3xx response code
-        $this->assertGreaterThan(299, $this->klein_app->response()->code());
-        $this->assertLessThan(400, $this->klein_app->response()->code());
+        static::assertGreaterThan(299, $this->klein_app->response()->code());
+        static::assertLessThan(400, $this->klein_app->response()->code());
     }
 
     public function testLayoutGetSet()
@@ -321,11 +314,11 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
         $service = new ServiceProvider();
 
-        $this->assertEmpty($service->layout());
+        static::assertEmpty($service->layout());
 
         $service->layout($test_layout);
 
-        $this->assertSame($test_layout, $service->layout());
+        static::assertSame($test_layout, $service->layout());
     }
 
     /**
@@ -333,13 +326,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
      */
     public function testRender()
     {
-        $test_data = array(
+        $test_data = [
             'name' => 'trevor suarez',
             'title' => 'about',
             'verb' => 'woot',
-        );
+        ];
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($test_data) {
             // Set some data manually
             $service->sharedData()->set('name', 'should be overwritten');
 
@@ -366,16 +359,16 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
     public function testRenderChunked()
     {
-        $test_data = array(
+        $test_data = [
             'name' => 'trevor suarez',
             'title' => 'about',
             'verb' => 'woot',
-        );
+        ];
 
         $response = new Response();
         $response->chunk();
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($test_data) {
             // Set some data manually
             $service->sharedData()->set('name', 'should be overwritten');
 
@@ -402,13 +395,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
 
     public function testPartial()
     {
-        $test_data = array(
+        $test_data = [
             'name' => 'trevor suarez',
             'title' => 'about',
             'verb' => 'woot',
-        );
+        ];
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($test_data) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($test_data) {
             // Set our layout
             $service->layout(__DIR__ . '/views/layout.php');
 
@@ -427,27 +420,27 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $service = new ServiceProvider();
 
         // Initially empty
-        $this->assertEmpty(Validator::$methods);
+        static::assertEmpty(Validator::$methods);
 
-        $test_callback = function () {
+        $test_callback = static function () {
             echo 'test';
         };
 
         $service->addValidator('awesome', $test_callback);
 
-        $this->assertNotEmpty(Validator::$methods);
-        $this->assertArrayHasKey('awesome', Validator::$methods);
-        $this->assertContains($test_callback, Validator::$methods);
+        static::assertNotEmpty(Validator::$methods);
+        static::assertArrayHasKey('awesome', Validator::$methods);
+        static::assertContains($test_callback, Validator::$methods);
     }
 
     public function testValidate()
     {
         $this->expectException(ValidationException::class);
-        $this->klein_app->onError(function ($a, $b, $c, $exception) {
+        $this->klein_app->onError(static function ($a, $b, $c, $exception) {
             throw $exception;
         });
 
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             $service->validate('thing')->isLen(3);
         });
 
@@ -457,11 +450,11 @@ class ServiceProviderTest extends AbstractKleinTestCase
     public function testValidateParam()
     {
         $this->expectException(ValidationException::class);
-        $this->klein_app->onError(function ($a, $b, $c, $exception) {
+        $this->klein_app->onError(static function ($a, $b, $c, $exception) {
             throw $exception;
         });
 
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             // Set a test param
             $request->paramsNamed()->set('name', 'trevor');
 
@@ -474,27 +467,30 @@ class ServiceProviderTest extends AbstractKleinTestCase
     // Test ALL of the magic setter, getter, exists, and removal methods
     public function testMagicGetSetExistsRemove()
     {
-        $test_data = array(
+        $test_data = [
             'name' => 'huh?',
-        );
+        ];
 
         $service = new ServiceProvider();
 
-        $this->assertEmpty($service->sharedData()->all());
-        $this->assertNull($service->sharedData()->get('test_data'));
-        $this->assertNull($service->name);
-        $this->assertFalse(isset($service->name));
+        static::assertEmpty($service->sharedData()->all());
+        static::assertNull($service->sharedData()->get('test_data'));
+        static::assertNull($service->name);
+        // @mago-expect lint:no-isset (tests the magic __isset()/offsetExists())
+        static::assertFalse(isset($service->name));
 
         $service->name = $test_data['name'];
 
-        $this->assertTrue(isset($service->name));
-        $this->assertSame($test_data['name'], $service->name);
+        // @mago-expect lint:no-isset (tests the magic __isset()/offsetExists())
+        static::assertTrue(isset($service->name));
+        static::assertSame($test_data['name'], $service->name);
 
         unset($service->name);
 
-        $this->assertEmpty($service->sharedData()->all());
-        $this->assertNull($service->sharedData()->get('test_data'));
-        $this->assertNull($service->name);
-        $this->assertFalse(isset($service->name));
+        static::assertEmpty($service->sharedData()->all());
+        static::assertNull($service->sharedData()->get('test_data'));
+        static::assertNull($service->name);
+        // @mago-expect lint:no-isset (tests the magic __isset()/offsetExists())
+        static::assertFalse(isset($service->name));
     }
 }

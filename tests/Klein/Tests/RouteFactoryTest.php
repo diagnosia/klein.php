@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -32,9 +34,7 @@ class RouteFactoryTest extends AbstractKleinTestCase
 
     protected function getTestCallable($message = self::TEST_CALLBACK_MESSAGE)
     {
-        return function () use ($message) {
-            return $message;
-        };
+        return static fn() => $message;
     }
 
     /**
@@ -55,15 +55,15 @@ class RouteFactoryTest extends AbstractKleinTestCase
 
         $route = $factory->build($test_callable, $test_path);
 
-        $this->assertTrue($route instanceof Route);
-        $this->assertNull($route->getMethod());
-        $this->assertNull($route->getName());
-        $this->assertSame($test_callable(), $route());
+        static::assertTrue($route instanceof Route);
+        static::assertNull($route->getMethod());
+        static::assertNull($route->getName());
+        static::assertSame($test_callable(), $route());
 
-        $this->assertSame($should_match, $route->getCountMatch());
+        static::assertSame($should_match, $route->getCountMatch());
 
         if ($test_paths_match) {
-            $this->assertSame($test_path, $route->getPath());
+            static::assertSame($test_path, $route->getPath());
         }
     }
 

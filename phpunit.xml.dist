@@ -6,6 +6,12 @@
          stopOnFailure="false"
          bootstrap="tests/bootstrap.php"
 >
+    <php>
+        <!-- Don't send headers when testing sessions -->
+        <ini name="session.use_cookies" value="0"/>
+        <!-- Don't send cache headers when testing sessions -->
+        <ini name="session.cache_limiter" value=""/>
+    </php>
     <testsuites>
         <testsuite name="Klein Test Suite">
             <directory>./tests/</directory>

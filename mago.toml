@@ -1,6 +1,6 @@
 # Welcome to Mago!
 # For full documentation, see https://mago.carthage.software/tools/overview
-php-version = "8.5.0"
+php-version = "8.5.13"
 
 [source]
 paths = ["src/", "tests/"]
@@ -21,8 +21,13 @@ integrations = ["symfony", "laravel", "phpunit"]
 # literal-named-argument = { enabled = false }
 # halstead = { enabled = false }
 # interface-name = { enabled = false }
-# kan-defect = { enabled = false }
-# cyclomatic-complexity = { enabled = false }
+
+# Suppressed for now: structural metrics that need larger refactorings of the classes to fix
+too-many-methods = { enabled = false }
+too-many-properties = { enabled = false }
+excessive-parameter-list = { enabled = false }
+cyclomatic-complexity = { enabled = false }
+kan-defect = { enabled = false }
 
 [analyzer]
 # find-unused-definitions = true

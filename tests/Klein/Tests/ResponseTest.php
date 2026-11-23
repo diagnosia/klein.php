@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Klein (klein.php) - A fast & flexible router for PHP
  *
@@ -34,15 +36,15 @@ class ResponseTest extends AbstractKleinTestCase
         // Empty constructor
         $response = new Response();
 
-        $this->assertNotNull($response->protocolVersion());
-        $this->assertIsString($response->protocolVersion());
-        $this->assertMatchesRegularExpression($version_reg_ex, $response->protocolVersion());
+        static::assertNotNull($response->protocolVersion());
+        static::assertIsString($response->protocolVersion());
+        static::assertMatchesRegularExpression($version_reg_ex, $response->protocolVersion());
 
         // Set in method
         $response = new Response();
         $response->protocolVersion('2.0');
 
-        $this->assertSame('2.0', $response->protocolVersion());
+        static::assertSame('2.0', $response->protocolVersion());
     }
 
     public function testBodyGetSet()
@@ -50,18 +52,18 @@ class ResponseTest extends AbstractKleinTestCase
         // Empty constructor
         $response = new Response();
 
-        $this->assertEmpty($response->body());
+        static::assertEmpty($response->body());
 
         // Body set in constructor
         $response = new Response('dog');
 
-        $this->assertSame('dog', $response->body());
+        static::assertSame('dog', $response->body());
 
         // Body set in method
         $response = new Response();
         $response->body('testing');
 
-        $this->assertSame('testing', $response->body());
+        static::assertSame('testing', $response->body());
     }
 
     public function testCodeGetSet()
@@ -69,43 +71,43 @@ class ResponseTest extends AbstractKleinTestCase
         // Empty constructor
         $response = new Response();
 
-        $this->assertNotNull($response->code());
-        $this->assertIsInt($response->code());
+        static::assertNotNull($response->code());
+        static::assertIsInt($response->code());
 
         // Code set in constructor
         $response = new Response(null, 503);
 
-        $this->assertSame(503, $response->code());
+        static::assertSame(503, $response->code());
 
         // Code set in method
         $response = new Response();
         $response->code(204);
 
-        $this->assertSame(204, $response->code());
+        static::assertSame(204, $response->code());
     }
 
     public function testStatusGetter()
     {
         $response = new Response();
 
-        $this->assertIsObject($response->status());
-        $this->assertTrue($response->status() instanceof HttpStatus);
+        static::assertIsObject($response->status());
+        static::assertTrue($response->status() instanceof HttpStatus);
     }
 
     public function testHeadersGetter()
     {
         $response = new Response();
 
-        $this->assertIsObject($response->headers());
-        $this->assertTrue($response->headers() instanceof HeaderDataCollection);
+        static::assertIsObject($response->headers());
+        static::assertTrue($response->headers() instanceof HeaderDataCollection);
     }
 
     public function testCookiesGetter()
     {
         $response = new Response();
 
-        $this->assertIsObject($response->cookies());
-        $this->assertTrue($response->cookies() instanceof ResponseCookieDataCollection);
+        static::assertIsObject($response->cookies());
+        static::assertTrue($response->cookies() instanceof ResponseCookieDataCollection);
     }
 
     public function testPrepend()
@@ -113,7 +115,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response('ein');
         $response->prepend('Kl');
 
-        $this->assertSame('Klein', $response->body());
+        static::assertSame('Klein', $response->body());
     }
 
     public function testAppend()
@@ -121,22 +123,22 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response('Kl');
         $response->append('ein');
 
-        $this->assertSame('Klein', $response->body());
+        static::assertSame('Klein', $response->body());
     }
 
     public function testLockToggleAndGetters()
     {
         $response = new Response();
 
-        $this->assertFalse($response->isLocked());
+        static::assertFalse($response->isLocked());
 
         $response->lock();
 
-        $this->assertTrue($response->isLocked());
+        static::assertTrue($response->isLocked());
 
         $response->unlock();
 
-        $this->assertFalse($response->isLocked());
+        static::assertFalse($response->isLocked());
     }
 
     public function testLockedNotModifiable()
@@ -149,36 +151,28 @@ class ResponseTest extends AbstractKleinTestCase
         $body = $response->body();
         $code = $response->code();
 
-        // Attempt to modify
-        try {
-            $response->protocolVersion('2.0');
-        } catch (LockedResponseException $e) {
-        }
+        // Attempt to modify, every attempt has to be rejected
+        $attempts = [
+            'protocolVersion' => static fn() => $response->protocolVersion('2.0'),
+            'body' => static fn() => $response->body('WOOT!'),
+            'code' => static fn() => $response->code(204),
+            'prepend' => static fn() => $response->prepend('cat'),
+            'append' => static fn() => $response->append('dog'),
+        ];
 
-        try {
-            $response->body('WOOT!');
-        } catch (LockedResponseException $e) {
-        }
-
-        try {
-            $response->code(204);
-        } catch (LockedResponseException $e) {
-        }
-
-        try {
-            $response->prepend('cat');
-        } catch (LockedResponseException $e) {
-        }
-
-        try {
-            $response->append('dog');
-        } catch (LockedResponseException $e) {
+        foreach ($attempts as $method => $attempt) {
+            try {
+                $attempt();
+                static::fail($method . '() did not throw a LockedResponseException');
+            } catch (LockedResponseException $e) {
+                static::assertSame('Response is locked', $e->getMessage());
+            }
         }
 
         // Assert nothing has changed
-        $this->assertSame($protocol_version, $response->protocolVersion());
-        $this->assertSame($body, $response->body());
-        $this->assertSame($code, $response->code());
+        static::assertSame($protocol_version, $response->protocolVersion());
+        static::assertSame($body, $response->body());
+        static::assertSame($code, $response->code());
     }
 
     /**
@@ -236,7 +230,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response('woot!');
         $response->sendBody();
 
-        $this->assertEquals('woot!', $response->body());
+        static::assertSame('woot!', $response->body());
     }
 
     public function testSend()
@@ -245,7 +239,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response->send();
 
         $this->expectOutputString('woot!');
-        $this->assertTrue($response->isLocked());
+        static::assertTrue($response->isLocked());
     }
 
     public function testSendWhenAlreadySent()
@@ -254,7 +248,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response();
         $response->send();
 
-        $this->assertTrue($response->isLocked());
+        static::assertTrue($response->isLocked());
 
         $response->send();
     }
@@ -278,11 +272,11 @@ class ResponseTest extends AbstractKleinTestCase
 
     public function skipChunk()
     {
-        $content = array(
+        $content = [
             'initial content',
             'more',
             'content',
-        );
+        ];
 
         $response = new Response($content[0]);
 
@@ -293,37 +287,37 @@ class ResponseTest extends AbstractKleinTestCase
         // We do not send the bytes in chunk method
         $this->expectOutputString(
             // dechex(strlen($content[0]))."\r\n"
-            "$content[0]\r\n"
+            "{$content[0]}\r\n"
             // .dechex(strlen($content[1]))."\r\n"
-            . "$content[1]\r\n"
+            . "{$content[1]}\r\n"
             // .dechex(strlen($content[2]))."\r\n"
-            . "$content[2]\r\n",
+            . "{$content[2]}\r\n",
         );
     }
 
     public function testHeader()
     {
-        $headers = array(
+        $headers = [
             'test' => 'woot!',
             'test' => 'sure',
             'okay' => 'yup',
-        );
+        ];
 
         $response = new Response();
 
         // Make sure the headers are initially empty
-        $this->assertEmpty($response->headers()->all());
+        static::assertEmpty($response->headers()->all());
 
         // Set the headers
         foreach ($headers as $name => $value) {
             $response->header($name, $value);
         }
 
-        $this->assertNotEmpty($response->headers()->all());
+        static::assertNotEmpty($response->headers()->all());
 
         // Set the headers
         foreach ($headers as $name => $value) {
-            $this->assertSame($value, $response->headers()->get($name));
+            static::assertSame($value, $response->headers()->get($name));
         }
     }
 
@@ -332,7 +326,7 @@ class ResponseTest extends AbstractKleinTestCase
      */
     public function testCookie()
     {
-        $test_cookie_data = array(
+        $test_cookie_data = [
             'name' => 'name',
             'value' => 'value',
             'expiry' => null,
@@ -340,7 +334,7 @@ class ResponseTest extends AbstractKleinTestCase
             'domain' => 'whatever.com',
             'secure' => true,
             'httponly' => true,
-        );
+        ];
 
         $test_cookie = new ResponseCookie(
             $test_cookie_data['name'],
@@ -355,7 +349,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response();
 
         // Make sure the cookies are initially empty
-        $this->assertEmpty($response->cookies()->all());
+        static::assertEmpty($response->cookies()->all());
 
         // Set a cookies
         $response->cookie(
@@ -368,19 +362,19 @@ class ResponseTest extends AbstractKleinTestCase
             $test_cookie_data['httponly'],
         );
 
-        $this->assertNotEmpty($response->cookies()->all());
+        static::assertNotEmpty($response->cookies()->all());
 
         $the_cookie = $response->cookies()->get($test_cookie_data['name']);
 
-        $this->assertNotNull($the_cookie);
-        $this->assertTrue($the_cookie instanceof ResponseCookie);
-        $this->assertSame($test_cookie_data['name'], $the_cookie->getName());
-        $this->assertSame($test_cookie_data['value'], $the_cookie->getValue());
-        $this->assertSame($test_cookie_data['path'], $the_cookie->getPath());
-        $this->assertSame($test_cookie_data['domain'], $the_cookie->getDomain());
-        $this->assertSame($test_cookie_data['secure'], $the_cookie->getSecure());
-        $this->assertSame($test_cookie_data['httponly'], $the_cookie->getHttpOnly());
-        $this->assertNotNull($the_cookie->getExpire());
+        static::assertNotNull($the_cookie);
+        static::assertTrue($the_cookie instanceof ResponseCookie);
+        static::assertSame($test_cookie_data['name'], $the_cookie->getName());
+        static::assertSame($test_cookie_data['value'], $the_cookie->getValue());
+        static::assertSame($test_cookie_data['path'], $the_cookie->getPath());
+        static::assertSame($test_cookie_data['domain'], $the_cookie->getDomain());
+        static::assertSame($test_cookie_data['secure'], $the_cookie->getSecure());
+        static::assertSame($test_cookie_data['httponly'], $the_cookie->getHttpOnly());
+        static::assertNotNull($the_cookie->getExpire());
     }
 
     public function testNoCache()
@@ -388,12 +382,12 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response();
 
         // Make sure the headers are initially empty
-        $this->assertEmpty($response->headers()->all());
+        static::assertEmpty($response->headers()->all());
 
         $response->noCache();
 
-        $this->assertArrayHasKey('Cache-Control', $response->headers()->all());
-        $this->assertEquals('no-store, no-cache', $response->headers()->all()['Cache-Control']);
+        static::assertArrayHasKey('Cache-Control', $response->headers()->all());
+        static::assertSame('no-store, no-cache', $response->headers()->all()['Cache-Control']);
     }
 
     public function testRedirect()
@@ -404,32 +398,32 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response();
         $response->redirect($url, $code);
 
-        $this->assertSame($code, $response->code());
-        $this->assertSame($url, $response->headers()->get('location'));
-        $this->assertTrue($response->isLocked());
+        static::assertSame($code, $response->code());
+        static::assertSame($url, $response->headers()->get('location'));
+        static::assertTrue($response->isLocked());
     }
 
     public function testDump()
     {
         $response = new Response();
 
-        $this->assertEmpty($response->body());
+        static::assertEmpty($response->body());
 
         $response->dump('test');
 
-        $this->assertStringContainsString('test', $response->body());
+        static::assertStringContainsString('test', $response->body());
     }
 
     public function testDumpArray()
     {
         $response = new Response();
 
-        $this->assertEmpty($response->body());
+        static::assertEmpty($response->body());
 
         $response->dump(['sure', 1, 10, 17, 'ok' => 'no']);
 
-        $this->assertNotEmpty($response->body());
-        $this->assertNotEquals('<pre></pre>', $response->body());
+        static::assertNotEmpty($response->body());
+        static::assertNotSame('<pre></pre>', $response->body());
     }
 
     public function testFileSend()
@@ -437,7 +431,7 @@ class ResponseTest extends AbstractKleinTestCase
         $file_name = 'testing';
         $file_mime = 'text/plain';
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($file_name, $file_mime) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($file_name, $file_mime) {
             $response->file(__FILE__, $file_name, $file_mime);
         });
 
@@ -447,32 +441,17 @@ class ResponseTest extends AbstractKleinTestCase
         $this->expectOutputString(file_get_contents(__FILE__));
 
         // Assert headers were passed
-        $this->assertEquals(
-            $file_mime,
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Type'),
-        );
-        $this->assertEquals(
-            filesize(__FILE__),
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Length'),
-        );
-        $this->assertStringContainsString(
+        static::assertEquals($file_mime, $this->klein_app->response()->headers()->get('Content-Type'));
+        static::assertEquals(filesize(__FILE__), $this->klein_app->response()->headers()->get('Content-Length'));
+        static::assertStringContainsString(
             $file_name,
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Disposition'),
+            $this->klein_app->response()->headers()->get('Content-Disposition'),
         );
     }
 
     public function testFileSendLooseArgs()
     {
-        $this->klein_app->respond(function ($request, $response, $service) {
+        $this->klein_app->respond(static function ($request, $response, $service) {
             $response->file(__FILE__);
         });
 
@@ -482,25 +461,9 @@ class ResponseTest extends AbstractKleinTestCase
         $this->expectOutputString(file_get_contents(__FILE__));
 
         // Assert headers were passed
-        $this->assertEquals(
-            filesize(__FILE__),
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Length'),
-        );
-        $this->assertNotNull(
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Type'),
-        );
-        $this->assertNotNull(
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Disposition'),
-        );
+        static::assertEquals(filesize(__FILE__), $this->klein_app->response()->headers()->get('Content-Length'));
+        static::assertNotNull($this->klein_app->response()->headers()->get('Content-Type'));
+        static::assertNotNull($this->klein_app->response()->headers()->get('Content-Disposition'));
     }
 
     public function testFileSendWhenAlreadySent()
@@ -512,7 +475,7 @@ class ResponseTest extends AbstractKleinTestCase
         $response = new Response();
         $response->file(__FILE__);
 
-        $this->assertTrue($response->isLocked());
+        static::assertTrue($response->isLocked());
 
         $response->file(__FILE__);
     }
@@ -552,7 +515,7 @@ class ResponseTest extends AbstractKleinTestCase
     public function testJSON()
     {
         // Create a test object to be JSON encoded/decoded
-        $test_object = (object) array(
+        $test_object = (object) [
             'cheese',
             'dog' => 'bacon',
             1 => 'should be 1 (thanks PHP casting...)',
@@ -560,9 +523,9 @@ class ResponseTest extends AbstractKleinTestCase
             'double' => 1.5,
             '_weird' => true,
             'uniqid' => uniqid(),
-        );
+        ];
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($test_object) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($test_object) {
             $response->json($test_object);
         });
 
@@ -572,38 +535,20 @@ class ResponseTest extends AbstractKleinTestCase
         $this->expectOutputString(json_encode($test_object));
 
         // Assert headers were passed
-        $this->assertEquals(
-            'no-cache',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Pragma'),
-        );
-        $this->assertEquals(
-            'no-store, no-cache',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Cache-Control'),
-        );
-        $this->assertEquals(
-            'application/json',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Type'),
-        );
+        static::assertSame('no-cache', $this->klein_app->response()->headers()->get('Pragma'));
+        static::assertSame('no-store, no-cache', $this->klein_app->response()->headers()->get('Cache-Control'));
+        static::assertSame('application/json', $this->klein_app->response()->headers()->get('Content-Type'));
     }
 
     public function testJSONWithPrefix()
     {
         // Create a test object to be JSON encoded/decoded
-        $test_object = array(
+        $test_object = [
             'cheese',
-        );
+        ];
         $prefix = 'dogma';
 
-        $this->klein_app->respond(function ($request, $response, $service) use ($test_object, $prefix) {
+        $this->klein_app->respond(static function ($request, $response, $service) use ($test_object, $prefix) {
             $response->json($test_object, $prefix);
         });
 
@@ -613,26 +558,8 @@ class ResponseTest extends AbstractKleinTestCase
         $this->expectOutputString('dogma(' . json_encode($test_object) . ');');
 
         // Assert headers were passed
-        $this->assertEquals(
-            'no-cache',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Pragma'),
-        );
-        $this->assertEquals(
-            'no-store, no-cache',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Cache-Control'),
-        );
-        $this->assertEquals(
-            'text/javascript',
-            $this->klein_app
-                ->response()
-                ->headers()
-                ->get('Content-Type'),
-        );
+        static::assertSame('no-cache', $this->klein_app->response()->headers()->get('Pragma'));
+        static::assertSame('no-store, no-cache', $this->klein_app->response()->headers()->get('Cache-Control'));
+        static::assertSame('text/javascript', $this->klein_app->response()->headers()->get('Content-Type'));
     }
 }
