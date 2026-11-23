@@ -27,6 +27,7 @@ use Klein\Response;
 use Klein\Route;
 use Klein\ServiceProvider;
 use Klein\Tests\Mocks\MockRequestFactory;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
  * RoutingTest
@@ -561,8 +562,14 @@ class RoutingTest extends AbstractKleinTestCase
         $this->klein_app->dispatch(MockRequestFactory::create('/notroute'));
     }
 
+    #[IgnoreDeprecations]
     public function test404RouteDefinitionOrderDoesntEffectWhen404HandlersCalled()
     {
+        // Uses a deprecated 404/405 "route" on purpose
+        $this->expectUserDeprecationMessage(
+            'Use of 404/405 "routes" is deprecated. Use $klein->onHttpError() instead.',
+        );
+
         $this->expectOutputString('onetwo404 Code');
 
         $this->klein_app->respond(static function () {
@@ -806,8 +813,14 @@ class RoutingTest extends AbstractKleinTestCase
         static::assertSame(404, $this->klein_app->response()->code());
     }
 
+    #[IgnoreDeprecations]
     public function test405Routes()
     {
+        // Uses a deprecated 404/405 "route" on purpose
+        $this->expectUserDeprecationMessage(
+            'Use of 404/405 "routes" is deprecated. Use $klein->onHttpError() instead.',
+        );
+
         $result_array = [];
 
         $this->expectOutputString('_');

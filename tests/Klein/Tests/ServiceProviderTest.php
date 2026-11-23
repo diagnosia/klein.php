@@ -21,6 +21,7 @@ use Klein\Response;
 use Klein\ServiceProvider;
 use Klein\Validator;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\IgnoreDeprecations;
 
 /**
  * ServiceProviderTest
@@ -37,13 +38,24 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $service = new ServiceProvider();
 
         // Make sure our attributes are first null
-        static::assertFalse($service->isBond());
+        static::assertFalse($service->isBound());
 
         // New service with injected dependencies
         $service = new ServiceProvider($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
-        static::assertTrue($service->isBond());
+        static::assertTrue($service->isBound());
+    }
+
+    #[IgnoreDeprecations]
+    public function testIsBondIsADeprecatedAliasOfIsBound()
+    {
+        $this->expectUserDeprecationMessage(
+            'Method Klein\\ServiceProvider::isBond() is deprecated, use isBound() instead',
+        );
+
+        static::assertFalse(new ServiceProvider()->isBond());
+        static::assertTrue(new ServiceProvider(new Request(), new Response())->isBond());
     }
 
     public function testBinder()
@@ -51,13 +63,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
         $service = new ServiceProvider();
 
         // Make sure our attributes are first null
-        static::assertFalse($service->isBond());
+        static::assertFalse($service->isBound());
 
         // New service with injected dependencies
         $return_val = $service->bind($request = new Request(), $response = new Response());
 
         // Make sure our attributes are set
-        static::assertTrue($service->isBond());
+        static::assertTrue($service->isBound());
 
         // Make sure we're chainable
         static::assertEquals($service, $return_val);

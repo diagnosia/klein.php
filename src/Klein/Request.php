@@ -112,18 +112,16 @@ class Request
     /**
      * Gets a unique ID for the request
      *
-     * Generates one on the first call
+     * Generates a random one on the first call
      *
-     * @param boolean $hash     Whether or not to hash the ID on creation
+     * @param boolean $hash     Whether to generate a long (40 hex characters, like a SHA-1 hash)
+     *  or a short (16 hex characters) ID
      */
     public function id(bool $hash = true): string
     {
         if (null === $this->id) {
-            $this->id = uniqid();
-
-            if ($hash) {
-                $this->id = sha1($this->id);
-            }
+            // Cryptographically random, unlike the time based uniqid() used before
+            $this->id = bin2hex(random_bytes($hash ? 20 : 8));
         }
 
         return $this->id;

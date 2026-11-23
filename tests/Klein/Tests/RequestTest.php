@@ -410,6 +410,12 @@ class RequestTest extends AbstractKleinTestCase
         static::assertNotSame($request_one->id(), $request_two->id());
     }
 
+    public function testIdFormat()
+    {
+        static::assertMatchesRegularExpression('/^[0-9a-f]{40}$/', new Request()->id());
+        static::assertMatchesRegularExpression('/^[0-9a-f]{16}$/', new Request()->id(false));
+    }
+
     public function testMockFactory()
     {
         // Test data

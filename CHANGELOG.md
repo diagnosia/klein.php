@@ -15,6 +15,10 @@
   if a buffer can't be removed instead of looping forever
 - A route regex failing without a PHP warning (e.g. hitting the backtrack limit) throws the compilation
   exception with PCRE's error message instead of a `TypeError`
+- Add `ServiceProvider::isBound()`; the misspelled `isBond()` is deprecated
+- `Request::id()` is cryptographically random (`random_bytes()`) instead of time based (`uniqid()`): 40 hex
+  characters by default, 16 with `id(false)`
+- The tests expect the deprecation notices of the deprecated 404/405 "routes" instead of reporting them
 
 ### 2026-11-23 (4.3.0)
 

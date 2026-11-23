@@ -84,9 +84,21 @@ class ServiceProvider
         return $this;
     }
 
+    /**
+     * Checks if both a request and a response are bound
+     */
+    public function isBound(): bool
+    {
+        return null !== $this->request && null !== $this->response;
+    }
+
+    /**
+     * Misspelled alias of isBound()
+     */
+    #[\Deprecated(message: 'use isBound() instead')]
     public function isBond(): bool
     {
-        return $this->request && $this->response;
+        return $this->isBound();
     }
 
     /**
