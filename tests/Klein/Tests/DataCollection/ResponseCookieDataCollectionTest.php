@@ -88,4 +88,16 @@ class ResponseCookieDataCollectionTest extends AbstractKleinTestCase
             static::assertTrue($cookie instanceof ResponseCookie);
         }
     }
+
+    public function testNumericKeyAndNonStringValueConvertToCookie()
+    {
+        // PHP turns the array key "123" into the int 123
+        $data_collection = new ResponseCookieDataCollection(['123' => 5]);
+
+        $cookie = $data_collection->get(123);
+
+        static::assertTrue($cookie instanceof ResponseCookie);
+        static::assertSame('123', $cookie->getName());
+        static::assertSame('5', $cookie->getValue());
+    }
 }

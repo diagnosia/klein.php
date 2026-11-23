@@ -21,6 +21,7 @@ use Klein\Exceptions\ResponseAlreadySentException;
 use Klein\HttpStatus;
 use Klein\Response;
 use Klein\ResponseCookie;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\Attributes\WithoutErrorHandler;
 
@@ -377,6 +378,16 @@ class ResponseTest extends AbstractKleinTestCase
         static::assertNotNull($the_cookie->getExpire());
     }
 
+    public function testCookieWithNonStringValue()
+    {
+        $response = new Response();
+
+        $response->cookie('count', 5, '3600');
+
+        static::assertSame('5', $response->cookies()->get('count')->getValue());
+        static::assertSame(3600, $response->cookies()->get('count')->getExpire());
+    }
+
     public function testNoCache()
     {
         $response = new Response();
@@ -424,6 +435,27 @@ class ResponseTest extends AbstractKleinTestCase
 
         static::assertNotEmpty($response->body());
         static::assertNotSame('<pre></pre>', $response->body());
+    }
+
+    public static function dumpScalarProvider(): array
+    {
+        return [
+            'int' => [42, '42'],
+            'float' => [1.5, '1.5'],
+            'true' => [true, '1'],
+            'false' => [false, ''],
+            'null' => [null, ''],
+        ];
+    }
+
+    #[DataProvider('dumpScalarProvider')]
+    public function testDumpNonStringScalar(mixed $value, string $expected)
+    {
+        $response = new Response();
+
+        $response->dump($value);
+
+        static::assertSame('<pre>' . $expected . "</pre><br />\n", $response->body());
     }
 
     public function testFileSend()

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace Klein\Tests;
 
+use InvalidArgumentException;
 use Klein\ResponseCookie;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -175,5 +176,39 @@ class ResponseCookieTest extends AbstractKleinTestCase
 
         static::assertSame($sample_data_other['http_only'], $response_cookie->getHttpOnly());
         static::assertIsBool($response_cookie->getHttpOnly());
+    }
+
+    public function testNonStringNameAndValueAreCast()
+    {
+        $response_cookie = new ResponseCookie(123, 5);
+
+        static::assertSame('123', $response_cookie->getName());
+        static::assertSame('5', $response_cookie->getValue());
+
+        $response_cookie->setValue(1.5);
+        static::assertSame('1.5', $response_cookie->getValue());
+
+        $response_cookie->setValue(false);
+        static::assertSame('', $response_cookie->getValue());
+
+        $response_cookie->setValue(null);
+        static::assertNull($response_cookie->getValue());
+    }
+
+    public function testNumericStringExpireIsCast()
+    {
+        $response_cookie = new ResponseCookie('name', null, '3600');
+
+        static::assertSame(3600, $response_cookie->getExpire());
+
+        $response_cookie->setExpire('60');
+        static::assertSame(60, $response_cookie->getExpire());
+    }
+
+    public function testNonNumericStringExpireThrows()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new ResponseCookie('name', null, 'tomorrow');
     }
 }

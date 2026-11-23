@@ -55,9 +55,8 @@ class Response extends AbstractResponse
      */
     public function dump($obj)
     {
-        if (is_array($obj) || is_object($obj)) {
-            $obj = print_r($obj, return: true);
-        }
+        // Arrays and objects are printed, anything else (int, float, bool, null) is cast
+        $obj = is_array($obj) || is_object($obj) ? print_r($obj, return: true) : (string) $obj;
 
         $this->append('<pre>' . htmlentities($obj, ENT_QUOTES) . "</pre><br />\n");
 

@@ -263,6 +263,22 @@ class RequestTest extends AbstractKleinTestCase
         static::assertTrue($request->method(strtolower($weird_override_method)));
     }
 
+    public static function unusableMethodOverrideProvider(): array
+    {
+        return [
+            'array (_method[]=x)' => [['DELETE']],
+            'empty string' => [''],
+        ];
+    }
+
+    #[DataProvider('unusableMethodOverrideProvider')]
+    public function testMethodOverrideIgnoresUnusableValue(mixed $override)
+    {
+        $request = new Request([], ['_method' => $override], [], ['REQUEST_METHOD' => 'POST']);
+
+        static::assertSame('POST', $request->method());
+    }
+
     public function testQueryModify()
     {
         $test_uri = '/test?query';
@@ -305,6 +321,15 @@ class RequestTest extends AbstractKleinTestCase
             $expected_uri . '?' . str_replace('per_page=3', replace: 'per_page=10', subject: $query_string),
             $test_three,
         );
+    }
+
+    public function testQueryWithoutQueryString()
+    {
+        // A URL without "?" has no QUERY_STRING server entry at all
+        $request = new Request([], [], [], ['REQUEST_URI' => '/test']);
+
+        static::assertSame('/test?test=dog', $request->query('test', 'dog'));
+        static::assertSame('/test', $request->query([]));
     }
 
     public function testId()

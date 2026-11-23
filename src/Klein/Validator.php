@@ -34,6 +34,13 @@ class Validator
     protected null|string $str;
 
     /**
+     * The type of the given value, if it couldn't be validated as a string (e.g. an array)
+     *
+     * Every check, negated ones included, fails for such a value
+     */
+    protected null|string $invalid_type = null;
+
+    /**
      * The custom exception message to throw on validation failure
      */
     protected null|string|bool $err;
@@ -50,13 +57,22 @@ class Validator
     /**
      * Sets up the validator chain with the string and optional error message
      *
-     * @param string $str   The string to validate
+     * @param mixed $str   The string to validate, other scalars are cast to string
      * @param string $err   The optional custom exception message to throw on validation failure
      */
-    public function __construct(null|string $str, null|string|bool $err = null)
+    public function __construct(mixed $str, null|string|bool $err = null)
     {
-        $this->str = $str;
         $this->err = $err;
+        $this->str = null;
+
+        if (null !== $str && is_scalar($str)) {
+            $this->str = (string) $str;
+        }
+
+        if (null !== $str && !is_scalar($str)) {
+            // e.g. "?id[]=1" gives an array, which can't pass any string validation
+            $this->invalid_type = get_debug_type($str);
+        }
 
         if (!static::$default_added) {
             static::addDefault();
@@ -230,7 +246,7 @@ class Validator
         $validator = static::$methods[$validator];
         array_unshift($args, $this->str);
 
-        $result = (bool) ($validator(...$args) ^ $reverse);
+        $result = null === $this->invalid_type && (bool) ($validator(...$args) ^ $reverse);
 
         if ($this->err === false) {
             return $result;
@@ -240,7 +256,10 @@ class Validator
             throw new ValidationException(
                 is_string($this->err)
                     ? $this->err
-                    : 'Validation failed for ' . $method . '() with value: ' . var_export($this->str, return: true),
+                    : 'Validation failed for '
+                    . $method
+                    . '() with value: '
+                    . ($this->invalid_type ?? var_export($this->str, return: true)),
             );
         }
 

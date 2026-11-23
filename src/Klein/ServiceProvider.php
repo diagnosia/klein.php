@@ -245,6 +245,11 @@ class ServiceProvider
      */
     public static function escape($str, $flags = ENT_QUOTES)
     {
+        // Cast other scalars (int, float, bool) and null, like before strict types
+        if (null === $str || is_scalar($str)) {
+            $str = (string) $str;
+        }
+
         return htmlentities($str, $flags, encoding: 'UTF-8');
     }
 
@@ -376,11 +381,11 @@ class ServiceProvider
     /**
      * Start a validator chain for the specified string
      *
-     * @param string $string    The string to validate
+     * @param mixed $string     The string to validate, other scalars are cast and anything else fails
      * @param string $err       The custom exception message to throw or `false` to return the result as boolean
      * @return Validator
      */
-    public function validate(null|string $string, null|string|bool $err = null): Validator
+    public function validate(mixed $string, null|string|bool $err = null): Validator
     {
         return new Validator($string, $err);
     }

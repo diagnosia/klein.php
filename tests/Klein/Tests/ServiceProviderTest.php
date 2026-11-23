@@ -251,6 +251,13 @@ class ServiceProviderTest extends AbstractKleinTestCase
         );
     }
 
+    public function testEscapeNonString()
+    {
+        static::assertSame('42', ServiceProvider::escape(42));
+        static::assertSame('1', ServiceProvider::escape(true));
+        static::assertSame('', ServiceProvider::escape(null));
+    }
+
     public function testRefresh()
     {
         $this->klein_app->respond(static function ($request, $response, $service) {
@@ -462,6 +469,36 @@ class ServiceProviderTest extends AbstractKleinTestCase
         });
 
         $this->klein_app->dispatch();
+    }
+
+    public function testValidateNonStringScalarIsCast()
+    {
+        $service = new ServiceProvider();
+
+        static::assertTrue($service->validate(42, false)->isInt());
+        static::assertTrue($service->validate(1.5, false)->isFloat());
+        static::assertTrue($service->validate(true, false)->isLen(1));
+    }
+
+    public function testValidateParamArrayFailsEveryCheck()
+    {
+        // e.g. "?id[]=1"
+        $service = new ServiceProvider(new Request(['id' => ['1']]), new Response());
+
+        static::assertFalse($service->validateParam('id', false)->isInt());
+        static::assertFalse($service->validateParam('id', false)->isNull());
+        static::assertFalse($service->validateParam('id', false)->notNull());
+        static::assertFalse($service->validateParam('id', false)->notInt());
+    }
+
+    public function testValidateParamArrayThrowsValidationException()
+    {
+        $service = new ServiceProvider(new Request(['id' => ['1']]), new Response());
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Validation failed for isInt() with value: array');
+
+        $service->validateParam('id')->isInt();
     }
 
     // Test ALL of the magic setter, getter, exists, and removal methods

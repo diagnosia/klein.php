@@ -441,11 +441,14 @@ class Request
         // Override
         if ($allow_override && $method === 'POST') {
             // For legacy servers, override the HTTP method with the X-HTTP-Method-Override header or _method parameter
-            $method = $this->server->exists('X_HTTP_METHOD_OVERRIDE')
+            $override = $this->server->exists('X_HTTP_METHOD_OVERRIDE')
                 ? $this->server->get('X_HTTP_METHOD_OVERRIDE', $method)
                 : $this->param('_method', $method);
 
-            $method = strtoupper($method);
+            // Ignore overrides that aren't a usable method name (e.g. "_method[]=x" gives an array)
+            if (is_string($override) && $override !== '') {
+                $method = strtoupper($override);
+            }
         }
 
         // We're doing a check
@@ -467,7 +470,7 @@ class Request
     {
         $query = [];
 
-        parse_str($this->server()->get('QUERY_STRING'), $query);
+        parse_str((string) $this->server()->get('QUERY_STRING', ''), $query);
 
         $query = is_array($key) ? array_merge($query, $key) : array_replace($query, [$key => $value]);
 

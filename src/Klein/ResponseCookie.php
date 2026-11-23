@@ -14,6 +14,8 @@ declare(strict_types=1);
 
 namespace Klein;
 
+use InvalidArgumentException;
+
 /**
  * ResponseCookie
  *
@@ -73,17 +75,17 @@ class ResponseCookie
     /**
      * Constructor
      *
-     * @param string  $name         The name of the cookie
-     * @param string  $value        The value to set the cookie with
-     * @param int     $expire       The time that the cookie should expire
+     * @param string|int                  $name   The name of the cookie (array keys like "123" become ints)
+     * @param string|int|float|bool|null  $value  The value to set the cookie with, scalars are cast to string
+     * @param int|string|null             $expire The time that the cookie should expire, as a (numeric) Unix timestamp
      * @param string  $path         The path of which to restrict the cookie
      * @param string  $domain       The domain of which to restrict the cookie
      * @param bool    $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param bool    $http_only    Flag of whether the cookie should only be accessible over the HTTP protocol
      */
     public function __construct(
-        string $name,
-        string|null $value = null,
+        string|int $name,
+        string|int|float|bool|null $value = null,
         int|string|null $expire = null,
         string|null $path = null,
         string|null $domain = null,
@@ -113,9 +115,9 @@ class ResponseCookie
      *
      * @return ResponseCookie
      */
-    public function setName(string $name)
+    public function setName(string|int $name)
     {
-        $this->name = $name;
+        $this->name = (string) $name;
 
         return $this;
     }
@@ -131,9 +133,9 @@ class ResponseCookie
     /**
      * Sets the cookie's value
      */
-    public function setValue(string|null $value): static
+    public function setValue(string|int|float|bool|null $value): static
     {
-        $this->value = $value;
+        $this->value = null === $value ? null : (string) $value;
 
         return $this;
     }
@@ -149,11 +151,21 @@ class ResponseCookie
     /**
      * Sets the cookie's expire time
      *
-     * The time should be an integer
+     * The time should be an integer (or numeric string)
      * representing a Unix timestamp
+     *
+     * @throws InvalidArgumentException If the time is a non-numeric string
      */
-    public function setExpire(int|null $expire): static
+    public function setExpire(int|string|null $expire): static
     {
+        if (is_string($expire)) {
+            if (!is_numeric($expire)) {
+                throw new InvalidArgumentException('Expected a numeric cookie expire time. Got: ' . $expire);
+            }
+
+            $expire = (int) $expire;
+        }
+
         $this->expire = $expire;
 
         return $this;
