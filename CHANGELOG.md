@@ -2,6 +2,17 @@
 
 ## Changes for Diagnosia
 
+### 2026-11-23 (4.2.0)
+
+- Fix escaping of the backtick delimiter in compiled route regexes
+- Fix route params being URL decoded twice for following catch-all routes
+- Treat `HTTPS=off` (IIS) as not secure in `Request::isSecure()`
+- Add `declare(strict_types=1)` and fix mago lint findings across src and tests
+- Remove PHP 5 leftovers (dead `Exception` catch blocks)
+- Update Docker image (PHP 8.5 on Debian trixie, extensions via PIE)
+- GitHub Actions: update checkout action, add mago lint and format checks
+- Add `version` field to `composer.json`
+
 ### 2025-12-29 (4.1.2)
 
 - Fix depcrecation warning in Validator for `strlen` not accepting `null` anymore
