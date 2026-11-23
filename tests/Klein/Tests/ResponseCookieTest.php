@@ -211,4 +211,27 @@ class ResponseCookieTest extends AbstractKleinTestCase
 
         new ResponseCookie('name', null, 'tomorrow');
     }
+
+    public function testSameSiteGetSet()
+    {
+        $response_cookie = new ResponseCookie('name');
+
+        static::assertNull($response_cookie->getSameSite());
+
+        // Normalized to the canonical spelling
+        static::assertSame('Strict', $response_cookie->setSameSite('strict')->getSameSite());
+        static::assertSame('Lax', $response_cookie->setSameSite('LAX')->getSameSite());
+        static::assertSame(
+            'None',
+            new ResponseCookie('name', null, null, null, null, true, false, 'None')->getSameSite(),
+        );
+        static::assertNull($response_cookie->setSameSite(null)->getSameSite());
+    }
+
+    public function testInvalidSameSiteThrows()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new ResponseCookie('name', null, null, null, null, false, false, 'sometimes');
+    }
 }

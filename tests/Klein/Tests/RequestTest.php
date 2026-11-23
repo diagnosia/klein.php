@@ -264,6 +264,16 @@ class RequestTest extends AbstractKleinTestCase
         static::assertTrue($request->method(strtolower($weird_override_method)));
     }
 
+    public function testMethodOverrideParamOnlyFromPostBody()
+    {
+        $server = ['REQUEST_METHOD' => 'POST'];
+
+        // A query string or cookie could be set by a plain link or another site, so they must not override
+        static::assertSame('POST', new Request(['_method' => 'DELETE'], [], [], $server)->method());
+        static::assertSame('POST', new Request([], [], ['_method' => 'DELETE'], $server)->method());
+        static::assertSame('DELETE', new Request([], ['_method' => 'DELETE'], [], $server)->method());
+    }
+
     public function testMethodOverrideHeaderFromServerGlobals()
     {
         // As createFromGlobals() would get it for a request with an "X-HTTP-Method-Override: put" header

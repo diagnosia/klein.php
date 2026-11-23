@@ -279,13 +279,16 @@ class ServiceProvider
     /**
      * Redirects the request back to the referrer
      *
+     * Only a referrer on the request's own host is followed, otherwise (or without one) this refreshes,
+     * since the Referer header can point anywhere (an open redirect)
+     *
      * @return ServiceProvider
      */
     public function back()
     {
         $referer = $this->request->server()->get('HTTP_REFERER');
 
-        if (null !== $referer) {
+        if (is_string($referer) && $this->isOwnHostUrl($referer)) {
             $this->response->redirect($referer);
 
             return $this;
@@ -294,6 +297,32 @@ class ServiceProvider
         $this->refresh();
 
         return $this;
+    }
+
+    /**
+     * Checks if a URL is an absolute HTTP(S) URL on the request's host (and port)
+     *
+     * @param string $url   The URL to check
+     * @return boolean
+     */
+    protected function isOwnHostUrl($url)
+    {
+        $parts = parse_url($url);
+        $request_host = $this->request->server()->get('HTTP_HOST');
+
+        if (false === $parts || !is_string($request_host)) {
+            return false;
+        }
+
+        $scheme = strtolower($parts['scheme'] ?? '');
+
+        if (($parts['host'] ?? null) === null || $scheme !== 'http' && $scheme !== 'https') {
+            return false;
+        }
+
+        $host = $parts['host'] . (($parts['port'] ?? null) !== null ? ':' . $parts['port'] : '');
+
+        return strcasecmp($host, $request_host) === 0;
     }
 
     /**

@@ -448,7 +448,7 @@ class Request
 
             $override = $this->server->exists($header_key)
                 ? $this->server->get($header_key, $method)
-                : $this->param('_method', $method);
+                : $this->params_post->get('_method', $method); // Only the POST body, so a link can't override it
 
             // Ignore overrides that aren't a usable method name (e.g. "_method[]=x" gives an array)
             if (is_string($override) && $override !== '') {

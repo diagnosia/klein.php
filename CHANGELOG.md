@@ -19,6 +19,15 @@
 - `Response::json()` throws a `JsonException` when encoding fails instead of sending an empty 200 response
 - `Response::file()` throws before sending anything when the file isn't a readable file, and falls back to
   `application/octet-stream` when the MIME type can't be detected
+- Security: the `_method` override is only read from the POST body, no longer from the query string or cookies
+- Security: `Klein::getPathFor()` URL encodes param values (catch-all `*`/`**` params keep their slashes);
+  values that were already encoded get encoded again
+- Security: `Response::file()` escapes the filename in `Content-Disposition` and adds an RFC 6266
+  `filename*` for names that aren't plain ASCII
+- Security: `ServiceProvider::back()` only follows a referrer on the request's own host (and port), otherwise
+  it refreshes, closing an open redirect
+- Add SameSite cookie support: `$samesite` parameter for `Response::cookie()` and `ResponseCookie`
+  (`Strict`, `Lax` or `None`, default: not sent); a cookie with a `null` value no longer throws when sent
 
 ### 2026-11-23 (4.2.0)
 

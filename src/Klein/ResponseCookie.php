@@ -69,6 +69,16 @@ class ResponseCookie
     protected bool $http_only;
 
     /**
+     * The SameSite attribute ("Strict", "Lax" or "None"), null to not send one (browsers then default to "Lax")
+     */
+    protected string|null $same_site;
+
+    /**
+     * The allowed SameSite values, keyed by their lowercase form
+     */
+    const SAME_SITE_VALUES = ['strict' => 'Strict', 'lax' => 'Lax', 'none' => 'None'];
+
+    /**
      * Methods
      */
 
@@ -82,6 +92,7 @@ class ResponseCookie
      * @param string  $domain       The domain of which to restrict the cookie
      * @param bool    $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param bool    $http_only    Flag of whether the cookie should only be accessible over the HTTP protocol
+     * @param string|null $same_site The SameSite attribute ("Strict", "Lax" or "None"; "None" requires $secure)
      */
     public function __construct(
         string|int $name,
@@ -91,6 +102,7 @@ class ResponseCookie
         string|null $domain = null,
         bool $secure = false,
         bool $http_only = false,
+        string|null $same_site = null,
     ) {
         // Initialize our properties
         $this->setName($name);
@@ -100,6 +112,7 @@ class ResponseCookie
         $this->setDomain($domain);
         $this->setSecure($secure);
         $this->setHttpOnly($http_only);
+        $this->setSameSite($same_site);
     }
 
     /**
@@ -239,6 +252,33 @@ class ResponseCookie
     public function setHttpOnly(bool $http_only): static
     {
         $this->http_only = $http_only;
+
+        return $this;
+    }
+
+    /**
+     * Gets the cookie's SameSite attribute
+     */
+    public function getSameSite(): string|null
+    {
+        return $this->same_site;
+    }
+
+    /**
+     * Sets the cookie's SameSite attribute
+     *
+     * @throws InvalidArgumentException If the value isn't "Strict", "Lax" or "None" (case-insensitive)
+     */
+    public function setSameSite(string|null $same_site): static
+    {
+        if (null !== $same_site) {
+            $same_site = static::SAME_SITE_VALUES[strtolower(
+                $same_site,
+            )] ?? throw new InvalidArgumentException('Expected a SameSite value of "Strict", "Lax" or "None". Got: '
+            . $same_site);
+        }
+
+        $this->same_site = $same_site;
 
         return $this;
     }

@@ -20,6 +20,7 @@ use Klein\Request;
 use Klein\Response;
 use Klein\ServiceProvider;
 use Klein\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 /**
  * ServiceProviderTest
@@ -308,11 +309,20 @@ class ServiceProviderTest extends AbstractKleinTestCase
         static::assertLessThan(400, $this->klein_app->response()->code());
     }
 
-    public function testBack()
+    public static function ownHostRefererProvider(): array
     {
-        $url = 'http://google.com/';
+        return [
+            'same host' => ['example.com', 'https://example.com/previous?page=2'],
+            'host case-insensitive' => ['example.com', 'http://EXAMPLE.com/previous'],
+            'same host and port' => ['example.com:8080', 'http://example.com:8080/previous'],
+        ];
+    }
 
+    #[DataProvider('ownHostRefererProvider')]
+    public function testBack(string $host, string $url)
+    {
         $request = new Request();
+        $request->server()->set('HTTP_HOST', $host);
         $request->server()->set('HTTP_REFERER', $url);
 
         $this->klein_app->respond(static function ($request, $response, $service) {
@@ -327,6 +337,40 @@ class ServiceProviderTest extends AbstractKleinTestCase
         // Make sure we got a 3xx response code
         static::assertGreaterThan(299, $this->klein_app->response()->code());
         static::assertLessThan(400, $this->klein_app->response()->code());
+    }
+
+    public static function foreignRefererProvider(): array
+    {
+        return [
+            'other host' => ['example.com', 'http://google.com/'],
+            'protocol-relative' => ['example.com', '//google.com/'],
+            'userinfo trick' => ['example.com', 'http://example.com@evil.com/'],
+            'subdomain trick' => ['example.com', 'http://example.com.evil.com/'],
+            'other port' => ['example.com', 'http://example.com:8080/'],
+            'javascript' => ['example.com', 'javascript:alert(1)'],
+            'relative' => ['example.com', '/\\evil.com/'],
+            'no request host' => [null, 'http://example.com/'],
+        ];
+    }
+
+    #[DataProvider('foreignRefererProvider')]
+    public function testBackIgnoresForeignReferer(string|null $host, string $url)
+    {
+        $server = ['REQUEST_URI' => '/current', 'HTTP_REFERER' => $url];
+
+        if (null !== $host) {
+            $server['HTTP_HOST'] = $host;
+        }
+
+        $this->klein_app->respond(static function ($request, $response, $service) {
+            $service->back();
+        });
+
+        $this->klein_app->dispatch(new Request([], [], [], $server));
+
+        // Refreshes instead of redirecting off-site
+        static::assertSame('/current', $this->klein_app->response()->headers()->get('location'));
+        static::assertSame(302, $this->klein_app->response()->code());
     }
 
     public function testBackWithoutRefererSet()

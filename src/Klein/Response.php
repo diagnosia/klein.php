@@ -119,7 +119,7 @@ class Response extends AbstractResponse
         }
 
         $this->header('Content-type', $mimetype);
-        $this->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        $this->header('Content-Disposition', static::attachmentDisposition((string) $filename));
 
         // If the response is to be chunked, then the content length must not be sent
         // see: https://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.4
@@ -150,6 +150,28 @@ class Response extends AbstractResponse
         }
 
         return $this;
+    }
+
+    /**
+     * Builds a Content-Disposition attachment header value for a filename (RFC 6266)
+     *
+     * Quotes, backslashes and non-printable or non-ASCII characters can't go into the quoted
+     * filename as is, so they are replaced there and the exact name is added as UTF-8 "filename*"
+     *
+     * @param string $filename  The file's name
+     * @return string
+     */
+    protected static function attachmentDisposition($filename)
+    {
+        $fallback = preg_replace('/[^\x20-\x7E]|["\\\\]/', replacement: '_', subject: $filename);
+
+        $disposition = 'attachment; filename="' . $fallback . '"';
+
+        if ($fallback !== $filename) {
+            $disposition .= "; filename*=UTF-8''" . rawurlencode($filename);
+        }
+
+        return $disposition;
     }
 
     /**

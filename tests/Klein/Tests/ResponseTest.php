@@ -482,6 +482,69 @@ class ResponseTest extends AbstractKleinTestCase
         );
     }
 
+    public static function attachmentFilenameProvider(): array
+    {
+        return [
+            'plain' => ['report.pdf', 'attachment; filename="report.pdf"'],
+            'quote' => ['a"b.txt', 'attachment; filename="a_b.txt"; filename*=UTF-8\'\'a%22b.txt'],
+            'backslash' => ['a\\b.txt', 'attachment; filename="a_b.txt"; filename*=UTF-8\'\'a%5Cb.txt'],
+            'non-ASCII' => [
+                'Bericht ä.pdf',
+                'attachment; filename="Bericht __.pdf"; filename*=UTF-8\'\'Bericht%20%C3%A4.pdf',
+            ],
+            'line break' => [
+                "evil\r\nX-Injected: 1",
+                'attachment; filename="evil__X-Injected: 1"; filename*=UTF-8\'\'evil%0D%0AX-Injected%3A%201',
+            ],
+        ];
+    }
+
+    #[DataProvider('attachmentFilenameProvider')]
+    public function testFileSendEscapesFilename(string $filename, string $expected)
+    {
+        $this->expectOutputString(file_get_contents(__FILE__));
+
+        $response = new Response();
+        $response->file(__FILE__, $filename, 'text/plain');
+
+        static::assertSame($expected, $response->headers()->get('Content-Disposition'));
+    }
+
+    public function testCookieWithSameSite()
+    {
+        $response = new Response();
+
+        $response->cookie('session', 'abc', null, '/', null, true, true, 'strict');
+
+        static::assertSame('Strict', $response->cookies()->get('session')->getSameSite());
+        static::assertNull(
+            new Response()
+                ->cookie('plain')
+                ->cookies()
+                ->get('plain')
+                ->getSameSite(),
+        );
+    }
+
+    #[RunInSeparateProcess]
+    public function testSendCookiesWithSameSite()
+    {
+        if (!function_exists('xdebug_get_headers')) {
+            static::markTestSkipped('Needs xdebug_get_headers() to inspect the sent headers');
+        }
+
+        $response = new Response();
+        $response->cookie('session', 'abc', 0, '/', null, true, true, 'Lax');
+        $response->cookies()->set('empty', null); // A null value used to throw a TypeError in setcookie()
+
+        $response->sendCookies();
+
+        $headers = xdebug_get_headers(); // @mago-expect lint:no-debug-symbols
+
+        static::assertContains('Set-Cookie: session=abc; path=/; secure; HttpOnly; SameSite=Lax', $headers);
+        static::assertCount(2, array_filter($headers, static fn($h) => str_starts_with($h, 'Set-Cookie: ')));
+    }
+
     public function testFileSendLooseArgs()
     {
         $this->klein_app->respond(static function ($request, $response, $service) {

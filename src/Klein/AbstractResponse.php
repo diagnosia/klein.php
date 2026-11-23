@@ -360,16 +360,20 @@ abstract class AbstractResponse
 
         // Iterate through our Cookies data collection and set each cookie natively
         foreach ($this->cookies as $cookie) {
-            // Use the built-in PHP "setcookie" function
-            setcookie(
-                $cookie->getName(),
-                $cookie->getValue(),
-                $cookie->getExpire() ?? 0,
-                $cookie->getPath() ?? '',
-                $cookie->getDomain() ?? '',
-                $cookie->getSecure(),
-                $cookie->getHttpOnly(),
-            );
+            $options = [
+                'expires' => $cookie->getExpire() ?? 0,
+                'path' => $cookie->getPath() ?? '',
+                'domain' => $cookie->getDomain() ?? '',
+                'secure' => $cookie->getSecure(),
+                'httponly' => $cookie->getHttpOnly(),
+            ];
+
+            if (null !== $cookie->getSameSite()) {
+                $options['samesite'] = $cookie->getSameSite();
+            }
+
+            // Use the built-in PHP "setcookie" function (a null value is sent as empty)
+            setcookie($cookie->getName(), $cookie->getValue() ?? '', $options);
         }
 
         return $this;
@@ -478,6 +482,7 @@ abstract class AbstractResponse
      * @param string $domain        The domain of which to restrict the cookie
      * @param boolean $secure       Flag of whether the cookie should only be sent over a HTTPS connection
      * @param boolean $httponly     Flag of whether the cookie should only be accessible over the HTTP protocol
+     * @param string|null $samesite The SameSite attribute ("Strict", "Lax" or "None"; "None" requires $secure)
      * @return AbstractResponse
      */
     public function cookie(
@@ -488,12 +493,16 @@ abstract class AbstractResponse
         $domain = null,
         $secure = false,
         $httponly = false,
+        $samesite = null,
     ) {
         if (null === $expiry) {
             $expiry = time() + (3600 * 24 * 30);
         }
 
-        $this->cookies->set($key, new ResponseCookie($key, $value, $expiry, $path, $domain, $secure, $httponly));
+        $this->cookies->set(
+            $key,
+            new ResponseCookie($key, $value, $expiry, $path, $domain, $secure, $httponly, $samesite),
+        );
 
         return $this;
     }

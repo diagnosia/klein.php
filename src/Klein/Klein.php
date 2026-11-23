@@ -1004,10 +1004,10 @@ class Klein
         $reversed_path = preg_replace_callback(
             static::ROUTE_COMPILE_REGEX,
             static function ($match) use ($params) {
-                list($block, $pre, , $param, $optional) = $match;
+                list($block, $pre, $type, $param, $optional) = $match;
 
                 if (($params[$param] ?? null) !== null) {
-                    return $pre . $params[$param];
+                    return $pre . static::encodePathParam((string) $params[$param], $type);
                 }
 
                 if ($optional) {
@@ -1026,6 +1026,24 @@ class Klein
         }
 
         return $reversed_path;
+    }
+
+    /**
+     * URL encodes a param value for a path built by getPathFor()
+     *
+     * Catch-all params ("*" and "**" types) may span several path segments, so their slashes are kept
+     *
+     * @param string $value     The param value
+     * @param string $type      The match type of the param block
+     * @return string
+     */
+    protected static function encodePathParam($value, $type)
+    {
+        if ($type === '*' || $type === '**') {
+            return implode('/', array_map(rawurlencode(...), explode('/', $value)));
+        }
+
+        return rawurlencode($value);
     }
 
     /**

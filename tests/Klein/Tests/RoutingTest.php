@@ -985,6 +985,40 @@ class RoutingTest extends AbstractKleinTestCase
         static::assertSame(implode('', $test_strings), $test_result);
     }
 
+    public function testGetPathForEncodesParams()
+    {
+        $captured = [];
+
+        $this->klein_app
+            ->respond('/users/[:name]', static function ($request) use (&$captured) {
+                $captured[] = $request->name;
+            })
+            ->setName('user');
+        $this->klein_app
+            ->respond('/files/[**:path]', static function ($request) use (&$captured) {
+                $captured[] = $request->path;
+            })
+            ->setName('file');
+        $this->klein_app->respond('/dogs/[i:id]', static function () {})->setName('dog');
+
+        $this->klein_app->routes()->prepareNamed();
+
+        $user_path = $this->klein_app->getPathFor('user', ['name' => 'a/../b?x=1#y z']);
+        $file_path = $this->klein_app->getPathFor('file', ['path' => 'docs/my file?.txt']);
+
+        // Used to be "/users/a/../b?x=1#y z", which breaks out of the path
+        static::assertSame('/users/a%2F..%2Fb%3Fx%3D1%23y%20z', $user_path);
+        // Catch-all params keep their slashes
+        static::assertSame('/files/docs/my%20file%3F.txt', $file_path);
+        static::assertSame('/dogs/5', $this->klein_app->getPathFor('dog', ['id' => 5]));
+
+        // The paths route back to the original values
+        $this->klein_app->dispatch(MockRequestFactory::create($user_path), null, false);
+        $this->klein_app->dispatch(MockRequestFactory::create($file_path), null, false);
+
+        static::assertSame(['a/../b?x=1#y z', 'docs/my file?.txt'], $captured);
+    }
+
     public function testGetPathFor()
     {
         $this->klein_app->respond('/dogs', static function () {})->setName('dogs');
